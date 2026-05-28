@@ -60,7 +60,8 @@ export function WeeklyProgressChart({
             dataKey="habits"
             fill="#f2b705"
             radius={[10, 10, 0, 0]}
-            name="Habits completed"
+            name="Habit completion"
+            unit="%"
           />
           <Bar
             dataKey="workouts"

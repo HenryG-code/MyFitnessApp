@@ -228,3 +228,24 @@ still use mock data.
 No extra SQL is required if `supabase/schema.sql` has already been run. The
 feature uses the existing `workouts` and `workout_exercises` tables and their
 Row Level Security policies.
+
+## Dashboard Real Data Testing
+
+The dashboard reads real user-scoped data from `weight_logs`, `daily_habits`,
+`workouts`, and `workout_exercises`. Supabase Auth and RLS keep each user's
+dashboard private.
+
+1. Register or log in with a Supabase email/password account.
+2. Visit `/dashboard` with no data and confirm empty placeholders and action
+   links appear.
+3. Add a weight log on `/weight`, then return to `/dashboard` and confirm the
+   latest weight and total change update.
+4. Toggle habits on `/habits`, then return to `/dashboard` and confirm today's
+   completion percentage and weekly chart update.
+5. Create a workout on `/workouts/new`, then return to `/dashboard` and confirm
+   weekly workouts, minutes, latest workout, and chart update.
+6. Confirm `/weight`, `/habits`, and `/workouts` still work.
+7. Log out, use a second account, and confirm the dashboard does not show the
+   first user's data.
+
+No extra SQL is required if `supabase/schema.sql` has already been run.
