@@ -65,25 +65,90 @@ export type DailyHabit = {
   updated_at: string;
 };
 
-type Insert<T extends { id?: string; created_at?: string; updated_at?: string }> =
-  Omit<T, "id" | "created_at" | "updated_at"> & {
-    id?: string;
-    created_at?: string;
-    updated_at?: string;
-  };
-
-type Update<T> = Partial<Omit<T, "id" | "created_at">> & {
-  id?: never;
-  created_at?: never;
+export type ProfileInsert = {
+  id: string;
+  email?: string | null;
+  full_name?: string | null;
+  avatar_url?: string | null;
+  created_at?: string;
+  updated_at?: string;
 };
+
+export type ProfileUpdate = Partial<Omit<Profile, "id" | "created_at">>;
+
+export type WeightLogInsert = {
+  id?: string;
+  user_id: string;
+  logged_at?: string;
+  weight_kg: number;
+  notes?: string | null;
+  created_at?: string;
+  updated_at?: string;
+};
+
+export type WeightLogUpdate = Partial<
+  Omit<WeightLog, "id" | "user_id" | "created_at">
+>;
+
+export type WorkoutInsert = {
+  id?: string;
+  user_id: string;
+  title: string;
+  workout_type?: string | null;
+  started_at?: string;
+  duration_minutes?: number | null;
+  notes?: string | null;
+  created_at?: string;
+  updated_at?: string;
+};
+
+export type WorkoutUpdate = Partial<
+  Omit<Workout, "id" | "user_id" | "created_at">
+>;
+
+export type WorkoutExerciseInsert = {
+  id?: string;
+  workout_id: string;
+  user_id: string;
+  name: string;
+  sets?: number | null;
+  reps?: number | null;
+  weight_kg?: number | null;
+  order_index?: number;
+  notes?: string | null;
+  created_at?: string;
+  updated_at?: string;
+};
+
+export type WorkoutExerciseUpdate = Partial<
+  Omit<WorkoutExercise, "id" | "workout_id" | "user_id" | "created_at">
+>;
+
+export type DailyHabitInsert = {
+  id?: string;
+  user_id: string;
+  habit_date?: string;
+  habit_key: string;
+  label: string;
+  target_value?: number | null;
+  completed_value?: number | null;
+  unit?: string | null;
+  is_completed?: boolean;
+  created_at?: string;
+  updated_at?: string;
+};
+
+export type DailyHabitUpdate = Partial<
+  Omit<DailyHabit, "id" | "user_id" | "created_at">
+>;
 
 export type Database = {
   public: {
     Tables: {
       profiles: {
         Row: Profile;
-        Insert: Insert<Profile>;
-        Update: Update<Profile>;
+        Insert: ProfileInsert;
+        Update: ProfileUpdate;
         Relationships: [
           {
             foreignKeyName: "profiles_id_fkey";
@@ -95,8 +160,8 @@ export type Database = {
       };
       weight_logs: {
         Row: WeightLog;
-        Insert: Insert<WeightLog>;
-        Update: Update<WeightLog>;
+        Insert: WeightLogInsert;
+        Update: WeightLogUpdate;
         Relationships: [
           {
             foreignKeyName: "weight_logs_user_id_fkey";
@@ -108,8 +173,8 @@ export type Database = {
       };
       workouts: {
         Row: Workout;
-        Insert: Insert<Workout>;
-        Update: Update<Workout>;
+        Insert: WorkoutInsert;
+        Update: WorkoutUpdate;
         Relationships: [
           {
             foreignKeyName: "workouts_user_id_fkey";
@@ -121,8 +186,8 @@ export type Database = {
       };
       workout_exercises: {
         Row: WorkoutExercise;
-        Insert: Insert<WorkoutExercise>;
-        Update: Update<WorkoutExercise>;
+        Insert: WorkoutExerciseInsert;
+        Update: WorkoutExerciseUpdate;
         Relationships: [
           {
             foreignKeyName: "workout_exercises_workout_id_fkey";
@@ -140,8 +205,8 @@ export type Database = {
       };
       daily_habits: {
         Row: DailyHabit;
-        Insert: Insert<DailyHabit>;
-        Update: Update<DailyHabit>;
+        Insert: DailyHabitInsert;
+        Update: DailyHabitUpdate;
         Relationships: [
           {
             foreignKeyName: "daily_habits_user_id_fkey";

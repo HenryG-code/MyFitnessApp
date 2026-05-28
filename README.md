@@ -106,3 +106,63 @@ Run a production build before deploying:
 ```bash
 npm run build
 ```
+
+## Testing Checklist
+
+Use this checklist before the first real feature milestone:
+
+1. Install dependencies:
+
+```bash
+npm install
+```
+
+2. Create `.env.local` from `.env.example` and add your Supabase values:
+
+```bash
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_ANON_KEY=
+```
+
+3. Start the app locally:
+
+```bash
+npm run dev
+```
+
+4. Build the app:
+
+```bash
+npm run build
+```
+
+5. Test registration:
+
+Open `/register`, enter a full name, email, password, and matching confirmation.
+If email confirmation is enabled in Supabase, confirm the email before logging in.
+
+6. Test login:
+
+Open `/login`, sign in with the registered email and password, and confirm you
+are redirected to `/dashboard`.
+
+7. Test protected routes:
+
+While logged out, visit `/dashboard`, `/workouts`, `/workouts/new`, `/weight`,
+`/habits`, and `/settings`. Each route should redirect to `/login`.
+
+8. Test public auth redirects:
+
+While logged in, visit `/login` or `/register`. Each route should redirect to
+`/dashboard`.
+
+9. Test logout:
+
+Use the logout button in the desktop sidebar or on the settings page. You should
+return to `/login`, and protected routes should require login again.
+
+10. Deploy to Vercel:
+
+Add `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` in Vercel
+Project Settings > Environment Variables, then deploy. Do not commit
+`.env.local`.

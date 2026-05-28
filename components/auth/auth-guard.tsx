@@ -12,7 +12,7 @@ import { useEffect, useState, type ReactNode } from "react";
 export function AuthGuard({ children }: { children: ReactNode }) {
   const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
-  const [isChecking, setIsChecking] = useState(true);
+  const [isChecking, setIsChecking] = useState(hasSupabaseEnv);
 
   useEffect(() => {
     if (!hasSupabaseEnv) {
@@ -23,12 +23,13 @@ export function AuthGuard({ children }: { children: ReactNode }) {
     const supabase = createBrowserSupabaseClient();
     let isMounted = true;
 
-    supabase.auth.getSession().then(({ data }) => {
+    supabase.auth.getSession().then(({ data, error }) => {
       if (!isMounted) {
         return;
       }
 
-      if (!data.session?.user) {
+      if (error || !data.session?.user) {
+        setIsChecking(false);
         router.replace("/login");
         return;
       }
@@ -42,6 +43,7 @@ export function AuthGuard({ children }: { children: ReactNode }) {
     } = supabase.auth.onAuthStateChange((_event, session) => {
       if (!session?.user) {
         setUser(null);
+        setIsChecking(false);
         router.replace("/login");
         return;
       }

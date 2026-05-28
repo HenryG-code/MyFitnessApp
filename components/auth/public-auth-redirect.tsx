@@ -9,11 +9,10 @@ import { useEffect, useState, type ReactNode } from "react";
 
 export function PublicAuthRedirect({ children }: { children: ReactNode }) {
   const router = useRouter();
-  const [isChecking, setIsChecking] = useState(true);
+  const [isChecking, setIsChecking] = useState(hasSupabaseEnv);
 
   useEffect(() => {
     if (!hasSupabaseEnv) {
-      setIsChecking(false);
       return;
     }
 

@@ -8,7 +8,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { useEffect, useState } from "react";
+import { useSyncExternalStore } from "react";
 
 type WeightPoint = {
   date: string;
@@ -16,11 +16,11 @@ type WeightPoint = {
 };
 
 export function WeightTrendChart({ data }: { data: WeightPoint[] }) {
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  const mounted = useSyncExternalStore(
+    () => () => undefined,
+    () => true,
+    () => false
+  );
 
   if (!mounted) {
     return <div className="h-64 w-full rounded-[1.5rem] bg-stone-100" />;

@@ -37,6 +37,18 @@ function formatAuthError(error: unknown) {
       return "Supabase is not configured yet. Add your project URL and anon key to .env.local.";
     }
 
+    if (/invalid login credentials/i.test(error.message)) {
+      return "The email or password is incorrect.";
+    }
+
+    if (/email not confirmed/i.test(error.message)) {
+      return "Please confirm your email before logging in.";
+    }
+
+    if (/user already registered|already exists/i.test(error.message)) {
+      return "An account already exists for this email. Try logging in instead.";
+    }
+
     return error.message;
   }
 

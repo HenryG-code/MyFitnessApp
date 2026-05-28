@@ -58,7 +58,9 @@ export function LogoutButton({
         <LogOut className="size-4" />
         {isSigningOut ? "Logging out..." : label}
       </button>
-      {error ? <p className="mt-2 text-sm font-medium text-red-700">{error}</p> : null}
+      {error ? (
+        <p className="mt-2 text-sm font-medium text-red-700">{error}</p>
+      ) : null}
     </div>
   );
 }
