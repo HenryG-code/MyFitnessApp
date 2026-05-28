@@ -62,15 +62,16 @@ create table if not exists public.daily_habits (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references auth.users(id) on delete cascade,
   habit_date date not null default current_date,
-  habit_key text not null,
-  label text not null,
-  target_value numeric(8, 2),
-  completed_value numeric(8, 2),
-  unit text,
-  is_completed boolean not null default false,
+  sleep_8_hours boolean not null default false,
+  trained boolean not null default false,
+  walked_10k_steps boolean not null default false,
+  ate_healthy boolean not null default false,
+  no_late_food boolean not null default false,
+  limited_alcohol boolean not null default false,
+  clean_environment boolean not null default false,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
-  unique (user_id, habit_date, habit_key)
+  unique (user_id, habit_date)
 );
 
 create index if not exists profiles_email_idx

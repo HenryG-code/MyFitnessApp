@@ -1,20 +1,21 @@
 "use client";
 
 import { HabitCompletionChart } from "@/components/charts/habit-completion-chart";
-import { HabitProgressForm } from "@/components/forms/habit-progress-form";
 import {
   FitnessCard,
   MetricCard,
   SectionHeader,
 } from "@/components/ui/fitness-card";
-import type { DailyHabit } from "@/src/lib/supabase/database.types";
+import type {
+  DailyHabit,
+  HabitKey,
+} from "@/src/lib/supabase/database.types";
 import {
-  defaultHabits,
-  ensureDefaultHabitsForDate,
+  ensureHabitRowForDate,
   fetchRecentHabitHistory,
-  getDateInputValue,
   getDateDaysAgo,
-  toggleHabitCompletion,
+  getDateInputValue,
+  toggleHabitField,
 } from "@/src/lib/habits/queries";
 import {
   CalendarDays,
@@ -26,7 +27,14 @@ import {
   Sprout,
   TimerReset,
 } from "lucide-react";
+import type { ComponentType, SVGProps } from "react";
 import { useEffect, useState } from "react";
+
+type HabitCardMeta = {
+  key: HabitKey;
+  label: string;
+  icon: ComponentType<SVGProps<SVGSVGElement>>;
+};
 
 type WeeklySummaryPoint = {
   date: string;
@@ -35,7 +43,21 @@ type WeeklySummaryPoint = {
   total: number;
 };
 
-const editableHabitKeys = new Set(["sleep_8_hours", "walked_10k_steps"]);
+const habits: HabitCardMeta[] = [
+  { key: "sleep_8_hours", label: "Sleep 8 hours", icon: Moon },
+  { key: "trained", label: "Trained", icon: Sparkles },
+  { key: "walked_10k_steps", label: "Walked 10k steps", icon: TimerReset },
+  { key: "ate_healthy", label: "Ate healthy", icon: Salad },
+  {
+    key: "no_late_food",
+    label: "No food 3 hours before bed",
+    icon: CalendarDays,
+  },
+  { key: "limited_alcohol", label: "Limited alcohol", icon: Sprout },
+  { key: "clean_environment", label: "Clean environment", icon: Sparkles },
+];
+
+const habitCount = habits.length;
 
 function formatDate(date: string) {
   return new Intl.DateTimeFormat("en", {
@@ -44,96 +66,64 @@ function formatDate(date: string) {
   }).format(new Date(`${date}T00:00:00`));
 }
 
-function formatValue(value: number | null, unit: string | null) {
-  if (value === null) {
-    return `0 ${unit ?? ""}`.trim();
-  }
-
-  return `${value.toLocaleString()} ${unit ?? ""}`.trim();
-}
-
-function getProgressPercentage(habit: DailyHabit) {
-  if (habit.is_completed) {
-    return 100;
-  }
-
-  const target = habit.target_value ?? 0;
-  const completed = habit.completed_value ?? 0;
-
-  if (target <= 0) {
+function countCompleted(row: DailyHabit | null) {
+  if (!row) {
     return 0;
   }
 
-  return Math.min(100, Math.round((completed / target) * 100));
+  return habits.filter((habit) => row[habit.key]).length;
 }
 
-function getHabitIcon(habitKey: string) {
-  if (habitKey === "sleep_8_hours") {
-    return Moon;
-  }
-
-  if (habitKey === "ate_healthy") {
-    return Salad;
-  }
-
-  if (habitKey === "walked_10k_steps") {
-    return TimerReset;
-  }
-
-  return Sparkles;
+function getPercentage(completed: number) {
+  return Math.round((completed / habitCount) * 100);
 }
 
-function getTodayStats(habits: DailyHabit[]) {
-  const completed = habits.filter((habit) => habit.is_completed);
-  const latestCompleted = completed
+function getLatestCompletedLabel(row: DailyHabit | null) {
+  if (!row) {
+    return null;
+  }
+
+  return habits
     .slice()
-    .sort((a, b) => b.updated_at.localeCompare(a.updated_at))[0];
-  const total = habits.length;
-  const percentage = total ? Math.round((completed.length / total) * 100) : 0;
-
-  return {
-    completedCount: completed.length,
-    remainingCount: Math.max(total - completed.length, 0),
-    latestCompleted,
-    percentage,
-    total,
-  };
+    .reverse()
+    .find((habit) => row[habit.key])?.label;
 }
 
 function buildWeeklySummary(history: DailyHabit[]) {
   return Array.from({ length: 7 }, (_item, index) => {
     const date = getDateDaysAgo(6 - index);
-    const dayHabits = history.filter((habit) => habit.habit_date === date);
-    const completed = dayHabits.filter((habit) => habit.is_completed).length;
-    const total = dayHabits.length || defaultHabits.length;
+    const row = history.find((habitRow) => habitRow.habit_date === date);
+    const completed = countCompleted(row ?? null);
 
     return {
       date: formatDate(date),
-      percentage: dayHabits.length ? Math.round((completed / total) * 100) : 0,
+      percentage: getPercentage(completed),
       completed,
-      total,
+      total: habitCount,
     };
   }) satisfies WeeklySummaryPoint[];
 }
 
 export function HabitsTracker() {
   const today = getDateInputValue();
-  const [habits, setHabits] = useState<DailyHabit[]>([]);
+  const [todayRow, setTodayRow] = useState<DailyHabit | null>(null);
   const [history, setHistory] = useState<DailyHabit[]>([]);
   const [notice, setNotice] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(true);
-  const [updatingHabitId, setUpdatingHabitId] = useState<string | null>(null);
+  const [updatingHabitKey, setUpdatingHabitKey] = useState<HabitKey | null>(
+    null
+  );
 
   async function refreshHabits() {
     setError("");
 
     try {
-      const [todayHabits, recentHistory] = await Promise.all([
-        ensureDefaultHabitsForDate(today),
+      const [row, recentHistory] = await Promise.all([
+        ensureHabitRowForDate(today),
         fetchRecentHabitHistory(7),
       ]);
-      setHabits(todayHabits);
+      setTodayRow(row);
       setHistory(recentHistory);
     } catch (loadError) {
       setError(
@@ -149,10 +139,10 @@ export function HabitsTracker() {
   useEffect(() => {
     let isMounted = true;
 
-    Promise.all([ensureDefaultHabitsForDate(today), fetchRecentHabitHistory(7)])
-      .then(([todayHabits, recentHistory]) => {
+    Promise.all([ensureHabitRowForDate(today), fetchRecentHabitHistory(7)])
+      .then(([row, recentHistory]) => {
         if (isMounted) {
-          setHabits(todayHabits);
+          setTodayRow(row);
           setHistory(recentHistory);
         }
       })
@@ -176,25 +166,29 @@ export function HabitsTracker() {
     };
   }, [today]);
 
-  const todayStats = getTodayStats(habits);
+  const completedCount = countCompleted(todayRow);
+  const remainingCount = habitCount - completedCount;
+  const percentage = getPercentage(completedCount);
+  const latestCompletedLabel = getLatestCompletedLabel(todayRow);
   const weeklySummary = buildWeeklySummary(history);
 
-  async function handleToggle(habit: DailyHabit) {
+  async function handleToggle(habit: HabitCardMeta) {
+    if (!todayRow) {
+      return;
+    }
+
+    const nextValue = !todayRow[habit.key];
     setError("");
     setNotice("");
-    setUpdatingHabitId(habit.id);
+    setUpdatingHabitKey(habit.key);
 
     try {
-      const updated = await toggleHabitCompletion(habit);
-      setHabits((currentHabits) =>
-        currentHabits.map((currentHabit) =>
-          currentHabit.id === updated.id ? updated : currentHabit
-        )
-      );
+      const updated = await toggleHabitField(today, habit.key, nextValue);
+      setTodayRow(updated);
       setNotice(
-        updated.is_completed
-          ? `${updated.label} marked complete.`
-          : `${updated.label} marked incomplete.`
+        nextValue
+          ? `${habit.label} marked complete.`
+          : `${habit.label} marked incomplete.`
       );
       await refreshHabits();
     } catch (toggleError) {
@@ -204,13 +198,8 @@ export function HabitsTracker() {
           : "Could not update this habit."
       );
     } finally {
-      setUpdatingHabitId(null);
+      setUpdatingHabitKey(null);
     }
-  }
-
-  async function handleProgressSaved(message: string) {
-    setNotice(message);
-    await refreshHabits();
   }
 
   return (
@@ -223,8 +212,8 @@ export function HabitsTracker() {
           Build the boring magic.
         </h1>
         <p className="mt-3 max-w-2xl text-sm leading-6 text-muted">
-          Track today&apos;s core habits, update sleep and step progress, and keep
-          your streak engine quietly humming.
+          Track today&apos;s core habits with one private row per day in
+          Supabase.
         </p>
       </section>
 
@@ -243,31 +232,31 @@ export function HabitsTracker() {
       <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <MetricCard
           label="Today's completion"
-          value={`${todayStats.percentage}%`}
-          detail={`${todayStats.completedCount} of ${todayStats.total} habits complete.`}
+          value={`${percentage}%`}
+          detail={`${completedCount} of ${habitCount} habits complete.`}
           icon={<Sprout className="size-5" />}
           tone="teal"
         />
         <MetricCard
           label="Completed"
-          value={`${todayStats.completedCount}`}
+          value={`${completedCount}`}
           detail="Checked off today."
           icon={<CheckCircle2 className="size-5" />}
           tone="amber"
         />
         <MetricCard
           label="Remaining"
-          value={`${todayStats.remainingCount}`}
+          value={`${remainingCount}`}
           detail="Still available for a late comeback."
           icon={<ClipboardCheck className="size-5" />}
           tone="ink"
         />
         <MetricCard
           label="Latest completed"
-          value={todayStats.latestCompleted?.label ?? "--"}
+          value={latestCompletedLabel ?? "--"}
           detail={
-            todayStats.latestCompleted
-              ? "Most recently updated complete habit."
+            latestCompletedLabel
+              ? "Last true habit in the daily list."
               : "No completed habits yet today."
           }
           icon={<CalendarDays className="size-5" />}
@@ -282,23 +271,22 @@ export function HabitsTracker() {
             <div className="rounded-[1.5rem] bg-stone-100 p-6 text-sm font-black text-muted">
               Loading today&apos;s habits...
             </div>
-          ) : habits.length ? (
+          ) : todayRow ? (
             <div className="grid gap-4 sm:grid-cols-2">
               {habits.map((habit) => {
-                const Icon = getHabitIcon(habit.habit_key);
-                const progress = getProgressPercentage(habit);
-                const isEditable = editableHabitKeys.has(habit.habit_key);
+                const Icon = habit.icon;
+                const isComplete = todayRow[habit.key];
 
                 return (
                   <div
-                    key={habit.id}
+                    key={habit.key}
                     className="rounded-[1.5rem] border border-line bg-white/65 p-4"
                   >
                     <div className="flex items-start justify-between gap-4">
                       <div className="flex gap-3">
                         <span
                           className={`grid size-12 shrink-0 place-items-center rounded-2xl ${
-                            habit.is_completed
+                            isComplete
                               ? "bg-accent text-white"
                               : "bg-stone-950 text-sun"
                           }`}
@@ -310,28 +298,23 @@ export function HabitsTracker() {
                             {habit.label}
                           </p>
                           <p className="mt-1 text-sm font-medium text-muted">
-                            Target:{" "}
-                            {formatValue(habit.target_value, habit.unit)}
-                          </p>
-                          <p className="mt-1 text-sm font-medium text-muted">
-                            Done:{" "}
-                            {formatValue(habit.completed_value, habit.unit)}
+                            {isComplete ? "Complete" : "Not complete yet"}
                           </p>
                         </div>
                       </div>
                       <button
                         type="button"
                         onClick={() => void handleToggle(habit)}
-                        disabled={updatingHabitId === habit.id}
+                        disabled={updatingHabitKey === habit.key}
                         className={`rounded-2xl px-4 py-2 text-sm font-black transition disabled:cursor-not-allowed disabled:opacity-70 ${
-                          habit.is_completed
+                          isComplete
                             ? "bg-[#eaf3dd] text-accent-strong hover:bg-stone-100"
                             : "bg-stone-950 text-white hover:bg-accent"
                         }`}
                       >
-                        {updatingHabitId === habit.id
+                        {updatingHabitKey === habit.key
                           ? "Saving..."
-                          : habit.is_completed
+                          : isComplete
                             ? "Complete"
                             : "Mark done"}
                       </button>
@@ -340,19 +323,12 @@ export function HabitsTracker() {
                     <div className="mt-5 h-3 rounded-full bg-stone-200">
                       <div
                         className="h-full rounded-full bg-accent"
-                        style={{ width: `${progress}%` }}
+                        style={{ width: isComplete ? "100%" : "0%" }}
                       />
                     </div>
                     <p className="mt-2 text-xs font-black uppercase tracking-[0.18em] text-muted">
-                      {progress}% progress
+                      Boolean habit column: {habit.key}
                     </p>
-
-                    {isEditable ? (
-                      <HabitProgressForm
-                        habit={habit}
-                        onSaved={handleProgressSaved}
-                      />
-                    ) : null}
                   </div>
                 );
               })}
@@ -360,11 +336,11 @@ export function HabitsTracker() {
           ) : (
             <div className="rounded-[1.5rem] bg-[#eaf3dd] p-6">
               <p className="font-display text-xl font-black">
-                No habits found for today.
+                No habit row found for today.
               </p>
               <p className="mt-2 text-sm leading-6 text-muted">
-                Refresh the page and LiftLog will try to create today&apos;s
-                default habits again.
+                Refresh the page and LiftLog will try to create today&apos;s row
+                again.
               </p>
             </div>
           )}

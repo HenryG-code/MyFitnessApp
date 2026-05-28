@@ -3,61 +3,10 @@ import type {
   DailyHabit,
   DailyHabitInsert,
   DailyHabitUpdate,
+  HabitKey,
 } from "@/src/lib/supabase/database.types";
 
-export type DefaultHabit = {
-  habit_key: string;
-  label: string;
-  target_value: number;
-  unit: string;
-};
-
-export const defaultHabits: DefaultHabit[] = [
-  {
-    habit_key: "sleep_8_hours",
-    label: "Sleep 8 hours",
-    target_value: 8,
-    unit: "hours",
-  },
-  {
-    habit_key: "trained",
-    label: "Trained",
-    target_value: 1,
-    unit: "session",
-  },
-  {
-    habit_key: "walked_10k_steps",
-    label: "Walked 10k steps",
-    target_value: 10000,
-    unit: "steps",
-  },
-  {
-    habit_key: "ate_healthy",
-    label: "Ate healthy",
-    target_value: 1,
-    unit: "day",
-  },
-  {
-    habit_key: "no_late_food",
-    label: "No food 3 hours before bed",
-    target_value: 1,
-    unit: "day",
-  },
-  {
-    habit_key: "limited_alcohol",
-    label: "Limited alcohol",
-    target_value: 1,
-    unit: "day",
-  },
-  {
-    habit_key: "clean_environment",
-    label: "Clean environment",
-    target_value: 1,
-    unit: "day",
-  },
-];
-
-async function getAuthenticatedUserId() {
+export async function getAuthenticatedUserId() {
   const supabase = createBrowserSupabaseClient();
   const {
     data: { user },
@@ -88,80 +37,45 @@ export function getDateDaysAgo(daysAgo: number) {
   return getDateInputValue(date);
 }
 
-export async function fetchHabitsForDate(habitDate: string) {
+export async function fetchHabitRowForDate(habitDate: string) {
   const { supabase, userId } = await getAuthenticatedUserId();
   const { data, error } = await supabase
     .from("daily_habits")
     .select("*")
     .eq("user_id", userId)
     .eq("habit_date", habitDate)
-    .order("created_at", { ascending: true });
+    .maybeSingle();
 
   if (error) {
     throw new Error(error.message);
   }
 
-  return data satisfies DailyHabit[];
+  return data satisfies DailyHabit | null;
 }
 
-export async function ensureDefaultHabitsForDate(habitDate: string) {
-  const { supabase, userId } = await getAuthenticatedUserId();
-  const { data: existing, error: fetchError } = await supabase
-    .from("daily_habits")
-    .select("*")
-    .eq("user_id", userId)
-    .eq("habit_date", habitDate);
+export async function ensureHabitRowForDate(habitDate: string) {
+  const existing = await fetchHabitRowForDate(habitDate);
 
-  if (fetchError) {
-    throw new Error(fetchError.message);
+  if (existing) {
+    return existing;
   }
 
-  const existingKeys = new Set(existing.map((habit) => habit.habit_key));
-  const missingHabits: DailyHabitInsert[] = defaultHabits
-    .filter((habit) => !existingKeys.has(habit.habit_key))
-    .map((habit) => ({
-      user_id: userId,
-      habit_date: habitDate,
-      habit_key: habit.habit_key,
-      label: habit.label,
-      target_value: habit.target_value,
-      completed_value: null,
-      unit: habit.unit,
-      is_completed: false,
-    }));
-
-  if (missingHabits.length) {
-    const { error: insertError } = await supabase
-      .from("daily_habits")
-      .upsert(missingHabits, {
-        onConflict: "user_id,habit_date,habit_key",
-        ignoreDuplicates: true,
-      });
-
-    if (insertError) {
-      throw new Error(insertError.message);
-    }
-  }
-
-  return fetchHabitsForDate(habitDate);
-}
-
-export async function toggleHabitCompletion(habit: DailyHabit) {
   const { supabase, userId } = await getAuthenticatedUserId();
-  const nextIsCompleted = !habit.is_completed;
-  const payload: DailyHabitUpdate = {
-    is_completed: nextIsCompleted,
-    completed_value:
-      nextIsCompleted && habit.completed_value === null
-        ? habit.target_value
-        : habit.completed_value,
+  const payload: DailyHabitInsert = {
+    user_id: userId,
+    habit_date: habitDate,
+    sleep_8_hours: false,
+    trained: false,
+    walked_10k_steps: false,
+    ate_healthy: false,
+    no_late_food: false,
+    limited_alcohol: false,
+    clean_environment: false,
   };
 
   const { data, error } = await supabase
     .from("daily_habits")
-    .update(payload)
-    .eq("id", habit.id)
-    .eq("user_id", userId)
+    .insert(payload)
     .select("*")
     .single();
 
@@ -172,22 +86,21 @@ export async function toggleHabitCompletion(habit: DailyHabit) {
   return data satisfies DailyHabit;
 }
 
-export async function updateHabitCompletedValue(
-  habit: DailyHabit,
-  completedValue: number
+export async function toggleHabitField(
+  habitDate: string,
+  habitKey: HabitKey,
+  nextValue: boolean
 ) {
   const { supabase, userId } = await getAuthenticatedUserId();
-  const targetValue = habit.target_value ?? 0;
   const payload: DailyHabitUpdate = {
-    completed_value: completedValue,
-    is_completed: targetValue > 0 ? completedValue >= targetValue : false,
+    [habitKey]: nextValue,
   };
 
   const { data, error } = await supabase
     .from("daily_habits")
     .update(payload)
-    .eq("id", habit.id)
     .eq("user_id", userId)
+    .eq("habit_date", habitDate)
     .select("*")
     .single();
 
@@ -208,8 +121,7 @@ export async function fetchRecentHabitHistory(days = 7) {
     .eq("user_id", userId)
     .gte("habit_date", startDate)
     .lte("habit_date", endDate)
-    .order("habit_date", { ascending: true })
-    .order("created_at", { ascending: true });
+    .order("habit_date", { ascending: true });
 
   if (error) {
     throw new Error(error.message);

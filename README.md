@@ -188,17 +188,18 @@ policies.
 ## Daily Habits CRUD Testing
 
 Daily Habits is the second Supabase-backed feature. Workouts and dashboard
-fitness cards still use mock data.
+fitness cards still use mock data. The live table uses one `daily_habits` row
+per user per day with seven boolean habit columns.
 
 1. Register or log in with a Supabase email/password account.
 2. Go to `/habits`.
-3. Confirm today's default habit rows are created automatically:
+3. Confirm today's habit row is created automatically with these boolean fields:
    Sleep 8 hours, Trained, Walked 10k steps, Ate healthy, No food 3 hours before
    bed, Limited alcohol, and Clean environment.
 4. Toggle a habit complete and incomplete.
-5. Edit progress for Sleep 8 hours and Walked 10k steps.
-6. Confirm today's completion percentage and stat cards update.
-7. Confirm the 7-day summary updates after habit changes.
+5. Confirm today's completion percentage and stat cards update.
+6. Confirm the 7-day summary updates after habit changes.
+7. Confirm `/weight` still loads and the weight tracker still works.
 8. Log out, create or use a second account, and confirm that account cannot see
    the first user's habit rows.
 
