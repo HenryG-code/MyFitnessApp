@@ -184,3 +184,24 @@ and dashboard fitness cards still use mock data.
 No extra SQL is required if `supabase/schema.sql` has already been run. The
 feature uses the existing `weight_logs` table and its Row Level Security
 policies.
+
+## Daily Habits CRUD Testing
+
+Daily Habits is the second Supabase-backed feature. Workouts and dashboard
+fitness cards still use mock data.
+
+1. Register or log in with a Supabase email/password account.
+2. Go to `/habits`.
+3. Confirm today's default habit rows are created automatically:
+   Sleep 8 hours, Trained, Walked 10k steps, Ate healthy, No food 3 hours before
+   bed, Limited alcohol, and Clean environment.
+4. Toggle a habit complete and incomplete.
+5. Edit progress for Sleep 8 hours and Walked 10k steps.
+6. Confirm today's completion percentage and stat cards update.
+7. Confirm the 7-day summary updates after habit changes.
+8. Log out, create or use a second account, and confirm that account cannot see
+   the first user's habit rows.
+
+No extra SQL is required if `supabase/schema.sql` has already been run. The
+feature uses the existing `daily_habits` table and its Row Level Security
+policies.
