@@ -1,4 +1,4 @@
-import { NewWorkoutForm } from "@/components/forms/new-workout-form";
+import { WorkoutForm } from "@/components/forms/workout-form";
 import { FitnessCard, SectionHeader } from "@/components/ui/fitness-card";
 
 export default function NewWorkoutPage() {
@@ -12,14 +12,13 @@ export default function NewWorkoutPage() {
           Log the session while it is still warm.
         </h1>
         <p className="mt-3 text-sm leading-6 text-stone-300">
-          This form validates locally with React Hook Form and Zod. No database
-          writes yet.
+          Save a real workout and its exercises to your private Supabase log.
         </p>
       </section>
 
       <FitnessCard>
-        <SectionHeader eyebrow="Mock form" title="Workout details" />
-        <NewWorkoutForm />
+        <SectionHeader eyebrow="Workout form" title="Workout details" />
+        <WorkoutForm />
       </FitnessCard>
     </div>
   );

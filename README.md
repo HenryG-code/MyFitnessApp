@@ -77,8 +77,8 @@ Manual database types live at:
 src/lib/supabase/database.types.ts
 ```
 
-The current UI still uses mock data. Workout, weight, habit, and auth form logic
-is not connected to Supabase yet.
+The dashboard still uses mock fitness summary data. Weight, daily habits, and
+workout tracking are connected to Supabase.
 
 ## Authentication
 
@@ -206,3 +206,25 @@ per user per day with seven boolean habit columns.
 No extra SQL is required if `supabase/schema.sql` has already been run. The
 feature uses the existing `daily_habits` table and its Row Level Security
 policies.
+
+## Workout Tracker CRUD Testing
+
+Workout Tracker is the third Supabase-backed feature. Dashboard fitness cards
+still use mock data.
+
+1. Register or log in with a Supabase email/password account.
+2. Go to `/workouts` and confirm the list or empty state loads.
+3. Go to `/workouts/new`.
+4. Create a workout with title, type, start time, duration, and notes.
+5. Add one or more exercise rows before saving.
+6. Confirm the workout appears on `/workouts` with exercise count and stats.
+7. Open the workout with View/Edit and update workout fields or exercises.
+8. Delete the workout and confirm it disappears from the list.
+9. Log out, create or use a second account, and confirm that account cannot see
+   the first user's workouts.
+10. Confirm `/weight` still works.
+11. Confirm `/habits` still works.
+
+No extra SQL is required if `supabase/schema.sql` has already been run. The
+feature uses the existing `workouts` and `workout_exercises` tables and their
+Row Level Security policies.
