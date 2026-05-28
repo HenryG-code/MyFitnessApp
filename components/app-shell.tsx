@@ -1,5 +1,8 @@
 "use client";
 
+import { LogoutButton } from "@/components/auth/logout-button";
+import { getUserDisplayName } from "@/src/lib/auth/user";
+import type { User } from "@supabase/supabase-js";
 import {
   BarChart3,
   Dumbbell,
@@ -29,8 +32,15 @@ function isActive(pathname: string, href: string) {
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
-export function AppShell({ children }: { children: ReactNode }) {
+export function AppShell({
+  children,
+  user,
+}: {
+  children: ReactNode;
+  user: User;
+}) {
   const pathname = usePathname();
+  const userName = getUserDisplayName(user);
 
   return (
     <div className="min-h-screen text-foreground">
@@ -72,14 +82,31 @@ export function AppShell({ children }: { children: ReactNode }) {
           })}
         </nav>
 
-        <div className="mt-auto rounded-[1.6rem] bg-[#eaf3dd] p-4">
-          <p className="text-xs font-black uppercase tracking-[0.18em] text-accent-strong">
-            This week
-          </p>
-          <p className="mt-2 text-2xl font-black tracking-tight">4 workouts</p>
-          <p className="mt-1 text-sm leading-6 text-muted">
-            Mock data today. Supabase comes later, neat and tidy.
-          </p>
+        <div className="mt-auto space-y-3">
+          <div className="rounded-[1.6rem] border border-line bg-white/70 p-4">
+            <p className="text-xs font-black uppercase tracking-[0.18em] text-muted">
+              Signed in
+            </p>
+            <p className="mt-2 truncate font-display text-lg font-black">
+              {userName}
+            </p>
+            {user.email ? (
+              <p className="mt-1 truncate text-xs font-medium text-muted">
+                {user.email}
+              </p>
+            ) : null}
+            <LogoutButton className="mt-4 w-full bg-stone-950 text-white hover:bg-accent" />
+          </div>
+
+          <div className="rounded-[1.6rem] bg-[#eaf3dd] p-4">
+            <p className="text-xs font-black uppercase tracking-[0.18em] text-accent-strong">
+              This week
+            </p>
+            <p className="mt-2 text-2xl font-black tracking-tight">4 workouts</p>
+            <p className="mt-1 text-sm leading-6 text-muted">
+              Mock data today. Supabase comes later, neat and tidy.
+            </p>
+          </div>
         </div>
       </aside>
 
@@ -95,7 +122,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                   LiftLog
                 </span>
                 <span className="text-xs font-medium text-muted">
-                  Free tracker
+                  {userName}
                 </span>
               </span>
             </Link>

@@ -43,11 +43,13 @@ Never commit `.env.local` or real Supabase keys.
 ## Supabase Setup
 
 1. Create a free Supabase project.
-2. Open the Supabase dashboard.
-3. Go to SQL Editor.
-4. Open `supabase/schema.sql` from this repository.
-5. Paste the full SQL file into the SQL Editor.
-6. Run the SQL.
+2. In the Supabase dashboard, go to Authentication > Providers.
+3. Enable Email provider authentication.
+4. Choose whether email confirmation is required for your project.
+5. Go to SQL Editor.
+6. Open `supabase/schema.sql` from this repository.
+7. Paste the full SQL file into the SQL Editor.
+8. Run the SQL.
 
 The schema creates the foundation tables:
 
@@ -77,6 +79,25 @@ src/lib/supabase/database.types.ts
 
 The current UI still uses mock data. Workout, weight, habit, and auth form logic
 is not connected to Supabase yet.
+
+## Authentication
+
+Login, registration, protected routes, and logout are connected to Supabase Auth.
+
+Required local values in `.env.local`:
+
+```bash
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_ANON_KEY=
+```
+
+The protected app routes redirect signed-out users to `/login`. The public
+`/login` and `/register` routes redirect signed-in users back to `/dashboard`.
+Registration passes `full_name` to Supabase user metadata. If your Supabase
+project requires email confirmation, new users will see a message asking them to
+confirm their email before logging in.
+
+Do not commit `.env.local` or real Supabase keys.
 
 ## Validation
 

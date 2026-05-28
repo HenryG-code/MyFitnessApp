@@ -1,3 +1,4 @@
+import { LogoutButton } from "@/components/auth/logout-button";
 import { FitnessCard, SectionHeader } from "@/components/ui/fitness-card";
 import { profile } from "@/lib/mock-data";
 import { Bell, Lock, UserRound } from "lucide-react";
@@ -60,6 +61,14 @@ export default function SettingsPage() {
           Built for Vercel Hobby and Supabase Free. The product boundary is clear:
           free portfolio app, no payments, no AI APIs, no paid analytics.
         </p>
+      </FitnessCard>
+
+      <FitnessCard>
+        <SectionHeader eyebrow="Account" title="Sign out" />
+        <p className="mb-4 text-sm leading-6 text-muted">
+          Log out of this browser and return to the public login page.
+        </p>
+        <LogoutButton className="bg-stone-950 text-white hover:bg-accent" />
       </FitnessCard>
     </div>
   );
