@@ -11,8 +11,8 @@ import {
 import { useSyncExternalStore } from "react";
 
 type WeightPoint = {
-  date: string;
-  weight: number;
+  logged_at: string;
+  weight_kg: number;
 };
 
 export function WeightTrendChart({ data }: { data: WeightPoint[] }) {
@@ -31,7 +31,7 @@ export function WeightTrendChart({ data }: { data: WeightPoint[] }) {
       <ResponsiveContainer width="100%" height="100%">
         <LineChart data={data} margin={{ top: 8, right: 8, left: -18, bottom: 0 }}>
           <XAxis
-            dataKey="date"
+            dataKey="logged_at"
             axisLine={false}
             tickLine={false}
             tick={{ fill: "#69746f", fontSize: 12, fontWeight: 700 }}
@@ -51,7 +51,7 @@ export function WeightTrendChart({ data }: { data: WeightPoint[] }) {
           />
           <Line
             type="monotone"
-            dataKey="weight"
+            dataKey="weight_kg"
             stroke="#0f766e"
             strokeWidth={4}
             dot={{ fill: "#f2b705", strokeWidth: 0, r: 5 }}

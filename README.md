@@ -166,3 +166,21 @@ return to `/login`, and protected routes should require login again.
 Add `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` in Vercel
 Project Settings > Environment Variables, then deploy. Do not commit
 `.env.local`.
+
+## Weight Tracker CRUD Testing
+
+The weight tracker is the first real Supabase-backed feature. Workouts, habits,
+and dashboard fitness cards still use mock data.
+
+1. Register or log in with a Supabase email/password account.
+2. Go to `/weight`.
+3. Add a weight log with a date, weight in kg, and optional notes.
+4. Confirm the stat cards, recent entries list, and chart update.
+5. Edit the weight log and confirm the updated values appear.
+6. Delete the weight log and confirm it is removed from the list and chart.
+7. Log out, create or use a second account, and confirm that account cannot see
+   the first user's weight logs.
+
+No extra SQL is required if `supabase/schema.sql` has already been run. The
+feature uses the existing `weight_logs` table and its Row Level Security
+policies.
