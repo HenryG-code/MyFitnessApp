@@ -37,6 +37,7 @@ function getShortUserId(userId: string) {
 
 const supportLinks = {
   paypal: "https://paypal.me/HenryGagiano",
+  // TODO: Replace with the real Yoco payment link once approved.
   yoco: "",
 };
 
@@ -298,7 +299,7 @@ export function SettingsPanel() {
                   height={20}
                   className="h-5 w-auto opacity-70"
                 />
-                Yoco link coming soon
+                Yoco coming soon
               </span>
             )}
             <a
