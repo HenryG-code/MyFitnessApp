@@ -178,6 +178,13 @@ export function DashboardOverview() {
               <Sprout className="size-4" />
               Update habits
             </Link>
+            <Link
+              href="/meal-planner"
+              className="inline-flex items-center gap-2 rounded-2xl bg-white/10 px-4 py-2 text-sm font-black text-white"
+            >
+              <CalendarDays className="size-4" />
+              Plan meals
+            </Link>
           </div>
         </div>
       </section>

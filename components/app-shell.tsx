@@ -6,6 +6,7 @@ import type { User } from "@supabase/supabase-js";
 import {
   BarChart3,
   BookOpen,
+  CalendarDays,
   Dumbbell,
   Home,
   Plus,
@@ -23,10 +24,13 @@ const navItems = [
   { label: "Weight", href: "/weight", icon: Scale },
   { label: "Habits", href: "/habits", icon: Sprout },
   { label: "Recipes", href: "/recipes", icon: BookOpen },
+  { label: "Meal Planner", href: "/meal-planner", icon: CalendarDays },
   { label: "Settings", href: "/settings", icon: Settings },
 ];
 
-const mobileNavItems = navItems.filter((item) => item.href !== "/recipes");
+const mobileNavItems = navItems.filter(
+  (item) => item.href !== "/recipes" && item.href !== "/meal-planner"
+);
 
 function isActive(pathname: string, href: string) {
   if (href === "/dashboard") {
@@ -139,6 +143,17 @@ export function AppShell({
                 aria-label="Open recipes"
               >
                 <BookOpen className="size-5" />
+              </Link>
+              <Link
+                href="/meal-planner"
+                className={`grid size-11 place-items-center rounded-2xl border border-line bg-white/70 text-muted transition hover:bg-stone-100 ${
+                  isActive(pathname, "/meal-planner")
+                    ? "bg-accent text-white"
+                    : ""
+                }`}
+                aria-label="Open meal planner"
+              >
+                <CalendarDays className="size-5" />
               </Link>
               <Link
                 href="/workouts/new"

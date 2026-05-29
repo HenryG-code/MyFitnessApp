@@ -78,7 +78,8 @@ src/lib/supabase/database.types.ts
 ```
 
 Dashboard, weight tracking, daily habits, workout tracking, settings, and
-healthy recipes are wired into their current v1 data sources.
+healthy recipes are wired into their current v1 data sources. Meal Planner uses
+localStorage for v1.
 
 ## Authentication
 
@@ -255,7 +256,7 @@ No extra SQL is required if `supabase/schema.sql` has already been run.
 Healthy Recipes is a static v1 feature powered by local TypeScript data in
 `src/lib/recipes/data.ts`. No paid API is used, no recipe content is scraped,
 and no Supabase recipe tables are required yet. Filtering happens client-side,
-and meal planner integration comes later.
+and Meal Planner reuses this same local recipe library.
 
 1. Register or log in with a Supabase email/password account.
 2. Open `/recipes`.
@@ -267,7 +268,26 @@ and meal planner integration comes later.
 7. Confirm `/dashboard`, `/weight`, `/habits`, `/workouts`, and `/settings`
    still load.
 
-Meal planner support is intentionally marked as coming later.
+Grocery List integration comes later.
+
+## Meal Planner Testing
+
+Meal Planner uses the static recipe library and stores weekly selections in
+browser `localStorage` under `liftlog-meal-planner-v1`. No Supabase table,
+database migration, paid API, AI, or scraped recipe content is used for v1.
+Grocery List integration comes next.
+
+1. Register or log in with a Supabase email/password account.
+2. Open `/meal-planner`.
+3. Select recipes for several meal slots across the week.
+4. Refresh the page and confirm selections persist.
+5. Clear one meal slot and confirm daily and weekly totals update.
+6. Use Clear week and confirm the browser confirmation appears.
+7. Open selected recipe detail links and confirm they go to `/recipes/[slug]`.
+8. Confirm `/recipes`, `/dashboard`, `/weight`, `/habits`, `/workouts`, and
+   `/settings` still load.
+
+No extra SQL is required.
 
 ## Settings Real Profile Data Testing
 
