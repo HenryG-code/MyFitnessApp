@@ -252,3 +252,19 @@ dashboard private.
    first user's data.
 
 No extra SQL is required if `supabase/schema.sql` has already been run.
+
+## Settings Real Profile Data Testing
+
+The Settings page reads the signed-in Supabase Auth user and the matching
+`profiles` row when available. If the profile row is missing, it falls back to
+Auth metadata and email.
+
+1. Register or log in with a Supabase email/password account.
+2. Open `/settings`.
+3. Confirm the full name or email appears in the Profile and Account details
+   sections.
+4. Confirm the account status says signed in and the plan says free portfolio
+   version.
+5. Use the sign out button and confirm logout still returns you to `/login`.
+6. Confirm `/weight`, `/habits`, and `/workouts` still load after signing back
+   in.
