@@ -8,17 +8,18 @@ import type {
 } from "@/src/lib/supabase/database.types";
 
 export type WorkoutExerciseInput = {
-  name: string;
+  exercise_name: string;
   sets: number | null;
   reps: number | null;
-  weight_kg: number | null;
+  weight: number | null;
+  distance_km: number | null;
+  duration_minutes: number | null;
   notes: string | null;
 };
 
 export type WorkoutInput = {
   title: string;
-  workout_type: string | null;
-  started_at: string;
+  workout_date: string;
   duration_minutes: number | null;
   notes: string | null;
   exercises: WorkoutExerciseInput[];
@@ -56,7 +57,8 @@ export async function fetchWorkouts() {
     .from("workouts")
     .select("*")
     .eq("user_id", userId)
-    .order("started_at", { ascending: false });
+    .order("workout_date", { ascending: false })
+    .order("created_at", { ascending: false });
 
   if (error) {
     throw new Error(error.message);
@@ -70,7 +72,6 @@ export async function fetchWorkouts() {
   const { data: exercises, error: exercisesError } = await supabase
     .from("workout_exercises")
     .select("workout_id")
-    .eq("user_id", userId)
     .in("workout_id", workoutIds);
 
   if (exercisesError) {
@@ -105,8 +106,6 @@ export async function fetchWorkoutWithExercises(id: string) {
     .from("workout_exercises")
     .select("*")
     .eq("workout_id", id)
-    .eq("user_id", userId)
-    .order("order_index", { ascending: true })
     .order("created_at", { ascending: true });
 
   if (exercisesError) {
@@ -121,19 +120,18 @@ export async function fetchWorkoutWithExercises(id: string) {
 
 function buildExercisePayloads(
   workoutId: string,
-  userId: string,
   exercises: WorkoutExerciseInput[]
 ) {
   return exercises.map(
-    (exercise, index) =>
+    (exercise) =>
       ({
         workout_id: workoutId,
-        user_id: userId,
-        name: exercise.name,
+        exercise_name: exercise.exercise_name,
         sets: exercise.sets,
         reps: exercise.reps,
-        weight_kg: exercise.weight_kg,
-        order_index: index,
+        weight: exercise.weight,
+        distance_km: exercise.distance_km,
+        duration_minutes: exercise.duration_minutes,
         notes: exercise.notes,
       }) satisfies WorkoutExerciseInsert
   );
@@ -144,8 +142,7 @@ export async function createWorkout(input: WorkoutInput) {
   const workoutPayload: WorkoutInsert = {
     user_id: userId,
     title: input.title,
-    workout_type: input.workout_type,
-    started_at: input.started_at,
+    workout_date: input.workout_date,
     duration_minutes: input.duration_minutes,
     notes: input.notes,
   };
@@ -163,7 +160,7 @@ export async function createWorkout(input: WorkoutInput) {
   if (input.exercises.length) {
     const { error: exerciseError } = await supabase
       .from("workout_exercises")
-      .insert(buildExercisePayloads(workout.id, userId, input.exercises));
+      .insert(buildExercisePayloads(workout.id, input.exercises));
 
     if (exerciseError) {
       throw new Error(exerciseError.message);
@@ -177,8 +174,7 @@ export async function updateWorkout(id: string, input: WorkoutInput) {
   const { supabase, userId } = await getAuthenticatedUserId();
   const workoutPayload: WorkoutUpdate = {
     title: input.title,
-    workout_type: input.workout_type,
-    started_at: input.started_at,
+    workout_date: input.workout_date,
     duration_minutes: input.duration_minutes,
     notes: input.notes,
   };
@@ -198,8 +194,7 @@ export async function updateWorkout(id: string, input: WorkoutInput) {
   const { error: deleteError } = await supabase
     .from("workout_exercises")
     .delete()
-    .eq("workout_id", id)
-    .eq("user_id", userId);
+    .eq("workout_id", id);
 
   if (deleteError) {
     throw new Error(deleteError.message);
@@ -208,7 +203,7 @@ export async function updateWorkout(id: string, input: WorkoutInput) {
   if (input.exercises.length) {
     const { error: insertError } = await supabase
       .from("workout_exercises")
-      .insert(buildExercisePayloads(id, userId, input.exercises));
+      .insert(buildExercisePayloads(id, input.exercises));
 
     if (insertError) {
       throw new Error(insertError.message);

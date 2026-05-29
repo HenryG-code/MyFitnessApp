@@ -36,26 +36,23 @@ create table if not exists public.workouts (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references auth.users(id) on delete cascade,
   title text not null,
-  workout_type text,
-  started_at timestamptz not null default now(),
+  workout_date date not null default current_date,
   duration_minutes integer check (duration_minutes is null or duration_minutes > 0),
   notes text,
-  created_at timestamptz not null default now(),
-  updated_at timestamptz not null default now()
+  created_at timestamptz not null default now()
 );
 
 create table if not exists public.workout_exercises (
   id uuid primary key default gen_random_uuid(),
   workout_id uuid not null references public.workouts(id) on delete cascade,
-  user_id uuid not null references auth.users(id) on delete cascade,
-  name text not null,
+  exercise_name text not null,
   sets integer check (sets is null or sets >= 0),
   reps integer check (reps is null or reps >= 0),
-  weight_kg numeric(6, 2) check (weight_kg is null or weight_kg >= 0),
-  order_index integer not null default 0,
+  weight numeric check (weight is null or weight >= 0),
+  distance_km numeric check (distance_km is null or distance_km >= 0),
+  duration_minutes integer check (duration_minutes is null or duration_minutes >= 0),
   notes text,
-  created_at timestamptz not null default now(),
-  updated_at timestamptz not null default now()
+  created_at timestamptz not null default now()
 );
 
 create table if not exists public.daily_habits (
@@ -80,14 +77,11 @@ create index if not exists profiles_email_idx
 create index if not exists weight_logs_user_logged_at_idx
   on public.weight_logs (user_id, logged_at desc);
 
-create index if not exists workouts_user_started_at_idx
-  on public.workouts (user_id, started_at desc);
+create index if not exists workouts_user_workout_date_idx
+  on public.workouts (user_id, workout_date desc);
 
-create index if not exists workout_exercises_user_workout_idx
-  on public.workout_exercises (user_id, workout_id);
-
-create index if not exists workout_exercises_workout_order_idx
-  on public.workout_exercises (workout_id, order_index);
+create index if not exists workout_exercises_workout_idx
+  on public.workout_exercises (workout_id);
 
 create index if not exists daily_habits_user_date_idx
   on public.daily_habits (user_id, habit_date desc);
@@ -172,13 +166,19 @@ create policy "Users can delete their own workouts"
 
 create policy "Users can view their own workout exercises"
   on public.workout_exercises for select
-  using (auth.uid() = user_id);
+  using (
+    exists (
+      select 1
+      from public.workouts
+      where workouts.id = workout_exercises.workout_id
+        and workouts.user_id = auth.uid()
+    )
+  );
 
 create policy "Users can insert exercises for their own workouts"
   on public.workout_exercises for insert
   with check (
-    auth.uid() = user_id
-    and exists (
+    exists (
       select 1
       from public.workouts
       where workouts.id = workout_exercises.workout_id
@@ -188,10 +188,16 @@ create policy "Users can insert exercises for their own workouts"
 
 create policy "Users can update exercises for their own workouts"
   on public.workout_exercises for update
-  using (auth.uid() = user_id)
+  using (
+    exists (
+      select 1
+      from public.workouts
+      where workouts.id = workout_exercises.workout_id
+        and workouts.user_id = auth.uid()
+    )
+  )
   with check (
-    auth.uid() = user_id
-    and exists (
+    exists (
       select 1
       from public.workouts
       where workouts.id = workout_exercises.workout_id
@@ -201,7 +207,14 @@ create policy "Users can update exercises for their own workouts"
 
 create policy "Users can delete their own workout exercises"
   on public.workout_exercises for delete
-  using (auth.uid() = user_id);
+  using (
+    exists (
+      select 1
+      from public.workouts
+      where workouts.id = workout_exercises.workout_id
+        and workouts.user_id = auth.uid()
+    )
+  );
 
 create policy "Users can view their own daily habits"
   on public.daily_habits for select
@@ -228,16 +241,6 @@ create trigger set_profiles_updated_at
 drop trigger if exists set_weight_logs_updated_at on public.weight_logs;
 create trigger set_weight_logs_updated_at
   before update on public.weight_logs
-  for each row execute function public.set_updated_at();
-
-drop trigger if exists set_workouts_updated_at on public.workouts;
-create trigger set_workouts_updated_at
-  before update on public.workouts
-  for each row execute function public.set_updated_at();
-
-drop trigger if exists set_workout_exercises_updated_at on public.workout_exercises;
-create trigger set_workout_exercises_updated_at
-  before update on public.workout_exercises
   for each row execute function public.set_updated_at();
 
 drop trigger if exists set_daily_habits_updated_at on public.daily_habits;

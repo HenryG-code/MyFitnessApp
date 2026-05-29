@@ -26,7 +26,7 @@ function formatDate(value: string) {
     month: "short",
     day: "numeric",
     year: "numeric",
-  }).format(new Date(value));
+  }).format(new Date(`${value}T00:00:00`));
 }
 
 function getStartOfWeek() {
@@ -40,7 +40,7 @@ function getStartOfWeek() {
 function getStats(workouts: WorkoutListItem[]) {
   const weekStart = getStartOfWeek();
   const workoutsThisWeek = workouts.filter(
-    (workout) => new Date(workout.started_at) >= weekStart
+    (workout) => new Date(`${workout.workout_date}T00:00:00`) >= weekStart
   ).length;
   const totalMinutes = workouts.reduce(
     (sum, workout) => sum + (workout.duration_minutes ?? 0),
@@ -191,7 +191,7 @@ export function WorkoutsList() {
           value={stats.latestWorkout?.title ?? "--"}
           detail={
             stats.latestWorkout
-              ? formatDate(stats.latestWorkout.started_at)
+              ? formatDate(stats.latestWorkout.workout_date)
               : "No workouts yet."
           }
           icon={<CalendarDays className="size-5" />}
@@ -215,7 +215,7 @@ export function WorkoutsList() {
           {workouts.map((workout) => (
             <FitnessCard key={workout.id}>
               <SectionHeader
-                eyebrow={workout.workout_type ?? "Workout"}
+                eyebrow="Workout"
                 title={workout.title}
               />
               <p className="line-clamp-3 text-sm leading-6 text-muted">
@@ -224,7 +224,7 @@ export function WorkoutsList() {
               <div className="mt-5 flex flex-wrap gap-3 text-sm font-bold text-muted">
                 <span className="inline-flex items-center gap-2 rounded-full bg-stone-100 px-3 py-2">
                   <CalendarDays className="size-4" />
-                  {formatDate(workout.started_at)}
+                  {formatDate(workout.workout_date)}
                 </span>
                 <span className="inline-flex items-center gap-2 rounded-full bg-stone-100 px-3 py-2">
                   <Clock className="size-4" />

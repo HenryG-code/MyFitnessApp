@@ -13,21 +13,20 @@ import { useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { z } from "zod";
 
-const workoutTypes = ["Strength", "Cardio", "Mobility", "Sport", "Mixed"];
-
 const exerciseSchema = z.object({
-  name: z.string(),
+  exercise_name: z.string(),
   sets: z.string(),
   reps: z.string(),
-  weight_kg: z.string(),
+  weight: z.string(),
+  distance_km: z.string(),
+  duration_minutes: z.string(),
   notes: z.string().max(240, "Keep exercise notes under 240 characters."),
 });
 
 const workoutSchema = z
   .object({
     title: z.string().trim().min(2, "Title must be at least 2 characters."),
-    workout_type: z.string(),
-    started_at: z.string().min(1, "Start date and time is required."),
+    workout_date: z.string().min(1, "Workout date is required."),
     duration_minutes: z.string(),
     notes: z.string().max(500, "Keep workout notes under 500 characters."),
     exercises: z.array(exerciseSchema),
@@ -37,15 +36,18 @@ const workoutSchema = z
       values.duration_minutes,
       "duration_minutes",
       context,
-      "Duration must be positive."
+      "Duration must be positive.",
+      { allowZero: false, integerOnly: true }
     );
 
     values.exercises.forEach((exercise, index) => {
       const hasAnyValue = [
-        exercise.name,
+        exercise.exercise_name,
         exercise.sets,
         exercise.reps,
-        exercise.weight_kg,
+        exercise.weight,
+        exercise.distance_km,
+        exercise.duration_minutes,
         exercise.notes,
       ].some((value) => value.trim());
 
@@ -53,11 +55,11 @@ const workoutSchema = z
         return;
       }
 
-      if (!exercise.name.trim()) {
+      if (!exercise.exercise_name.trim()) {
         context.addIssue({
           code: "custom",
           message: "Exercise name is required.",
-          path: ["exercises", index, "name"],
+          path: ["exercises", index, "exercise_name"],
         });
       }
 
@@ -66,20 +68,33 @@ const workoutSchema = z
         ["exercises", index, "sets"],
         context,
         "Sets cannot be negative.",
-        true
+        { integerOnly: true }
       );
       validateOptionalNumber(
         exercise.reps,
         ["exercises", index, "reps"],
         context,
         "Reps cannot be negative.",
-        true
+        { integerOnly: true }
       );
       validateOptionalNumber(
-        exercise.weight_kg,
-        ["exercises", index, "weight_kg"],
+        exercise.weight,
+        ["exercises", index, "weight"],
         context,
         "Weight cannot be negative."
+      );
+      validateOptionalNumber(
+        exercise.distance_km,
+        ["exercises", index, "distance_km"],
+        context,
+        "Distance cannot be negative."
+      );
+      validateOptionalNumber(
+        exercise.duration_minutes,
+        ["exercises", index, "duration_minutes"],
+        context,
+        "Duration cannot be negative.",
+        { integerOnly: true }
       );
     });
   });
@@ -93,12 +108,17 @@ type WorkoutFormProps = {
 
 type IssuePath = string | (string | number)[];
 
+type NumberOptions = {
+  allowZero?: boolean;
+  integerOnly?: boolean;
+};
+
 function validateOptionalNumber(
   value: string,
   path: IssuePath,
   context: z.RefinementCtx,
   message: string,
-  integerOnly = false
+  options: NumberOptions = {}
 ) {
   const trimmed = value.trim();
 
@@ -107,8 +127,14 @@ function validateOptionalNumber(
   }
 
   const parsed = Number(trimmed);
+  const allowZero = options.allowZero ?? true;
+  const isBelowMinimum = allowZero ? parsed < 0 : parsed <= 0;
 
-  if (!Number.isFinite(parsed) || parsed < 0 || (integerOnly && !Number.isInteger(parsed))) {
+  if (
+    !Number.isFinite(parsed) ||
+    isBelowMinimum ||
+    (options.integerOnly && !Number.isInteger(parsed))
+  ) {
     context.addIssue({
       code: "custom",
       message,
@@ -127,21 +153,21 @@ function normalizeOptionalText(value: string) {
   return trimmed ? trimmed : null;
 }
 
-function getDateTimeInputValue(date = new Date()) {
-  const localDate = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
-  return localDate.toISOString().slice(0, 16);
-}
+function getDateInputValue(date = new Date()) {
+  const month = `${date.getMonth() + 1}`.padStart(2, "0");
+  const day = `${date.getDate()}`.padStart(2, "0");
 
-function toDateTimeInputValue(value: string) {
-  return getDateTimeInputValue(new Date(value));
+  return `${date.getFullYear()}-${month}-${day}`;
 }
 
 function getEmptyExercise() {
   return {
-    name: "",
+    exercise_name: "",
     sets: "",
     reps: "",
-    weight_kg: "",
+    weight: "",
+    distance_km: "",
+    duration_minutes: "",
     notes: "",
   };
 }
@@ -150,8 +176,7 @@ function getDefaultValues(workout?: WorkoutWithExercises): WorkoutFormValues {
   if (!workout) {
     return {
       title: "",
-      workout_type: "Strength",
-      started_at: getDateTimeInputValue(),
+      workout_date: getDateInputValue(),
       duration_minutes: "",
       notes: "",
       exercises: [getEmptyExercise()],
@@ -160,16 +185,17 @@ function getDefaultValues(workout?: WorkoutWithExercises): WorkoutFormValues {
 
   return {
     title: workout.title,
-    workout_type: workout.workout_type ?? "Strength",
-    started_at: toDateTimeInputValue(workout.started_at),
+    workout_date: workout.workout_date,
     duration_minutes: workout.duration_minutes?.toString() ?? "",
     notes: workout.notes ?? "",
     exercises: workout.exercises.length
       ? workout.exercises.map((exercise) => ({
-          name: exercise.name,
+          exercise_name: exercise.exercise_name,
           sets: exercise.sets?.toString() ?? "",
           reps: exercise.reps?.toString() ?? "",
-          weight_kg: exercise.weight_kg?.toString() ?? "",
+          weight: exercise.weight?.toString() ?? "",
+          distance_km: exercise.distance_km?.toString() ?? "",
+          duration_minutes: exercise.duration_minutes?.toString() ?? "",
           notes: exercise.notes ?? "",
         }))
       : [getEmptyExercise()],
@@ -179,17 +205,18 @@ function getDefaultValues(workout?: WorkoutWithExercises): WorkoutFormValues {
 function toWorkoutInput(values: WorkoutFormValues): WorkoutInput {
   return {
     title: values.title.trim(),
-    workout_type: normalizeOptionalText(values.workout_type),
-    started_at: new Date(values.started_at).toISOString(),
+    workout_date: values.workout_date,
     duration_minutes: parseOptionalNumber(values.duration_minutes),
     notes: normalizeOptionalText(values.notes),
     exercises: values.exercises
-      .filter((exercise) => exercise.name.trim())
+      .filter((exercise) => exercise.exercise_name.trim())
       .map((exercise) => ({
-        name: exercise.name.trim(),
+        exercise_name: exercise.exercise_name.trim(),
         sets: parseOptionalNumber(exercise.sets),
         reps: parseOptionalNumber(exercise.reps),
-        weight_kg: parseOptionalNumber(exercise.weight_kg),
+        weight: parseOptionalNumber(exercise.weight),
+        distance_km: parseOptionalNumber(exercise.distance_km),
+        duration_minutes: parseOptionalNumber(exercise.duration_minutes),
         notes: normalizeOptionalText(exercise.notes),
       })),
   };
@@ -260,38 +287,20 @@ export function WorkoutForm({ mode = "create", workout }: WorkoutFormProps) {
         ) : null}
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-2">
         <div>
-          <label className="text-sm font-black" htmlFor="workout_type">
-            Type
-          </label>
-          <select
-            id="workout_type"
-            className="mt-2 w-full rounded-2xl border border-line bg-white/80 px-4 py-3 outline-none transition focus:border-accent focus:ring-4 focus:ring-teal-700/10"
-            {...register("workout_type")}
-          >
-            <option value="">No type</option>
-            {workoutTypes.map((type) => (
-              <option key={type} value={type}>
-                {type}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div>
-          <label className="text-sm font-black" htmlFor="started_at">
-            Started at
+          <label className="text-sm font-black" htmlFor="workout_date">
+            Workout date
           </label>
           <input
-            id="started_at"
-            type="datetime-local"
+            id="workout_date"
+            type="date"
             className="mt-2 w-full rounded-2xl border border-line bg-white/80 px-4 py-3 outline-none transition focus:border-accent focus:ring-4 focus:ring-teal-700/10"
-            {...register("started_at")}
+            {...register("workout_date")}
           />
-          {errors.started_at ? (
+          {errors.workout_date ? (
             <p className="mt-2 text-sm font-medium text-red-700">
-              {errors.started_at.message}
+              {errors.workout_date.message}
             </p>
           ) : null}
         </div>
@@ -303,7 +312,7 @@ export function WorkoutForm({ mode = "create", workout }: WorkoutFormProps) {
           <input
             id="duration_minutes"
             type="number"
-            min="0"
+            min="1"
             step="1"
             className="mt-2 w-full rounded-2xl border border-line bg-white/80 px-4 py-3 outline-none transition focus:border-accent focus:ring-4 focus:ring-teal-700/10"
             placeholder="45"
@@ -374,22 +383,22 @@ export function WorkoutForm({ mode = "create", workout }: WorkoutFormProps) {
                 ) : null}
               </div>
 
-              <div className="mt-4 grid gap-3 sm:grid-cols-4">
-                <div className="sm:col-span-4">
+              <div className="mt-4 grid gap-3 sm:grid-cols-6">
+                <div className="sm:col-span-6">
                   <label className="text-sm font-black">Name</label>
                   <input
                     className="mt-2 w-full rounded-2xl border border-line bg-white/80 px-4 py-3 outline-none transition focus:border-accent focus:ring-4 focus:ring-teal-700/10"
                     placeholder="Bench press"
-                    {...register(`exercises.${index}.name`)}
+                    {...register(`exercises.${index}.exercise_name`)}
                   />
-                  {errors.exercises?.[index]?.name ? (
+                  {errors.exercises?.[index]?.exercise_name ? (
                     <p className="mt-2 text-sm font-medium text-red-700">
-                      {errors.exercises[index]?.name?.message}
+                      {errors.exercises[index]?.exercise_name?.message}
                     </p>
                   ) : null}
                 </div>
 
-                <div>
+                <div className="sm:col-span-2">
                   <label className="text-sm font-black">Sets</label>
                   <input
                     type="number"
@@ -405,7 +414,7 @@ export function WorkoutForm({ mode = "create", workout }: WorkoutFormProps) {
                   ) : null}
                 </div>
 
-                <div>
+                <div className="sm:col-span-2">
                   <label className="text-sm font-black">Reps</label>
                   <input
                     type="number"
@@ -421,23 +430,57 @@ export function WorkoutForm({ mode = "create", workout }: WorkoutFormProps) {
                   ) : null}
                 </div>
 
-                <div>
+                <div className="sm:col-span-2">
                   <label className="text-sm font-black">Weight, kg</label>
                   <input
                     type="number"
                     min="0"
                     step="0.5"
                     className="mt-2 w-full rounded-2xl border border-line bg-white/80 px-4 py-3 outline-none transition focus:border-accent focus:ring-4 focus:ring-teal-700/10"
-                    {...register(`exercises.${index}.weight_kg`)}
+                    {...register(`exercises.${index}.weight`)}
                   />
-                  {errors.exercises?.[index]?.weight_kg ? (
+                  {errors.exercises?.[index]?.weight ? (
                     <p className="mt-2 text-sm font-medium text-red-700">
-                      {errors.exercises[index]?.weight_kg?.message}
+                      {errors.exercises[index]?.weight?.message}
                     </p>
                   ) : null}
                 </div>
 
-                <div className="sm:col-span-4">
+                <div className="sm:col-span-3">
+                  <label className="text-sm font-black">Distance, km</label>
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.1"
+                    className="mt-2 w-full rounded-2xl border border-line bg-white/80 px-4 py-3 outline-none transition focus:border-accent focus:ring-4 focus:ring-teal-700/10"
+                    {...register(`exercises.${index}.distance_km`)}
+                  />
+                  {errors.exercises?.[index]?.distance_km ? (
+                    <p className="mt-2 text-sm font-medium text-red-700">
+                      {errors.exercises[index]?.distance_km?.message}
+                    </p>
+                  ) : null}
+                </div>
+
+                <div className="sm:col-span-3">
+                  <label className="text-sm font-black">
+                    Exercise duration, min
+                  </label>
+                  <input
+                    type="number"
+                    min="0"
+                    step="1"
+                    className="mt-2 w-full rounded-2xl border border-line bg-white/80 px-4 py-3 outline-none transition focus:border-accent focus:ring-4 focus:ring-teal-700/10"
+                    {...register(`exercises.${index}.duration_minutes`)}
+                  />
+                  {errors.exercises?.[index]?.duration_minutes ? (
+                    <p className="mt-2 text-sm font-medium text-red-700">
+                      {errors.exercises[index]?.duration_minutes?.message}
+                    </p>
+                  ) : null}
+                </div>
+
+                <div className="sm:col-span-6">
                   <label className="text-sm font-black">Exercise notes</label>
                   <textarea
                     rows={2}

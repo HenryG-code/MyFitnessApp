@@ -16,9 +16,10 @@ type WorkoutDetailProps = {
 
 function formatDate(value: string) {
   return new Intl.DateTimeFormat("en", {
-    dateStyle: "medium",
-    timeStyle: "short",
-  }).format(new Date(value));
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  }).format(new Date(`${value}T00:00:00`));
 }
 
 export function WorkoutDetail({ workoutId }: WorkoutDetailProps) {
@@ -103,11 +104,11 @@ export function WorkoutDetail({ workoutId }: WorkoutDetailProps) {
         <div className="mt-5 flex flex-wrap gap-3 text-sm font-bold text-stone-300">
           <span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-2">
             <Dumbbell className="size-4" />
-            {workout.workout_type ?? "Workout"}
+            Workout
           </span>
           <span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-2">
             <Clock className="size-4" />
-            {formatDate(workout.started_at)}
+            {formatDate(workout.workout_date)}
           </span>
           <span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-2">
             {workout.duration_minutes ?? 0} min

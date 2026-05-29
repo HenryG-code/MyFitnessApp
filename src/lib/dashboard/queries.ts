@@ -57,21 +57,13 @@ export function getDateDaysAgo(daysAgo: number) {
   return getDateInputValue(date);
 }
 
-function getStartOfWeekIso() {
+function getStartOfWeekDate() {
   const now = new Date();
   const start = new Date(now);
   start.setHours(0, 0, 0, 0);
   start.setDate(now.getDate() - now.getDay());
 
-  return start.toISOString();
-}
-
-function getSevenDaysAgoIso() {
-  const date = new Date();
-  date.setHours(0, 0, 0, 0);
-  date.setDate(date.getDate() - 6);
-
-  return date.toISOString();
+  return getDateInputValue(start);
 }
 
 export function countCompletedHabits(row: DailyHabit | null) {
@@ -86,8 +78,7 @@ export async function fetchDashboardData(): Promise<DashboardData> {
   const { supabase, userId } = await getAuthenticatedUserId();
   const today = getDateInputValue();
   const sevenDaysAgo = getDateDaysAgo(6);
-  const startOfWeekIso = getStartOfWeekIso();
-  const sevenDaysAgoIso = getSevenDaysAgoIso();
+  const startOfWeek = getStartOfWeekDate();
 
   const [
     firstWeightResult,
@@ -139,21 +130,25 @@ export async function fetchDashboardData(): Promise<DashboardData> {
       .from("workouts")
       .select("*")
       .eq("user_id", userId)
-      .order("started_at", { ascending: false })
+      .order("workout_date", { ascending: false })
+      .order("created_at", { ascending: false })
       .limit(1)
       .maybeSingle(),
     supabase
       .from("workouts")
       .select("*")
       .eq("user_id", userId)
-      .gte("started_at", startOfWeekIso)
-      .order("started_at", { ascending: false }),
+      .gte("workout_date", startOfWeek)
+      .order("workout_date", { ascending: false })
+      .order("created_at", { ascending: false }),
     supabase
       .from("workouts")
       .select("*")
       .eq("user_id", userId)
-      .gte("started_at", sevenDaysAgoIso)
-      .order("started_at", { ascending: true }),
+      .gte("workout_date", sevenDaysAgo)
+      .lte("workout_date", today)
+      .order("workout_date", { ascending: true })
+      .order("created_at", { ascending: true }),
   ]);
 
   const results = [

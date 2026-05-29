@@ -60,8 +60,8 @@ The schema creates the foundation tables:
 - `daily_habits`
 
 It also enables Row Level Security, adds user ownership policies, adds indexes
-for user/date queries, maintains `updated_at` timestamps, and creates a profile
-automatically when a new Supabase Auth user signs up.
+for user/date queries, maintains `updated_at` timestamps where useful, and
+creates a profile automatically when a new Supabase Auth user signs up.
 
 ## Supabase Client
 
@@ -215,8 +215,10 @@ still use mock data.
 1. Register or log in with a Supabase email/password account.
 2. Go to `/workouts` and confirm the list or empty state loads.
 3. Go to `/workouts/new`.
-4. Create a workout with title, type, start time, duration, and notes.
-5. Add one or more exercise rows before saving.
+4. Create a workout with title, workout date, optional duration, and notes.
+5. Add one or more exercise rows before saving. Exercises use `exercise_name`,
+   optional sets/reps, `weight`, `distance_km`, optional exercise duration, and
+   notes.
 6. Confirm the workout appears on `/workouts` with exercise count and stats.
 7. Open the workout with View/Edit and update workout fields or exercises.
 8. Delete the workout and confirm it disappears from the list.
@@ -225,9 +227,10 @@ still use mock data.
 10. Confirm `/weight` still works.
 11. Confirm `/habits` still works.
 
-No extra SQL is required if `supabase/schema.sql` has already been run. The
-feature uses the existing `workouts` and `workout_exercises` tables and their
-Row Level Security policies.
+Workouts use `workout_date`, not `started_at`, and exercise weight uses
+`weight`, not `weight_kg`. No extra SQL is required if the live Supabase tables
+already match this schema. The feature uses the existing `workouts` and
+`workout_exercises` tables and their Row Level Security policies.
 
 ## Dashboard Real Data Testing
 

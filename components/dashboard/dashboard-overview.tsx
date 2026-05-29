@@ -10,7 +10,6 @@ import {
   countCompletedHabits,
   fetchDashboardData,
   getDateDaysAgo,
-  getDateInputValue,
   type DashboardData,
 } from "@/src/lib/dashboard/queries";
 import type { Workout } from "@/src/lib/supabase/database.types";
@@ -44,7 +43,7 @@ function formatDateTime(value: string) {
   return new Intl.DateTimeFormat("en", {
     month: "short",
     day: "numeric",
-  }).format(new Date(value));
+  }).format(new Date(`${value}T00:00:00`));
 }
 
 function formatWeight(value: number) {
@@ -52,7 +51,7 @@ function formatWeight(value: number) {
 }
 
 function getWorkoutDate(workout: Workout) {
-  return getDateInputValue(new Date(workout.started_at));
+  return workout.workout_date;
 }
 
 function buildWeeklyProgress(data: DashboardData): WeeklyPoint[] {
@@ -262,7 +261,7 @@ export function DashboardOverview() {
                       {data.latestWorkout.title}
                     </p>
                     <p className="text-sm font-medium text-muted">
-                      {formatDateTime(data.latestWorkout.started_at)} -{" "}
+                      {formatDateTime(data.latestWorkout.workout_date)} -{" "}
                       {data.latestWorkout.duration_minutes ?? 0} min
                     </p>
                   </div>

@@ -29,26 +29,23 @@ export type Workout = {
   id: string;
   user_id: string;
   title: string;
-  workout_type: string | null;
-  started_at: string;
+  workout_date: string;
   duration_minutes: number | null;
   notes: string | null;
   created_at: string;
-  updated_at: string;
 };
 
 export type WorkoutExercise = {
   id: string;
   workout_id: string;
-  user_id: string;
-  name: string;
+  exercise_name: string;
   sets: number | null;
   reps: number | null;
-  weight_kg: number | null;
-  order_index: number;
+  weight: number | null;
+  distance_km: number | null;
+  duration_minutes: number | null;
   notes: string | null;
   created_at: string;
-  updated_at: string;
 };
 
 export type DailyHabit = {
@@ -104,12 +101,10 @@ export type WorkoutInsert = {
   id?: string;
   user_id: string;
   title: string;
-  workout_type?: string | null;
-  started_at?: string;
+  workout_date?: string;
   duration_minutes?: number | null;
   notes?: string | null;
   created_at?: string;
-  updated_at?: string;
 };
 
 export type WorkoutUpdate = Partial<
@@ -119,19 +114,18 @@ export type WorkoutUpdate = Partial<
 export type WorkoutExerciseInsert = {
   id?: string;
   workout_id: string;
-  user_id: string;
-  name: string;
+  exercise_name: string;
   sets?: number | null;
   reps?: number | null;
-  weight_kg?: number | null;
-  order_index?: number;
+  weight?: number | null;
+  distance_km?: number | null;
+  duration_minutes?: number | null;
   notes?: string | null;
   created_at?: string;
-  updated_at?: string;
 };
 
 export type WorkoutExerciseUpdate = Partial<
-  Omit<WorkoutExercise, "id" | "workout_id" | "user_id" | "created_at">
+  Omit<WorkoutExercise, "id" | "workout_id" | "created_at">
 >;
 
 export type DailyHabitInsert = {
@@ -204,12 +198,6 @@ export type Database = {
             foreignKeyName: "workout_exercises_workout_id_fkey";
             columns: ["workout_id"];
             referencedRelation: "workouts";
-            referencedColumns: ["id"];
-          },
-          {
-            foreignKeyName: "workout_exercises_user_id_fkey";
-            columns: ["user_id"];
-            referencedRelation: "users";
             referencedColumns: ["id"];
           },
         ];
