@@ -211,11 +211,10 @@ export function SettingsPanel() {
               rel="noreferrer"
               className="inline-flex items-center justify-center gap-3 rounded-2xl border border-line bg-white/75 px-4 py-3 text-sm font-black transition hover:-translate-y-0.5 hover:border-accent"
             >
-              {/* TODO: Place the official Yoco brand asset at public/brand/yoco-logo.svg. */}
               <Image
-                src="/brand/yoco-logo.svg"
+                src="/brand/yoco-logo.png"
                 alt=""
-                width={54}
+                width={72}
                 height={20}
                 className="h-5 w-auto"
               />
@@ -228,9 +227,8 @@ export function SettingsPanel() {
               rel="noreferrer"
               className="inline-flex items-center justify-center gap-3 rounded-2xl border border-line bg-white/75 px-4 py-3 text-sm font-black transition hover:-translate-y-0.5 hover:border-accent"
             >
-              {/* TODO: Place the official PayPal brand asset at public/brand/paypal-logo.svg. */}
               <Image
-                src="/brand/paypal-logo.svg"
+                src="/brand/paypal-icon.webp"
                 alt=""
                 width={76}
                 height={20}
