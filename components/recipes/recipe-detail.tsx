@@ -143,16 +143,19 @@ export function RecipeDetail({ recipe }: RecipeDetailProps) {
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <p className="text-xs font-black uppercase tracking-[0.22em] text-accent-strong">
-              Coming later
+              Planning
             </p>
             <h2 className="mt-1 font-display text-xl font-black">
-              Meal planner support coming soon.
+              Add this recipe to your weekly plan from Meal Planner.
             </h2>
           </div>
-          <span className="inline-flex items-center gap-2 rounded-full bg-white/65 px-3 py-2 text-sm font-black text-muted">
+          <Link
+            href="/meal-planner"
+            className="inline-flex items-center gap-2 rounded-full bg-white/65 px-3 py-2 text-sm font-black text-muted transition hover:-translate-y-0.5 hover:text-accent-strong"
+          >
             <Clock className="size-4" />
-            Static recipes for v1
-          </span>
+            Open Meal Planner
+          </Link>
         </div>
       </FitnessCard>
     </div>

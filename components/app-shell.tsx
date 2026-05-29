@@ -116,11 +116,14 @@ export function AppShell({
 
           <div className="rounded-[1.6rem] bg-[#eaf3dd] p-4">
             <p className="text-xs font-black uppercase tracking-[0.18em] text-accent-strong">
-              This week
+              Keep building
             </p>
-            <p className="mt-2 text-2xl font-black tracking-tight">4 workouts</p>
+            <p className="mt-2 text-2xl font-black tracking-tight">
+              Your private hub
+            </p>
             <p className="mt-1 text-sm leading-6 text-muted">
-              Mock data today. Supabase comes later, neat and tidy.
+              Track workouts, meals, habits, and training plans from one
+              private dashboard.
             </p>
           </div>
         </div>

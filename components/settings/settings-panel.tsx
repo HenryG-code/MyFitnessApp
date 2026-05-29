@@ -8,14 +8,19 @@ import {
 } from "@/src/lib/profile/queries";
 import {
   Bell,
+  BookOpen,
+  CalendarDays,
   ExternalLink,
   Fingerprint,
   HandHeart,
   Lock,
   ShieldCheck,
+  ShoppingBasket,
+  Target,
   UserRound,
 } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 import { useEffect, useState } from "react";
 
 function getProfileDetail(profile: AuthProfile | null) {
@@ -79,6 +84,33 @@ export function SettingsPanel() {
       title: "Privacy",
       detail: "Supabase Auth and Row Level Security keep your fitness data scoped to your account.",
       icon: Lock,
+    },
+  ];
+
+  const toolLinks = [
+    {
+      href: "/recipes",
+      title: "Recipes",
+      detail: "Browse balanced meals.",
+      icon: BookOpen,
+    },
+    {
+      href: "/meal-planner",
+      title: "Meal Planner",
+      detail: "Plan the week locally.",
+      icon: CalendarDays,
+    },
+    {
+      href: "/grocery-list",
+      title: "Grocery List",
+      detail: "Shop from planned meals.",
+      icon: ShoppingBasket,
+    },
+    {
+      href: "/training-plan",
+      title: "Training Plan",
+      detail: "Pick a goal-based routine.",
+      icon: Target,
     },
   ];
 
@@ -186,6 +218,33 @@ export function SettingsPanel() {
           attached to your authenticated user and protected by Supabase RLS
           policies.
         </p>
+      </FitnessCard>
+
+      <FitnessCard>
+        <SectionHeader eyebrow="More tools" title="Quick links" />
+        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+          {toolLinks.map((item) => {
+            const Icon = item.icon;
+
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className="rounded-[1.25rem] border border-line bg-white/65 p-4 transition hover:-translate-y-0.5 hover:border-accent"
+              >
+                <span className="grid size-10 place-items-center rounded-2xl bg-accent text-white">
+                  <Icon className="size-4" />
+                </span>
+                <p className="mt-3 font-display text-lg font-black">
+                  {item.title}
+                </p>
+                <p className="mt-1 text-sm leading-6 text-muted">
+                  {item.detail}
+                </p>
+              </Link>
+            );
+          })}
+        </div>
       </FitnessCard>
 
       <FitnessCard>

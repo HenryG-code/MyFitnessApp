@@ -13,6 +13,24 @@ This project is intentionally free-tier friendly:
 - No file uploads
 - No paid analytics
 
+## Features
+
+- Supabase Auth with protected app routes and public login/register redirects.
+- Real dashboard data from user-scoped weight, habit, and workout records.
+- Weight Tracker CRUD with chart and stats.
+- Daily Habits with boolean daily habit tracking.
+- Workout Tracker CRUD with exercises.
+- Healthy Recipes using local static TypeScript data.
+- Meal Planner using the static recipe library and browser localStorage.
+- Grocery List generated from Meal Planner selections with local checked state.
+- Suggested Training Plans using static rule-based templates and localStorage.
+- Settings with real profile data, privacy notes, logout, and external support
+  links.
+
+Recipes, Meal Planner, Grocery List, and Suggested Training Plans are free
+static/localStorage features in v1. No paid APIs, AI APIs, recipe APIs, grocery
+APIs, analytics, or payment SDKs are used.
+
 ## Getting Started
 
 Install dependencies and run the local development server:
@@ -111,7 +129,7 @@ npm run build
 
 ## Testing Checklist
 
-Use this checklist before the first real feature milestone:
+Use this checklist when setting up the app locally:
 
 1. Install dependencies:
 
@@ -168,6 +186,26 @@ return to `/login`, and protected routes should require login again.
 Add `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` in Vercel
 Project Settings > Environment Variables, then deploy. Do not commit
 `.env.local`.
+
+## Manual QA Checklist
+
+Use this broader checklist before portfolio demos or deployments:
+
+1. Log in with a Supabase email/password user.
+2. Confirm `/dashboard` loads real user-scoped dashboard data and quick links.
+3. Test `/weight` create, edit, delete, chart, and empty state.
+4. Test `/habits` daily habit toggles and weekly summary.
+5. Test `/workouts` create, edit, delete, exercise rows, and workout details.
+6. Test `/recipes` filters and several `/recipes/[slug]` detail pages.
+7. Test `/meal-planner` selections, refresh persistence, clear slot, and clear
+   week.
+8. Test `/grocery-list` generation from planned meals, category grouping,
+   checked item persistence, clear checked, and reset checked.
+9. Test `/training-plan` goal selection, refresh persistence, and Log workout
+   links.
+10. Test `/settings` real profile data, quick links, external support links,
+    and logout.
+11. Log out and confirm protected routes redirect to `/login`.
 
 ## Weight Tracker CRUD Testing
 
@@ -238,8 +276,8 @@ The dashboard reads real user-scoped data from `weight_logs`, `daily_habits`,
 dashboard private.
 
 1. Register or log in with a Supabase email/password account.
-2. Visit `/dashboard` with no data and confirm empty placeholders and action
-   links appear.
+2. Visit `/dashboard` with no data and confirm empty states and action links
+   appear.
 3. Add a weight log on `/weight`, then return to `/dashboard` and confirm the
    latest weight and total change update.
 4. Toggle habits on `/habits`, then return to `/dashboard` and confirm today's

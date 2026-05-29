@@ -15,10 +15,12 @@ import {
 import type { Workout } from "@/src/lib/supabase/database.types";
 import {
   Activity,
+  BookOpen,
   CalendarDays,
   Dumbbell,
   Plus,
   Scale,
+  ShoppingBasket,
   Sprout,
   Target,
   Trophy,
@@ -180,11 +182,25 @@ export function DashboardOverview() {
               Update habits
             </Link>
             <Link
+              href="/recipes"
+              className="inline-flex items-center gap-2 rounded-2xl bg-white/10 px-4 py-2 text-sm font-black text-white"
+            >
+              <BookOpen className="size-4" />
+              Recipes
+            </Link>
+            <Link
               href="/meal-planner"
               className="inline-flex items-center gap-2 rounded-2xl bg-white/10 px-4 py-2 text-sm font-black text-white"
             >
               <CalendarDays className="size-4" />
               Plan meals
+            </Link>
+            <Link
+              href="/grocery-list"
+              className="inline-flex items-center gap-2 rounded-2xl bg-white/10 px-4 py-2 text-sm font-black text-white"
+            >
+              <ShoppingBasket className="size-4" />
+              Grocery list
             </Link>
             <Link
               href="/training-plan"
@@ -228,7 +244,7 @@ export function DashboardOverview() {
           value="--"
           detail={
             totalWeightChange === null
-              ? "Goal setting can come later."
+              ? "Goal setting is reserved for a future profile milestone."
               : `Total change: ${totalWeightChange > 0 ? "+" : ""}${totalWeightChange.toFixed(1)} kg.`
           }
           icon={<Target className="size-5" />}
