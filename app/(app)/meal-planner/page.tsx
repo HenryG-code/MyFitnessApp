@@ -1,6 +1,7 @@
 import { MealPlanner } from "@/components/meal-planner/meal-planner";
 import { getAllRecipes } from "@/src/lib/recipes/data";
-import { CalendarDays, ChefHat, DatabaseZap } from "lucide-react";
+import { CalendarDays, ChefHat, DatabaseZap, ShoppingBasket } from "lucide-react";
+import Link from "next/link";
 
 export default function MealPlannerPage() {
   const recipes = getAllRecipes();
@@ -18,6 +19,13 @@ export default function MealPlannerPage() {
           <p className="mt-4 max-w-2xl text-base leading-7 text-stone-300 sm:text-lg">
             Plan balanced meals from your healthy recipe library.
           </p>
+          <Link
+            href="/grocery-list"
+            className="mt-6 inline-flex items-center gap-2 rounded-2xl bg-sun px-4 py-2 text-sm font-black text-stone-950 transition hover:-translate-y-0.5"
+          >
+            <ShoppingBasket className="size-4" />
+            Generate grocery list
+          </Link>
         </div>
 
         <div className="mt-8 grid gap-3 sm:grid-cols-3">

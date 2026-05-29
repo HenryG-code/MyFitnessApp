@@ -1,6 +1,13 @@
 import { RecipesGrid } from "@/components/recipes/recipes-grid";
 import { getAllRecipes } from "@/src/lib/recipes/data";
-import { BookOpen, CalendarDays, Flame, Salad, Utensils } from "lucide-react";
+import {
+  BookOpen,
+  CalendarDays,
+  Flame,
+  Salad,
+  ShoppingBasket,
+  Utensils,
+} from "lucide-react";
 import Link from "next/link";
 
 export default function RecipesPage() {
@@ -19,13 +26,22 @@ export default function RecipesPage() {
           <p className="mt-4 max-w-2xl text-base leading-7 text-stone-300 sm:text-lg">
             Balanced meals for fat loss, muscle gain, and getting fit.
           </p>
-          <Link
-            href="/meal-planner"
-            className="mt-6 inline-flex items-center gap-2 rounded-2xl bg-sun px-4 py-2 text-sm font-black text-stone-950 transition hover:-translate-y-0.5"
-          >
-            <CalendarDays className="size-4" />
-            Plan your week
-          </Link>
+          <div className="mt-6 flex flex-wrap gap-3">
+            <Link
+              href="/meal-planner"
+              className="inline-flex items-center gap-2 rounded-2xl bg-sun px-4 py-2 text-sm font-black text-stone-950 transition hover:-translate-y-0.5"
+            >
+              <CalendarDays className="size-4" />
+              Plan your week
+            </Link>
+            <Link
+              href="/grocery-list"
+              className="inline-flex items-center gap-2 rounded-2xl bg-white/10 px-4 py-2 text-sm font-black text-white transition hover:-translate-y-0.5"
+            >
+              <ShoppingBasket className="size-4" />
+              Grocery list
+            </Link>
+          </div>
         </div>
 
         <div className="mt-8 grid gap-3 sm:grid-cols-3">

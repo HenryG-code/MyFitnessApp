@@ -77,9 +77,9 @@ Manual database types live at:
 src/lib/supabase/database.types.ts
 ```
 
-Dashboard, weight tracking, daily habits, workout tracking, settings, and
-healthy recipes are wired into their current v1 data sources. Meal Planner uses
-localStorage for v1.
+Dashboard, weight tracking, daily habits, workout tracking, settings, healthy
+recipes, Meal Planner, and Grocery List are wired into their current v1 data
+sources. Meal Planner and Grocery List use localStorage for v1.
 
 ## Authentication
 
@@ -256,7 +256,7 @@ No extra SQL is required if `supabase/schema.sql` has already been run.
 Healthy Recipes is a static v1 feature powered by local TypeScript data in
 `src/lib/recipes/data.ts`. No paid API is used, no recipe content is scraped,
 and no Supabase recipe tables are required yet. Filtering happens client-side,
-and Meal Planner reuses this same local recipe library.
+and Meal Planner plus Grocery List reuse this same local recipe library.
 
 1. Register or log in with a Supabase email/password account.
 2. Open `/recipes`.
@@ -268,14 +268,14 @@ and Meal Planner reuses this same local recipe library.
 7. Confirm `/dashboard`, `/weight`, `/habits`, `/workouts`, and `/settings`
    still load.
 
-Grocery List integration comes later.
+Grocery List generates from Meal Planner selections.
 
 ## Meal Planner Testing
 
 Meal Planner uses the static recipe library and stores weekly selections in
 browser `localStorage` under `liftlog-meal-planner-v1`. No Supabase table,
 database migration, paid API, AI, or scraped recipe content is used for v1.
-Grocery List integration comes next.
+Grocery List reads this saved plan to generate shopping items.
 
 1. Register or log in with a Supabase email/password account.
 2. Open `/meal-planner`.
@@ -286,6 +286,30 @@ Grocery List integration comes next.
 7. Open selected recipe detail links and confirm they go to `/recipes/[slug]`.
 8. Confirm `/recipes`, `/dashboard`, `/weight`, `/habits`, `/workouts`, and
    `/settings` still load.
+
+No extra SQL is required.
+
+## Grocery List Testing
+
+Grocery List is generated from Meal Planner selections and the static recipe
+library. Checked grocery item state is stored in browser `localStorage` under
+`liftlog-grocery-list-checked-v1`. No Supabase table, database migration, paid
+API, AI, or scraped grocery content is used for v1. Quantity math is
+intentionally simple: duplicate ingredients are combined and shown with recipe
+usage counts instead of invented measurements.
+
+1. Register or log in with a Supabase email/password account.
+2. Open `/grocery-list` with no planned meals and confirm the empty state links
+   to `/meal-planner`.
+3. Add recipes to several slots on `/meal-planner`.
+4. Return to `/grocery-list` and confirm ingredients generate from selected
+   recipes.
+5. Confirm ingredients are grouped by category and duplicates show recipe usage
+   counts.
+6. Check a few items, refresh the page, and confirm checked state persists.
+7. Use Clear checked items and Reset all checked states.
+8. Confirm `/meal-planner`, `/recipes`, `/dashboard`, `/weight`, `/habits`,
+   `/workouts`, and `/settings` still load.
 
 No extra SQL is required.
 

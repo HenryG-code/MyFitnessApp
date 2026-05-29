@@ -12,6 +12,7 @@ import {
   Plus,
   Scale,
   Settings,
+  ShoppingBasket,
   Sprout,
 } from "lucide-react";
 import Link from "next/link";
@@ -25,11 +26,15 @@ const navItems = [
   { label: "Habits", href: "/habits", icon: Sprout },
   { label: "Recipes", href: "/recipes", icon: BookOpen },
   { label: "Meal Planner", href: "/meal-planner", icon: CalendarDays },
+  { label: "Grocery List", href: "/grocery-list", icon: ShoppingBasket },
   { label: "Settings", href: "/settings", icon: Settings },
 ];
 
 const mobileNavItems = navItems.filter(
-  (item) => item.href !== "/recipes" && item.href !== "/meal-planner"
+  (item) =>
+    item.href !== "/recipes" &&
+    item.href !== "/meal-planner" &&
+    item.href !== "/grocery-list"
 );
 
 function isActive(pathname: string, href: string) {
