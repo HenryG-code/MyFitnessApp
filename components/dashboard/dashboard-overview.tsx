@@ -21,6 +21,7 @@ import {
   Scale,
   Sprout,
   Target,
+  Trophy,
   TrendingUp,
 } from "lucide-react";
 import Link from "next/link";
@@ -184,6 +185,13 @@ export function DashboardOverview() {
             >
               <CalendarDays className="size-4" />
               Plan meals
+            </Link>
+            <Link
+              href="/training-plan"
+              className="inline-flex items-center gap-2 rounded-2xl bg-white/10 px-4 py-2 text-sm font-black text-white"
+            >
+              <Trophy className="size-4" />
+              Training plan
             </Link>
           </div>
         </div>

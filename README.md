@@ -79,7 +79,8 @@ src/lib/supabase/database.types.ts
 
 Dashboard, weight tracking, daily habits, workout tracking, settings, healthy
 recipes, Meal Planner, and Grocery List are wired into their current v1 data
-sources. Meal Planner and Grocery List use localStorage for v1.
+sources. Meal Planner, Grocery List, and Suggested Training Plans use
+localStorage for v1.
 
 ## Authentication
 
@@ -286,6 +287,29 @@ Grocery List reads this saved plan to generate shopping items.
 7. Open selected recipe detail links and confirm they go to `/recipes/[slug]`.
 8. Confirm `/recipes`, `/dashboard`, `/weight`, `/habits`, `/workouts`, and
    `/settings` still load.
+
+No extra SQL is required.
+
+## Suggested Training Plans Testing
+
+Suggested Training Plans are static rule-based templates in
+`src/lib/training-plans/data.ts`. No AI, paid API, external fitness API, or
+scraped workout content is used. The selected goal is stored in browser
+`localStorage` under `liftlog-training-goal-v1`.
+
+These plans are general fitness suggestions, not medical advice. Start light,
+use proper form, and consult a professional if you have injuries or medical
+conditions. Users can manually log strength and hybrid suggested workouts from
+`/workouts/new`.
+
+1. Register or log in with a Supabase email/password account.
+2. Open `/training-plan`.
+3. Select each goal and confirm the weekly plan changes.
+4. Refresh the page and confirm the selected goal persists.
+5. Confirm plan overview stats and session cards render.
+6. Confirm Log workout buttons link to `/workouts/new`.
+7. Confirm `/dashboard`, `/workouts`, `/weight`, `/habits`, `/recipes`,
+   `/meal-planner`, `/grocery-list`, and `/settings` still load.
 
 No extra SQL is required.
 

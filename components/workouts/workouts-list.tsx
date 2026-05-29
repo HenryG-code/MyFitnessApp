@@ -16,6 +16,7 @@ import {
   Dumbbell,
   Flame,
   Plus,
+  Target,
   Trash2,
 } from "lucide-react";
 import Link from "next/link";
@@ -150,13 +151,22 @@ export function WorkoutsList() {
             Track real workout sessions and exercises with Supabase-backed CRUD.
           </p>
         </div>
-        <Link
-          href="/workouts/new"
-          className="inline-flex items-center justify-center gap-2 rounded-2xl bg-accent px-5 py-3 text-sm font-black text-white shadow-lg shadow-teal-900/15"
-        >
-          <Plus className="size-4" />
-          New workout
-        </Link>
+        <div className="flex flex-wrap gap-2">
+          <Link
+            href="/training-plan"
+            className="inline-flex items-center justify-center gap-2 rounded-2xl bg-stone-950 px-5 py-3 text-sm font-black text-white shadow-lg shadow-stone-900/10 transition hover:bg-accent"
+          >
+            <Target className="size-4" />
+            Training plan
+          </Link>
+          <Link
+            href="/workouts/new"
+            className="inline-flex items-center justify-center gap-2 rounded-2xl bg-accent px-5 py-3 text-sm font-black text-white shadow-lg shadow-teal-900/15"
+          >
+            <Plus className="size-4" />
+            New workout
+          </Link>
+        </div>
       </section>
 
       {notice ? (

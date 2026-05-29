@@ -14,6 +14,7 @@ import {
   Settings,
   ShoppingBasket,
   Sprout,
+  Target,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -27,6 +28,7 @@ const navItems = [
   { label: "Recipes", href: "/recipes", icon: BookOpen },
   { label: "Meal Planner", href: "/meal-planner", icon: CalendarDays },
   { label: "Grocery List", href: "/grocery-list", icon: ShoppingBasket },
+  { label: "Training Plan", href: "/training-plan", icon: Target },
   { label: "Settings", href: "/settings", icon: Settings },
 ];
 
@@ -34,7 +36,8 @@ const mobileNavItems = navItems.filter(
   (item) =>
     item.href !== "/recipes" &&
     item.href !== "/meal-planner" &&
-    item.href !== "/grocery-list"
+    item.href !== "/grocery-list" &&
+    item.href !== "/training-plan"
 );
 
 function isActive(pathname: string, href: string) {
