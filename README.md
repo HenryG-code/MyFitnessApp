@@ -77,8 +77,8 @@ Manual database types live at:
 src/lib/supabase/database.types.ts
 ```
 
-The dashboard still uses mock fitness summary data. Weight, daily habits, and
-workout tracking are connected to Supabase.
+Dashboard, weight tracking, daily habits, workout tracking, settings, and
+healthy recipes are wired into their current v1 data sources.
 
 ## Authentication
 
@@ -169,8 +169,7 @@ Project Settings > Environment Variables, then deploy. Do not commit
 
 ## Weight Tracker CRUD Testing
 
-The weight tracker is the first real Supabase-backed feature. Workouts, habits,
-and dashboard fitness cards still use mock data.
+The weight tracker is a Supabase-backed feature using user-scoped data.
 
 1. Register or log in with a Supabase email/password account.
 2. Go to `/weight`.
@@ -187,9 +186,8 @@ policies.
 
 ## Daily Habits CRUD Testing
 
-Daily Habits is the second Supabase-backed feature. Workouts and dashboard
-fitness cards still use mock data. The live table uses one `daily_habits` row
-per user per day with seven boolean habit columns.
+Daily Habits is a Supabase-backed feature. The live table uses one
+`daily_habits` row per user per day with seven boolean habit columns.
 
 1. Register or log in with a Supabase email/password account.
 2. Go to `/habits`.
@@ -209,8 +207,7 @@ policies.
 
 ## Workout Tracker CRUD Testing
 
-Workout Tracker is the third Supabase-backed feature. Dashboard fitness cards
-still use mock data.
+Workout Tracker is a Supabase-backed feature using the live workout schema.
 
 1. Register or log in with a Supabase email/password account.
 2. Go to `/workouts` and confirm the list or empty state loads.
@@ -252,6 +249,25 @@ dashboard private.
    first user's data.
 
 No extra SQL is required if `supabase/schema.sql` has already been run.
+
+## Healthy Recipes Testing
+
+Healthy Recipes is a static v1 feature powered by local TypeScript data in
+`src/lib/recipes/data.ts`. No paid API is used, no recipe content is scraped,
+and no Supabase recipe tables are required yet. Filtering happens client-side,
+and meal planner integration comes later.
+
+1. Register or log in with a Supabase email/password account.
+2. Open `/recipes`.
+3. Confirm recipe cards display for breakfast, lunch, dinner, and snack meals.
+4. Use the meal type, goal, prep time, and protein filters.
+5. Open several recipe detail pages, such as
+   `/recipes/greek-yogurt-protein-bowl` and `/recipes/chicken-rice-power-bowl`.
+6. Confirm an invalid recipe slug shows the clean not-found state.
+7. Confirm `/dashboard`, `/weight`, `/habits`, `/workouts`, and `/settings`
+   still load.
+
+Meal planner support is intentionally marked as coming later.
 
 ## Settings Real Profile Data Testing
 

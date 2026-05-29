@@ -5,6 +5,7 @@ import { getUserDisplayName } from "@/src/lib/auth/user";
 import type { User } from "@supabase/supabase-js";
 import {
   BarChart3,
+  BookOpen,
   Dumbbell,
   Home,
   Plus,
@@ -21,8 +22,11 @@ const navItems = [
   { label: "Workouts", href: "/workouts", icon: Dumbbell },
   { label: "Weight", href: "/weight", icon: Scale },
   { label: "Habits", href: "/habits", icon: Sprout },
+  { label: "Recipes", href: "/recipes", icon: BookOpen },
   { label: "Settings", href: "/settings", icon: Settings },
 ];
+
+const mobileNavItems = navItems.filter((item) => item.href !== "/recipes");
 
 function isActive(pathname: string, href: string) {
   if (href === "/dashboard") {
@@ -126,13 +130,24 @@ export function AppShell({
                 </span>
               </span>
             </Link>
-            <Link
-              href="/workouts/new"
-              className="grid size-11 place-items-center rounded-2xl bg-accent text-white shadow-lg shadow-teal-900/15"
-              aria-label="Add workout"
-            >
-              <Plus className="size-5" />
-            </Link>
+            <div className="flex items-center gap-2">
+              <Link
+                href="/recipes"
+                className={`grid size-11 place-items-center rounded-2xl border border-line bg-white/70 text-muted transition hover:bg-stone-100 ${
+                  isActive(pathname, "/recipes") ? "bg-accent text-white" : ""
+                }`}
+                aria-label="Open recipes"
+              >
+                <BookOpen className="size-5" />
+              </Link>
+              <Link
+                href="/workouts/new"
+                className="grid size-11 place-items-center rounded-2xl bg-accent text-white shadow-lg shadow-teal-900/15"
+                aria-label="Add workout"
+              >
+                <Plus className="size-5" />
+              </Link>
+            </div>
           </div>
         </header>
 
@@ -141,7 +156,7 @@ export function AppShell({
 
       <nav className="fixed inset-x-3 bottom-3 z-40 rounded-[1.5rem] border border-line/90 bg-card/95 p-2 shadow-[0_18px_60px_rgba(23,33,28,0.16)] backdrop-blur-xl lg:hidden">
         <div className="grid grid-cols-5 gap-1">
-          {navItems.map((item) => {
+          {mobileNavItems.map((item) => {
             const Icon = item.icon;
             const active = isActive(pathname, item.href);
 
