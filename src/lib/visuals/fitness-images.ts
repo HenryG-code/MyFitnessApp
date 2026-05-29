@@ -1,9 +1,7 @@
-// TODO: Add the supplied fitness images to public/images/fitness and replace
-// these null fallbacks with their matching public paths.
 export const fitnessImages = {
-  treadmillRunner: null,
-  fitnessCommunity: null,
-  squatCoaching: null,
-  cardioRunner: null,
-  strengthTraining: null,
+  treadmillRunner: "/images/fitness/treadmill-runner.jpg",
+  fitnessCommunity: "/images/fitness/fitness-community.jpg",
+  squatCoaching: "/images/fitness/squat-coaching.jpg",
+  cardioRunner: "/images/fitness/cardio-runner.jpg",
+  strengthTraining: "/images/fitness/strength-training.jpg",
 } satisfies Record<string, string | null>;
