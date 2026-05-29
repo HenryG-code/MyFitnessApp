@@ -2,9 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "LiftLog | Free Fitness Tracker",
-  description:
-    "A free portfolio fitness tracker for workouts, weight, and habits.",
+  title: "LiftLog",
+  description: "Full-stack fitness tracker built with Next.js and Supabase.",
 };
 
 export default function RootLayout({
