@@ -26,8 +26,7 @@ export default function RegisterPage() {
             Start free.
           </h1>
           <p className="mt-3 text-sm leading-6 text-muted">
-            Create a Supabase email/password account. No payments, uploads, or
-            paid services included.
+            Create your account and start building a private fitness dashboard.
           </p>
           <RegisterForm />
         </FitnessCard>

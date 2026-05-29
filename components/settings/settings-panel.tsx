@@ -11,7 +11,6 @@ import {
   BookOpen,
   CalendarDays,
   ExternalLink,
-  Fingerprint,
   HandHeart,
   Lock,
   ShieldCheck,
@@ -29,10 +28,6 @@ function getProfileDetail(profile: AuthProfile | null) {
   }
 
   return `${profile.fullName} - ${profile.email ?? "No email available"}`;
-}
-
-function getShortUserId(userId: string) {
-  return `${userId.slice(0, 8)}...${userId.slice(-6)}`;
 }
 
 const supportLinks = {
@@ -88,7 +83,7 @@ export function SettingsPanel() {
     },
     {
       title: "Privacy",
-      detail: "Supabase Auth and Row Level Security keep your fitness data scoped to your account.",
+      detail: "Your fitness data is private to your account.",
       icon: Lock,
     },
   ];
@@ -103,7 +98,7 @@ export function SettingsPanel() {
     {
       href: "/meal-planner",
       title: "Meal Planner",
-      detail: "Plan the week locally.",
+      detail: "Build your weekly meal plan.",
       icon: CalendarDays,
     },
     {
@@ -130,9 +125,8 @@ export function SettingsPanel() {
           Your LiftLog account.
         </h1>
         <p className="mt-3 max-w-2xl text-sm leading-6 text-muted">
-          This protected space uses Supabase Auth, private user-scoped data, and
-          a free-tier friendly portfolio setup. No billing, trackers, uploads, or
-          paid services tucked behind the curtain.
+          Manage your profile, privacy, support options, and quick links from
+          one calm account space.
         </p>
       </section>
 
@@ -209,20 +203,13 @@ export function SettingsPanel() {
             </p>
           </div>
         </div>
-        {profile?.userId ? (
-          <div className="mt-4 inline-flex items-center gap-2 rounded-full bg-stone-100 px-3 py-2 text-xs font-bold text-muted">
-            <Fingerprint className="size-4" />
-            User ID: {getShortUserId(profile.userId)}
-          </div>
-        ) : null}
       </FitnessCard>
 
       <FitnessCard>
-        <SectionHeader eyebrow="Privacy" title="Free and user-scoped" />
+        <SectionHeader eyebrow="Privacy" title="Private to your account" />
         <p className="text-sm leading-6 text-muted">
-          LiftLog is built for Vercel Hobby and Supabase Free. Your logs are
-          attached to your authenticated user and protected by Supabase RLS
-          policies.
+          Your workouts, weight logs, and habits stay connected to your signed-in
+          account.
         </p>
       </FitnessCard>
 

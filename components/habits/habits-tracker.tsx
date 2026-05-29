@@ -212,8 +212,8 @@ export function HabitsTracker() {
           Build the boring magic.
         </h1>
         <p className="mt-3 max-w-2xl text-sm leading-6 text-muted">
-          Track today&apos;s core habits with one private row per day in
-          Supabase.
+          Check off the daily habits that support better training, recovery,
+          and consistency.
         </p>
       </section>
 
@@ -256,7 +256,7 @@ export function HabitsTracker() {
           value={latestCompletedLabel ?? "--"}
           detail={
             latestCompletedLabel
-              ? "Last true habit in the daily list."
+              ? "Most recent habit checked off today."
               : "No completed habits yet today."
           }
           icon={<CalendarDays className="size-5" />}
@@ -315,7 +315,7 @@ export function HabitsTracker() {
                         {updatingHabitKey === habit.key
                           ? "Saving..."
                           : isComplete
-                            ? "Complete"
+                            ? "Undo"
                             : "Mark done"}
                       </button>
                     </div>
@@ -326,9 +326,6 @@ export function HabitsTracker() {
                         style={{ width: isComplete ? "100%" : "0%" }}
                       />
                     </div>
-                    <p className="mt-2 text-xs font-black uppercase tracking-[0.18em] text-muted">
-                      Boolean habit column: {habit.key}
-                    </p>
                   </div>
                 );
               })}
@@ -336,11 +333,10 @@ export function HabitsTracker() {
           ) : (
             <div className="rounded-[1.5rem] bg-[#eaf3dd] p-6">
               <p className="font-display text-xl font-black">
-                No habit row found for today.
+                Today&apos;s habits are getting ready.
               </p>
               <p className="mt-2 text-sm leading-6 text-muted">
-                Refresh the page and LiftLog will try to create today&apos;s row
-                again.
+                Refresh the page if they do not appear in a moment.
               </p>
             </div>
           )}

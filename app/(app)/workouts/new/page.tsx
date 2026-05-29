@@ -12,7 +12,8 @@ export default function NewWorkoutPage() {
           Log the session while it is still warm.
         </h1>
         <p className="mt-3 text-sm leading-6 text-stone-300">
-          Save a real workout and its exercises to your private Supabase log.
+          Save the workout, add exercises, and keep your training history
+          moving.
         </p>
       </section>
 

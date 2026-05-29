@@ -34,7 +34,7 @@ type RegisterValues = z.infer<typeof registerSchema>;
 function formatAuthError(error: unknown) {
   if (error instanceof Error) {
     if (error.message.startsWith("Missing NEXT_PUBLIC_SUPABASE")) {
-      return "Supabase is not configured yet. Add your project URL and anon key to .env.local.";
+      return "Sign in is temporarily unavailable. Please try again later.";
     }
 
     if (/invalid login credentials/i.test(error.message)) {

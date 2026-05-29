@@ -84,7 +84,7 @@ export function MealPlanner({ recipes }: MealPlannerProps) {
                 Start by choosing a recipe for Monday breakfast.
               </h2>
               <p className="mt-2 max-w-2xl text-sm leading-6 text-muted">
-                Your picks save to this browser automatically with localStorage.
+                Your planned meals stay available on this device.
               </p>
             </div>
             <span className="grid size-14 place-items-center rounded-2xl bg-white/75 text-accent-strong">

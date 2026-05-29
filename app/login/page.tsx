@@ -26,7 +26,8 @@ export default function LoginPage() {
             Welcome back.
           </h1>
           <p className="mt-3 text-sm leading-6 text-muted">
-            Log in with Supabase email and password auth.
+            Log in to continue tracking your workouts, habits, meals, and
+            progress.
           </p>
           <LoginForm />
         </FitnessCard>

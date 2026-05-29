@@ -275,7 +275,7 @@ export const trainingPlans: TrainingPlan[] = [
           { name: "Farmer carry", sets: 3, duration: "30 sec", rest: "60 sec" },
         ],
         notes:
-          "Do not chase maxes. Smooth, repeatable reps win. Manual logging keeps this version simple.",
+          "Do not chase maxes. Smooth, repeatable reps win.",
       },
       {
         dayLabel: "Day 3",
@@ -402,7 +402,7 @@ export const trainingPlans: TrainingPlan[] = [
           { name: "Farmer carry", sets: 2, duration: "30 sec", rest: "60 sec" },
         ],
         notes:
-          "Keep it simple and repeatable. Manual logging keeps this version simple.",
+          "Keep it simple and repeatable.",
       },
       {
         dayLabel: "Day 2",

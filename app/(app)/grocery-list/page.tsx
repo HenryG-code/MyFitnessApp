@@ -1,6 +1,6 @@
 import { GroceryList } from "@/components/grocery-list/grocery-list";
 import { getAllRecipes } from "@/src/lib/recipes/data";
-import { ClipboardList, DatabaseZap, ShoppingBasket } from "lucide-react";
+import { ClipboardList, ShoppingBasket, Sparkles } from "lucide-react";
 
 export default function GroceryListPage() {
   const recipes = getAllRecipes();
@@ -32,9 +32,9 @@ export default function GroceryListPage() {
             <p className="text-sm text-stone-300">Saved in this browser</p>
           </div>
           <div className="rounded-[1.5rem] bg-white/10 p-4">
-            <DatabaseZap className="size-5 text-sun" />
-            <p className="mt-3 text-2xl font-black">No SQL</p>
-            <p className="text-sm text-stone-300">LocalStorage v1</p>
+            <Sparkles className="size-5 text-sun" />
+            <p className="mt-3 text-2xl font-black">Simple</p>
+            <p className="text-sm text-stone-300">Ready for the shop</p>
           </div>
         </div>
       </section>

@@ -134,8 +134,8 @@ export function GroceryList({ recipes }: GroceryListProps) {
             {allGroceryItems.length} ingredients from your plan
           </h2>
           <p className="mt-2 text-sm leading-6 text-muted">
-            Quantity math stays simple for v1, so duplicates show as recipe
-            usage counts instead of invented measurements.
+            Duplicate ingredients are combined and show how many planned meals
+            use them.
           </p>
         </div>
 

@@ -148,7 +148,7 @@ export function WorkoutsList() {
             Keep your training visible.
           </h1>
           <p className="mt-3 max-w-2xl text-sm leading-6 text-muted">
-            Track real workout sessions and exercises with Supabase-backed CRUD.
+            Track your sessions, exercises, notes, and progress over time.
           </p>
         </div>
         <div className="flex flex-wrap gap-2">

@@ -35,6 +35,20 @@ Recommended capture flow:
    if desired.
 5. Save screenshots with the exact filenames listed above.
 
+Screenshot capture checklist:
+
+- Use clean test data that looks realistic.
+- Hide sensitive email addresses and personal account details where necessary.
+- Capture `/dashboard`.
+- Capture `/weight`.
+- Capture `/habits`.
+- Capture `/workouts`.
+- Capture `/recipes`.
+- Capture `/meal-planner`.
+- Capture `/grocery-list`.
+- Capture `/training-plan`.
+- Capture `/settings`.
+
 ## Features
 
 - Supabase email/password authentication.

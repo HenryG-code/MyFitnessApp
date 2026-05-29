@@ -1,6 +1,6 @@
 import { MealPlanner } from "@/components/meal-planner/meal-planner";
 import { getAllRecipes } from "@/src/lib/recipes/data";
-import { CalendarDays, ChefHat, DatabaseZap, ShoppingBasket } from "lucide-react";
+import { CalendarDays, ChefHat, ShoppingBasket, Sparkles } from "lucide-react";
 import Link from "next/link";
 
 export default function MealPlannerPage() {
@@ -40,9 +40,9 @@ export default function MealPlannerPage() {
             <p className="text-sm text-stone-300">Recipe options</p>
           </div>
           <div className="rounded-[1.5rem] bg-white/10 p-4">
-            <DatabaseZap className="size-5 text-sun" />
-            <p className="mt-3 text-2xl font-black">Local</p>
-            <p className="text-sm text-stone-300">Saved in this browser</p>
+            <Sparkles className="size-5 text-sun" />
+            <p className="mt-3 text-2xl font-black">Saved</p>
+            <p className="text-sm text-stone-300">Available on this device</p>
           </div>
         </div>
       </section>

@@ -72,7 +72,7 @@ export function SessionCard({ session }: SessionCardProps) {
       {canLogWorkout ? (
         <div className="mt-5 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-sm font-bold text-muted">
-            Manual logging keeps this version simple.
+            Use this session as a guide, then log your completed workout.
           </p>
           <Link
             href="/workouts/new"

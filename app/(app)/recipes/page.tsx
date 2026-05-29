@@ -57,8 +57,8 @@ export default function RecipesPage() {
           </div>
           <div className="rounded-[1.5rem] bg-white/10 p-4">
             <Flame className="size-5 text-sun" />
-            <p className="mt-3 text-2xl font-black">No APIs</p>
-            <p className="text-sm text-stone-300">Static v1 data</p>
+            <p className="mt-3 text-2xl font-black">Goal ready</p>
+            <p className="text-sm text-stone-300">Meals for training days</p>
           </div>
         </div>
       </section>
@@ -73,9 +73,8 @@ export default function RecipesPage() {
               Choose the meal that fits the day.
             </h2>
             <p className="mt-2 max-w-2xl text-sm leading-6 text-muted">
-              Filter by meal type, goal, prep speed, and protein target. Recipes
-              stay local for now so the feature remains fast, private, and
-              free-tier friendly.
+              Filter meals by goal, meal type, protein, and prep time. Simple,
+              practical meals for training, fat loss, and general health.
             </p>
           </div>
           <span className="grid size-14 place-items-center rounded-2xl bg-[#eaf3dd] text-accent-strong">

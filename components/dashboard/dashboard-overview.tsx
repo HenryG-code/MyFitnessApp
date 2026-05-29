@@ -156,8 +156,8 @@ export function DashboardOverview() {
             Track the quiet wins that build the big ones.
           </h1>
           <p className="mt-4 max-w-2xl text-base leading-7 text-stone-300 sm:text-lg">
-            Your private Supabase data for weight, workouts, and habits in one
-            calm overview.
+            See your weight, workouts, habits, and weekly momentum in one calm
+            overview.
           </p>
           <div className="mt-6 flex flex-wrap gap-3">
             <Link
@@ -244,7 +244,7 @@ export function DashboardOverview() {
           value="--"
           detail={
             totalWeightChange === null
-              ? "Goal setting is reserved for a future profile milestone."
+              ? "Add more logs to start shaping your target."
               : `Total change: ${totalWeightChange > 0 ? "+" : ""}${totalWeightChange.toFixed(1)} kg.`
           }
           icon={<Target className="size-5" />}
