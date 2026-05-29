@@ -6,7 +6,16 @@ import {
   fetchAuthenticatedProfile,
   type AuthProfile,
 } from "@/src/lib/profile/queries";
-import { Bell, Fingerprint, Lock, ShieldCheck, UserRound } from "lucide-react";
+import {
+  Bell,
+  ExternalLink,
+  Fingerprint,
+  HandHeart,
+  Lock,
+  ShieldCheck,
+  UserRound,
+} from "lucide-react";
+import Image from "next/image";
 import { useEffect, useState } from "react";
 
 function getProfileDetail(profile: AuthProfile | null) {
@@ -177,6 +186,61 @@ export function SettingsPanel() {
           attached to your authenticated user and protected by Supabase RLS
           policies.
         </p>
+      </FitnessCard>
+
+      <FitnessCard>
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+          <div>
+            <span className="grid size-12 place-items-center rounded-2xl bg-accent text-white">
+              <HandHeart className="size-5" />
+            </span>
+            <div className="mt-5">
+              <SectionHeader
+                eyebrow="Support"
+                title="Support the project"
+              />
+            </div>
+            <p className="max-w-2xl text-sm leading-6 text-muted">
+              Enjoying LiftLog? You can support future improvements.
+            </p>
+          </div>
+          <div className="grid gap-3 sm:min-w-64">
+            <a
+              href="https://example.com/yoco-support"
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center justify-center gap-3 rounded-2xl border border-line bg-white/75 px-4 py-3 text-sm font-black transition hover:-translate-y-0.5 hover:border-accent"
+            >
+              {/* TODO: Place the official Yoco brand asset at public/brand/yoco-logo.svg. */}
+              <Image
+                src="/brand/yoco-logo.svg"
+                alt=""
+                width={54}
+                height={20}
+                className="h-5 w-auto"
+              />
+              Support with Yoco
+              <ExternalLink className="size-4 text-muted" />
+            </a>
+            <a
+              href="https://www.paypal.com/paypalme/example"
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center justify-center gap-3 rounded-2xl border border-line bg-white/75 px-4 py-3 text-sm font-black transition hover:-translate-y-0.5 hover:border-accent"
+            >
+              {/* TODO: Place the official PayPal brand asset at public/brand/paypal-logo.svg. */}
+              <Image
+                src="/brand/paypal-logo.svg"
+                alt=""
+                width={76}
+                height={20}
+                className="h-5 w-auto"
+              />
+              Support with PayPal
+              <ExternalLink className="size-4 text-muted" />
+            </a>
+          </div>
+        </div>
       </FitnessCard>
 
       <FitnessCard>
