@@ -10,21 +10,29 @@ Repository: https://github.com/HenryG-code/MyFitnessApp
 
 ## Screenshots
 
-Add production or localhost screenshots after deployment. Save them in
-`public/screenshots/`, use a consistent browser size, and hide sensitive
-personal data before capturing.
+Portfolio screenshots are stored in `public/screenshots/`.
 
-| Screen | Placeholder path |
+| Dashboard | Workouts |
 | --- | --- |
-| Dashboard | `public/screenshots/dashboard.png` |
-| Weight tracker | `public/screenshots/weight.png` |
-| Daily habits | `public/screenshots/habits.png` |
-| Workout tracker | `public/screenshots/workouts.png` |
-| Healthy recipes | `public/screenshots/recipes.png` |
-| Meal planner | `public/screenshots/meal-planner.png` |
-| Grocery list | `public/screenshots/grocery-list.png` |
-| Training plan | `public/screenshots/training-plan.png` |
-| Settings | `public/screenshots/settings.png` |
+| ![LiftLog dashboard](public/screenshots/dashboard.png) | ![LiftLog workout tracker](public/screenshots/workouts.png) |
+
+| Recipes | Meal Planner |
+| --- | --- |
+| ![LiftLog healthy recipes](public/screenshots/recipes.png) | ![LiftLog meal planner](public/screenshots/meal-planner.png) |
+
+| Grocery List | Training Plan |
+| --- | --- |
+| ![LiftLog grocery list](public/screenshots/grocery-list.png) | ![LiftLog suggested training plan](public/screenshots/training-plan.png) |
+
+| Login | Register |
+| --- | --- |
+| ![LiftLog login screen](public/screenshots/login.png) | ![LiftLog register screen](public/screenshots/register.png) |
+
+Additional screenshot placeholders to capture later:
+
+- `public/screenshots/weight.png`
+- `public/screenshots/habits.png`
+- `public/screenshots/settings.png`
 
 Recommended capture flow:
 
@@ -33,7 +41,7 @@ Recommended capture flow:
 3. Seed a few safe demo entries for weight, habits, and workouts.
 4. Capture each page at the same desktop width, then repeat a few mobile shots
    if desired.
-5. Save screenshots with the exact filenames listed above.
+5. Save screenshots with consistent lowercase kebab-case filenames.
 
 Screenshot capture checklist:
 
