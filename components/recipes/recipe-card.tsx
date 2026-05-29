@@ -9,7 +9,8 @@ type RecipeCardProps = {
 
 export function RecipeCard({ recipe }: RecipeCardProps) {
   return (
-    <FitnessCard className="flex h-full flex-col">
+    <FitnessCard className="group flex h-full flex-col overflow-hidden hover:-translate-y-1 hover:shadow-[0_30px_90px_rgba(23,33,28,0.14)]">
+      <div className="-mx-5 -mt-5 mb-5 h-2 bg-gradient-to-r from-accent via-sun to-accent-strong opacity-90 transition group-hover:h-3" />
       <div className="flex items-start justify-between gap-4">
         <span className="rounded-full bg-[#eaf3dd] px-3 py-1 text-xs font-black uppercase tracking-[0.16em] text-accent-strong">
           {recipe.mealType}
@@ -28,14 +29,14 @@ export function RecipeCard({ recipe }: RecipeCardProps) {
       </p>
 
       <div className="mt-5 grid grid-cols-2 gap-3">
-        <div className="rounded-2xl bg-white/65 p-3">
+        <div className="rounded-2xl border border-line/60 bg-white/70 p-3 shadow-sm">
           <p className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.14em] text-muted">
             <Flame className="size-4 text-accent" />
             Calories
           </p>
           <p className="mt-2 text-xl font-black">{recipe.calories}</p>
         </div>
-        <div className="rounded-2xl bg-white/65 p-3">
+        <div className="rounded-2xl border border-line/60 bg-white/70 p-3 shadow-sm">
           <p className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.14em] text-muted">
             <Utensils className="size-4 text-accent" />
             Protein

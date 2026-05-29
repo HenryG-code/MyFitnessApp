@@ -6,6 +6,7 @@ import {
   MetricCard,
   SectionHeader,
 } from "@/components/ui/fitness-card";
+import { HeroPanel } from "@/components/ui/hero-panel";
 import type {
   DailyHabit,
   HabitKey,
@@ -17,6 +18,7 @@ import {
   getDateInputValue,
   toggleHabitField,
 } from "@/src/lib/habits/queries";
+import { fitnessImages } from "@/src/lib/visuals/fitness-images";
 import {
   CalendarDays,
   CheckCircle2,
@@ -204,18 +206,14 @@ export function HabitsTracker() {
 
   return (
     <div className="space-y-5">
-      <section className="rounded-[2rem] border border-line/80 bg-card/80 p-6 backdrop-blur">
-        <p className="text-xs font-black uppercase tracking-[0.28em] text-accent">
-          Habits
-        </p>
-        <h1 className="mt-3 font-display text-4xl font-black tracking-tight">
-          Build the boring magic.
-        </h1>
-        <p className="mt-3 max-w-2xl text-sm leading-6 text-muted">
-          Check off the daily habits that support better training, recovery,
-          and consistency.
-        </p>
-      </section>
+      <HeroPanel
+        eyebrow="Habits"
+        title="Build the boring magic."
+        description="Check off the daily habits that support better training, recovery, and consistency."
+        imageSrc={fitnessImages.treadmillRunner}
+        imageAlt="Runner training on a treadmill"
+        variant="amber"
+      />
 
       {notice ? (
         <p className="rounded-[1.5rem] border border-line bg-[#eaf3dd] p-4 text-sm font-black text-accent-strong">

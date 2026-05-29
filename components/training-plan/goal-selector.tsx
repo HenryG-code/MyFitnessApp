@@ -3,6 +3,7 @@
 import { trainingGoals } from "@/src/lib/training-plans/data";
 import type { TrainingGoal } from "@/src/lib/training-plans/types";
 import { Target } from "lucide-react";
+import { FitnessCard } from "@/components/ui/fitness-card";
 
 type GoalSelectorProps = {
   selectedGoal: TrainingGoal;
@@ -11,7 +12,7 @@ type GoalSelectorProps = {
 
 export function GoalSelector({ selectedGoal, onChange }: GoalSelectorProps) {
   return (
-    <section className="rounded-[1.75rem] border border-line/80 bg-card/85 p-5 shadow-[0_20px_60px_rgba(23,33,28,0.08)] backdrop-blur">
+    <FitnessCard>
       <div className="mb-5 flex items-center gap-3">
         <span className="grid size-12 place-items-center rounded-2xl bg-accent text-white">
           <Target className="size-5" />
@@ -35,10 +36,10 @@ export function GoalSelector({ selectedGoal, onChange }: GoalSelectorProps) {
               key={goal}
               type="button"
               onClick={() => onChange(goal)}
-              className={`rounded-2xl border px-4 py-4 text-left transition hover:-translate-y-0.5 ${
+              className={`rounded-2xl border px-4 py-4 text-left shadow-sm transition hover:-translate-y-0.5 hover:shadow-[0_18px_44px_rgba(23,33,28,0.10)] ${
                 active
                   ? "border-accent bg-accent text-white shadow-lg shadow-teal-900/15"
-                  : "border-line bg-white/70 text-foreground hover:border-accent"
+                  : "border-line/80 bg-white/75 text-foreground hover:border-accent"
               }`}
             >
               <span className="font-display text-lg font-black">{goal}</span>
@@ -53,6 +54,6 @@ export function GoalSelector({ selectedGoal, onChange }: GoalSelectorProps) {
           );
         })}
       </div>
-    </section>
+    </FitnessCard>
   );
 }

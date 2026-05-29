@@ -6,6 +6,7 @@ import {
   MetricCard,
   SectionHeader,
 } from "@/components/ui/fitness-card";
+import { HeroPanel } from "@/components/ui/hero-panel";
 import {
   countCompletedHabits,
   fetchDashboardData,
@@ -13,6 +14,7 @@ import {
   type DashboardData,
 } from "@/src/lib/dashboard/queries";
 import type { Workout } from "@/src/lib/supabase/database.types";
+import { fitnessImages } from "@/src/lib/visuals/fitness-images";
 import {
   Activity,
   BookOpen,
@@ -147,18 +149,14 @@ export function DashboardOverview() {
 
   return (
     <div className="space-y-5">
-      <section className="overflow-hidden rounded-[2rem] border border-line/80 bg-stone-950 p-6 text-white shadow-[0_24px_80px_rgba(23,33,28,0.18)] sm:p-8">
-        <div className="max-w-3xl">
-          <p className="text-xs font-black uppercase tracking-[0.28em] text-sun">
-            Real fitness dashboard
-          </p>
-          <h1 className="mt-4 font-display text-4xl font-black tracking-tight sm:text-6xl">
-            Track the quiet wins that build the big ones.
-          </h1>
-          <p className="mt-4 max-w-2xl text-base leading-7 text-stone-300 sm:text-lg">
-            See your weight, workouts, habits, and weekly momentum in one calm
-            overview.
-          </p>
+      <HeroPanel
+        eyebrow="Real fitness dashboard"
+        title="Track the quiet wins that build the big ones."
+        description="See your weight, workouts, habits, and weekly momentum in one calm overview."
+        imageSrc={fitnessImages.strengthTraining}
+        imageAlt="Athlete strength training in a gym"
+        variant="emerald"
+      >
           <div className="mt-6 flex flex-wrap gap-3">
             <Link
               href="/weight"
@@ -210,8 +208,7 @@ export function DashboardOverview() {
               Training plan
             </Link>
           </div>
-        </div>
-      </section>
+      </HeroPanel>
 
       {error ? (
         <p className="rounded-[1.5rem] border border-red-100 bg-red-50 p-4 text-sm font-black text-red-700">

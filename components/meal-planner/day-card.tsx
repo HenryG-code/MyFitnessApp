@@ -1,4 +1,5 @@
 import { MealSlotCard } from "@/components/meal-planner/meal-slot";
+import { FitnessCard } from "@/components/ui/fitness-card";
 import {
   calculateDayTotals,
   getPlannedRecipe,
@@ -29,7 +30,7 @@ export function DayCard({
   const totals = calculateDayTotals(plan, day, recipeMap);
 
   return (
-    <section className="rounded-[1.75rem] border border-line/80 bg-card/85 p-5 shadow-[0_20px_60px_rgba(23,33,28,0.08)] backdrop-blur">
+    <FitnessCard className="hover:-translate-y-0.5 hover:shadow-[0_28px_80px_rgba(23,33,28,0.12)]">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between xl:flex-col xl:items-start">
         <div>
           <p className="text-xs font-black uppercase tracking-[0.22em] text-accent">
@@ -65,6 +66,6 @@ export function DayCard({
           />
         ))}
       </div>
-    </section>
+    </FitnessCard>
   );
 }

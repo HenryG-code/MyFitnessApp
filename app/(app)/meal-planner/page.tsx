@@ -1,5 +1,7 @@
 import { MealPlanner } from "@/components/meal-planner/meal-planner";
+import { HeroPanel } from "@/components/ui/hero-panel";
 import { getAllRecipes } from "@/src/lib/recipes/data";
+import { fitnessImages } from "@/src/lib/visuals/fitness-images";
 import { CalendarDays, ChefHat, ShoppingBasket, Sparkles } from "lucide-react";
 import Link from "next/link";
 
@@ -8,17 +10,14 @@ export default function MealPlannerPage() {
 
   return (
     <div className="space-y-5">
-      <section className="overflow-hidden rounded-[2rem] border border-line/80 bg-stone-950 p-6 text-white shadow-[0_24px_80px_rgba(23,33,28,0.18)] sm:p-8">
-        <div className="max-w-3xl">
-          <p className="text-xs font-black uppercase tracking-[0.28em] text-sun">
-            Meal planner
-          </p>
-          <h1 className="mt-4 font-display text-4xl font-black tracking-tight sm:text-6xl">
-            Weekly meal planner
-          </h1>
-          <p className="mt-4 max-w-2xl text-base leading-7 text-stone-300 sm:text-lg">
-            Plan balanced meals from your healthy recipe library.
-          </p>
+      <HeroPanel
+        eyebrow="Meal planner"
+        title="Weekly meal planner"
+        description="Plan balanced meals from your healthy recipe library."
+        imageSrc={fitnessImages.fitnessCommunity}
+        imageAlt="Fitness community planning a healthy week"
+        variant="default"
+      >
           <Link
             href="/grocery-list"
             className="mt-6 inline-flex items-center gap-2 rounded-2xl bg-sun px-4 py-2 text-sm font-black text-stone-950 transition hover:-translate-y-0.5"
@@ -26,7 +25,6 @@ export default function MealPlannerPage() {
             <ShoppingBasket className="size-4" />
             Generate grocery list
           </Link>
-        </div>
 
         <div className="mt-8 grid gap-3 sm:grid-cols-3">
           <div className="rounded-[1.5rem] bg-white/10 p-4">
@@ -45,7 +43,7 @@ export default function MealPlannerPage() {
             <p className="text-sm text-stone-300">Available on this device</p>
           </div>
         </div>
-      </section>
+      </HeroPanel>
 
       <MealPlanner recipes={recipes} />
     </div>

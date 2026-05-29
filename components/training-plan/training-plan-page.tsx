@@ -4,6 +4,7 @@ import { GoalSelector } from "@/components/training-plan/goal-selector";
 import { PlanOverview } from "@/components/training-plan/plan-overview";
 import { SessionCard } from "@/components/training-plan/session-card";
 import { FitnessCard } from "@/components/ui/fitness-card";
+import { HeroPanel } from "@/components/ui/hero-panel";
 import {
   defaultTrainingGoal,
   getTrainingPlanByGoal,
@@ -13,6 +14,7 @@ import {
   saveTrainingGoalToStorage,
 } from "@/src/lib/training-plans/storage";
 import type { TrainingGoal } from "@/src/lib/training-plans/types";
+import { fitnessImages } from "@/src/lib/visuals/fitness-images";
 import { AlertTriangle, Dumbbell, HeartPulse, ShieldCheck } from "lucide-react";
 import { useEffect, useState } from "react";
 
@@ -39,18 +41,14 @@ export function TrainingPlanPage() {
 
   return (
     <div className="space-y-5">
-      <section className="overflow-hidden rounded-[2rem] border border-line/80 bg-stone-950 p-6 text-white shadow-[0_24px_80px_rgba(23,33,28,0.18)] sm:p-8">
-        <div className="max-w-3xl">
-          <p className="text-xs font-black uppercase tracking-[0.28em] text-sun">
-            Suggested training plan
-          </p>
-          <h1 className="mt-4 font-display text-4xl font-black tracking-tight sm:text-6xl">
-            Suggested training plan
-          </h1>
-          <p className="mt-4 max-w-2xl text-base leading-7 text-stone-300 sm:text-lg">
-            Choose your goal and get a balanced weekly routine.
-          </p>
-        </div>
+      <HeroPanel
+        eyebrow="Suggested training plan"
+        title="Suggested training plan"
+        description="Choose your goal and get a balanced weekly routine."
+        imageSrc={fitnessImages.cardioRunner}
+        imageAlt="Runner doing cardio training"
+        variant="amber"
+      >
 
         <div className="mt-8 grid gap-3 sm:grid-cols-3">
           <div className="rounded-[1.5rem] bg-white/10 p-4">
@@ -69,7 +67,7 @@ export function TrainingPlanPage() {
             <p className="text-sm text-stone-300">Gradual and sustainable</p>
           </div>
         </div>
-      </section>
+      </HeroPanel>
 
       <FitnessCard className="border-amber-200 bg-amber-50/80">
         <div className="flex items-start gap-3">

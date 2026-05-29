@@ -1,5 +1,7 @@
 import { RecipesGrid } from "@/components/recipes/recipes-grid";
+import { HeroPanel } from "@/components/ui/hero-panel";
 import { getAllRecipes } from "@/src/lib/recipes/data";
+import { fitnessImages } from "@/src/lib/visuals/fitness-images";
 import {
   BookOpen,
   CalendarDays,
@@ -15,17 +17,14 @@ export default function RecipesPage() {
 
   return (
     <div className="space-y-5">
-      <section className="overflow-hidden rounded-[2rem] border border-line/80 bg-stone-950 p-6 text-white shadow-[0_24px_80px_rgba(23,33,28,0.18)] sm:p-8">
-        <div className="max-w-3xl">
-          <p className="text-xs font-black uppercase tracking-[0.28em] text-sun">
-            Healthy recipes
-          </p>
-          <h1 className="mt-4 font-display text-4xl font-black tracking-tight sm:text-6xl">
-            Healthy recipes
-          </h1>
-          <p className="mt-4 max-w-2xl text-base leading-7 text-stone-300 sm:text-lg">
-            Balanced meals for fat loss, muscle gain, and getting fit.
-          </p>
+      <HeroPanel
+        eyebrow="Healthy recipes"
+        title="Healthy recipes"
+        description="Balanced meals for fat loss, muscle gain, and getting fit."
+        imageSrc={fitnessImages.fitnessCommunity}
+        imageAlt="Fitness community preparing for training"
+        variant="default"
+      >
           <div className="mt-6 flex flex-wrap gap-3">
             <Link
               href="/meal-planner"
@@ -42,7 +41,6 @@ export default function RecipesPage() {
               Grocery list
             </Link>
           </div>
-        </div>
 
         <div className="mt-8 grid gap-3 sm:grid-cols-3">
           <div className="rounded-[1.5rem] bg-white/10 p-4">
@@ -61,7 +59,7 @@ export default function RecipesPage() {
             <p className="text-sm text-stone-300">Meals for training days</p>
           </div>
         </div>
-      </section>
+      </HeroPanel>
 
       <section className="rounded-[1.75rem] border border-line/80 bg-card/85 p-5 shadow-[0_20px_60px_rgba(23,33,28,0.08)]">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">

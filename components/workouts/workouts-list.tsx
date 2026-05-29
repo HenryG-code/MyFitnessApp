@@ -5,11 +5,13 @@ import {
   MetricCard,
   SectionHeader,
 } from "@/components/ui/fitness-card";
+import { HeroPanel } from "@/components/ui/hero-panel";
 import {
   deleteWorkout,
   fetchWorkouts,
   type WorkoutListItem,
 } from "@/src/lib/workouts/queries";
+import { fitnessImages } from "@/src/lib/visuals/fitness-images";
 import {
   CalendarDays,
   Clock,
@@ -139,18 +141,14 @@ export function WorkoutsList() {
 
   return (
     <div className="space-y-5">
-      <section className="flex flex-col gap-4 rounded-[2rem] border border-line/80 bg-card/80 p-6 backdrop-blur sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <p className="text-xs font-black uppercase tracking-[0.28em] text-accent">
-            Workout log
-          </p>
-          <h1 className="mt-3 font-display text-4xl font-black tracking-tight">
-            Keep your training visible.
-          </h1>
-          <p className="mt-3 max-w-2xl text-sm leading-6 text-muted">
-            Track your sessions, exercises, notes, and progress over time.
-          </p>
-        </div>
+      <HeroPanel
+        eyebrow="Workout log"
+        title="Keep your training visible."
+        description="Track your sessions, exercises, notes, and progress over time."
+        imageSrc={fitnessImages.strengthTraining}
+        imageAlt="Strength training session"
+        variant="emerald"
+      >
         <div className="flex flex-wrap gap-2">
           <Link
             href="/training-plan"
@@ -167,7 +165,7 @@ export function WorkoutsList() {
             New workout
           </Link>
         </div>
-      </section>
+      </HeroPanel>
 
       {notice ? (
         <p className="rounded-[1.5rem] border border-line bg-[#eaf3dd] p-4 text-sm font-black text-accent-strong">

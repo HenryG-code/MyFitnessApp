@@ -1,4 +1,5 @@
 import { GroceryItemRow } from "@/components/grocery-list/grocery-item-row";
+import { FitnessCard } from "@/components/ui/fitness-card";
 import type {
   CheckedGroceryItems,
   GroceryCategory,
@@ -29,7 +30,7 @@ export function GroceryCategorySection({
   }
 
   return (
-    <section className="rounded-[1.75rem] border border-line/80 bg-card/85 p-5 shadow-[0_20px_60px_rgba(23,33,28,0.08)] backdrop-blur">
+    <FitnessCard className="hover:-translate-y-0.5 hover:shadow-[0_28px_80px_rgba(23,33,28,0.12)]">
       <div className="mb-4 flex items-center justify-between gap-4">
         <div>
           <p className="text-xs font-black uppercase tracking-[0.22em] text-accent">
@@ -52,6 +53,6 @@ export function GroceryCategorySection({
           />
         ))}
       </div>
-    </section>
+    </FitnessCard>
   );
 }

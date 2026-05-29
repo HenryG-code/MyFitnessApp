@@ -1,5 +1,7 @@
 import { GroceryList } from "@/components/grocery-list/grocery-list";
+import { HeroPanel } from "@/components/ui/hero-panel";
 import { getAllRecipes } from "@/src/lib/recipes/data";
+import { fitnessImages } from "@/src/lib/visuals/fitness-images";
 import { ClipboardList, ShoppingBasket, Sparkles } from "lucide-react";
 
 export default function GroceryListPage() {
@@ -7,18 +9,14 @@ export default function GroceryListPage() {
 
   return (
     <div className="space-y-5">
-      <section className="overflow-hidden rounded-[2rem] border border-line/80 bg-stone-950 p-6 text-white shadow-[0_24px_80px_rgba(23,33,28,0.18)] sm:p-8">
-        <div className="max-w-3xl">
-          <p className="text-xs font-black uppercase tracking-[0.28em] text-sun">
-            Grocery list
-          </p>
-          <h1 className="mt-4 font-display text-4xl font-black tracking-tight sm:text-6xl">
-            Grocery list
-          </h1>
-          <p className="mt-4 max-w-2xl text-base leading-7 text-stone-300 sm:text-lg">
-            Generated from your weekly meal plan.
-          </p>
-        </div>
+      <HeroPanel
+        eyebrow="Grocery list"
+        title="Grocery list"
+        description="Generated from your weekly meal plan."
+        imageSrc={fitnessImages.fitnessCommunity}
+        imageAlt="Healthy meal prep and fitness planning"
+        variant="default"
+      >
 
         <div className="mt-8 grid gap-3 sm:grid-cols-3">
           <div className="rounded-[1.5rem] bg-white/10 p-4">
@@ -37,7 +35,7 @@ export default function GroceryListPage() {
             <p className="text-sm text-stone-300">Ready for the shop</p>
           </div>
         </div>
-      </section>
+      </HeroPanel>
 
       <GroceryList recipes={recipes} />
     </div>

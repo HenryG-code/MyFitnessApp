@@ -8,7 +8,7 @@ type FitnessCardProps = {
 export function FitnessCard({ children, className = "" }: FitnessCardProps) {
   return (
     <section
-      className={`rounded-[1.75rem] border border-line/80 bg-card/85 p-5 shadow-[0_20px_60px_rgba(23,33,28,0.08)] backdrop-blur ${className}`}
+      className={`rounded-[1.75rem] border border-white/70 bg-card/90 p-5 shadow-[0_22px_70px_rgba(23,33,28,0.09)] ring-1 ring-line/45 backdrop-blur transition duration-200 ${className}`}
     >
       {children}
     </section>
@@ -37,15 +37,19 @@ export function MetricCard({
   tone = "teal",
 }: MetricCardProps) {
   return (
-    <FitnessCard>
+    <FitnessCard className="hover:-translate-y-0.5 hover:shadow-[0_28px_80px_rgba(23,33,28,0.13)]">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <p className="text-sm font-medium text-muted">{label}</p>
+          <p className="text-xs font-black uppercase tracking-[0.18em] text-muted">
+            {label}
+          </p>
           <p className="mt-3 font-display text-3xl font-black tracking-tight text-foreground">
             {value}
           </p>
         </div>
-        <div className={`rounded-2xl p-3 ${toneStyles[tone]}`}>{icon}</div>
+        <div className={`rounded-2xl p-3 shadow-lg shadow-stone-900/10 ${toneStyles[tone]}`}>
+          {icon}
+        </div>
       </div>
       <p className="mt-4 text-sm leading-6 text-muted">{detail}</p>
     </FitnessCard>
