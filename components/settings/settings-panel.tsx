@@ -35,6 +35,11 @@ function getShortUserId(userId: string) {
   return `${userId.slice(0, 8)}...${userId.slice(-6)}`;
 }
 
+const supportLinks = {
+  paypal: "https://paypal.me/HenryGagiano",
+  yoco: "",
+};
+
 export function SettingsPanel() {
   const [profile, setProfile] = useState<AuthProfile | null>(null);
   const [error, setError] = useState("");
@@ -264,24 +269,40 @@ export function SettingsPanel() {
             </p>
           </div>
           <div className="grid gap-3 sm:min-w-64">
+            {supportLinks.yoco ? (
+              <a
+                href={supportLinks.yoco}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center justify-center gap-3 rounded-2xl border border-line bg-white/75 px-4 py-3 text-sm font-black transition hover:-translate-y-0.5 hover:border-accent"
+              >
+                <Image
+                  src="/brand/yoco-logo.png"
+                  alt=""
+                  width={72}
+                  height={20}
+                  className="h-5 w-auto"
+                />
+                Support with Yoco
+                <ExternalLink className="size-4 text-muted" />
+              </a>
+            ) : (
+              <span
+                className="inline-flex items-center justify-center gap-3 rounded-2xl border border-line bg-white/50 px-4 py-3 text-sm font-black text-muted"
+                aria-disabled="true"
+              >
+                <Image
+                  src="/brand/yoco-logo.png"
+                  alt=""
+                  width={72}
+                  height={20}
+                  className="h-5 w-auto opacity-70"
+                />
+                Yoco link coming soon
+              </span>
+            )}
             <a
-              href="https://example.com/yoco-support"
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex items-center justify-center gap-3 rounded-2xl border border-line bg-white/75 px-4 py-3 text-sm font-black transition hover:-translate-y-0.5 hover:border-accent"
-            >
-              <Image
-                src="/brand/yoco-logo.png"
-                alt=""
-                width={72}
-                height={20}
-                className="h-5 w-auto"
-              />
-              Support with Yoco
-              <ExternalLink className="size-4 text-muted" />
-            </a>
-            <a
-              href="https://www.paypal.com/paypalme/example"
+              href={supportLinks.paypal}
               target="_blank"
               rel="noreferrer"
               className="inline-flex items-center justify-center gap-3 rounded-2xl border border-line bg-white/75 px-4 py-3 text-sm font-black transition hover:-translate-y-0.5 hover:border-accent"
