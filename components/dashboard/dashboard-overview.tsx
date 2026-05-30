@@ -19,9 +19,11 @@ import {
   Activity,
   BookOpen,
   CalendarDays,
+  Download,
   Dumbbell,
   Plus,
   Scale,
+  Settings,
   ShoppingBasket,
   Sprout,
   Target,
@@ -36,6 +38,15 @@ type WeeklyPoint = {
   workouts: number;
   habits: number;
 };
+
+const toolLinks = [
+  { href: "/recipes", label: "Recipes", icon: BookOpen },
+  { href: "/meal-planner", label: "Meal Planner", icon: CalendarDays },
+  { href: "/grocery-list", label: "Grocery List", icon: ShoppingBasket },
+  { href: "/training-plan", label: "Training Plan", icon: Trophy },
+  { href: "/settings", label: "Settings", icon: Settings },
+  { href: "/settings", label: "Install app", icon: Download },
+];
 
 function formatDate(value: string) {
   return new Intl.DateTimeFormat("en", {
@@ -53,6 +64,10 @@ function formatDateTime(value: string) {
 
 function formatWeight(value: number) {
   return `${value.toFixed(1)} kg`;
+}
+
+function formatSignedWeight(value: number) {
+  return `${value > 0 ? "+" : ""}${value.toFixed(1)} kg`;
 }
 
 function getWorkoutDate(workout: Workout) {
@@ -103,6 +118,36 @@ function getInsights(data: DashboardData) {
   ];
 }
 
+function getGoalSummary(latestWeight: number | null, goalWeight: number | null) {
+  if (goalWeight === null) {
+    return {
+      value: "No goal set",
+      detail: "Set a goal weight to track progress.",
+    };
+  }
+
+  if (latestWeight === null) {
+    return {
+      value: formatWeight(goalWeight),
+      detail: "Add your first weight log to track progress.",
+    };
+  }
+
+  const difference = latestWeight - goalWeight;
+
+  if (Math.abs(difference) < 0.05) {
+    return {
+      value: formatWeight(goalWeight),
+      detail: "Goal reached.",
+    };
+  }
+
+  return {
+    value: formatWeight(goalWeight),
+    detail: `${Math.abs(difference).toFixed(1)} kg from goal.`,
+  };
+}
+
 export function DashboardOverview() {
   const [data, setData] = useState<DashboardData | null>(null);
   const [error, setError] = useState("");
@@ -146,6 +191,8 @@ export function DashboardOverview() {
   const weeklyMinutes = data ? getWeeklyMinutes(data.workoutsThisWeek) : 0;
   const weeklyProgress = data ? buildWeeklyProgress(data) : [];
   const insights = data ? getInsights(data) : [];
+  const latestWeightValue = data?.latestWeight?.weight_kg ?? null;
+  const goalSummary = getGoalSummary(latestWeightValue, data?.goalWeightKg ?? null);
 
   return (
     <div className="space-y-5">
@@ -224,6 +271,71 @@ export function DashboardOverview() {
         </FitnessCard>
       ) : null}
 
+      <section className="grid gap-4 lg:grid-cols-[1.25fr_0.75fr]">
+        <FitnessCard>
+          <SectionHeader eyebrow="Today" title="Your home base" />
+          <div className="grid gap-3 sm:grid-cols-3">
+            <div className="rounded-[1.25rem] border border-line bg-white/65 p-4">
+              <p className="text-xs font-black uppercase tracking-[0.18em] text-muted">
+                Habits
+              </p>
+              <p className="mt-2 font-display text-3xl font-black">
+                {habitPercent}%
+              </p>
+              <p className="mt-1 text-sm text-muted">
+                {completedHabits} of 7 complete
+              </p>
+            </div>
+            <div className="rounded-[1.25rem] border border-line bg-white/65 p-4">
+              <p className="text-xs font-black uppercase tracking-[0.18em] text-muted">
+                This week
+              </p>
+              <p className="mt-2 font-display text-3xl font-black">
+                {data?.workoutsThisWeek.length ?? 0}
+              </p>
+              <p className="mt-1 text-sm text-muted">workouts logged</p>
+            </div>
+            <div className="rounded-[1.25rem] border border-line bg-white/65 p-4">
+              <p className="text-xs font-black uppercase tracking-[0.18em] text-muted">
+                Latest weight
+              </p>
+              <p className="mt-2 font-display text-3xl font-black">
+                {latestWeightValue !== null ? formatWeight(latestWeightValue) : "--"}
+              </p>
+              <p className="mt-1 text-sm text-muted">
+                {data?.latestWeight
+                  ? formatDate(data.latestWeight.logged_at)
+                  : "Add your first log"}
+              </p>
+            </div>
+          </div>
+        </FitnessCard>
+
+        <FitnessCard>
+          <SectionHeader eyebrow="Quick actions" title="Do the next thing" />
+          <div className="grid gap-2">
+            <Link
+              href="/weight"
+              className="flex min-h-12 items-center justify-between rounded-2xl bg-accent px-4 py-3 text-sm font-black text-white transition hover:-translate-y-0.5"
+            >
+              Add weight <Scale className="size-4" />
+            </Link>
+            <Link
+              href="/workouts/new"
+              className="flex min-h-12 items-center justify-between rounded-2xl bg-sun px-4 py-3 text-sm font-black text-stone-950 transition hover:-translate-y-0.5"
+            >
+              Log workout <Dumbbell className="size-4" />
+            </Link>
+            <Link
+              href="/habits"
+              className="flex min-h-12 items-center justify-between rounded-2xl border border-line bg-white/65 px-4 py-3 text-sm font-black text-foreground transition hover:-translate-y-0.5 hover:border-accent"
+            >
+              Update habits <Sprout className="size-4" />
+            </Link>
+          </div>
+        </FitnessCard>
+      </section>
+
       <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <MetricCard
           label="Current weight"
@@ -236,17 +348,36 @@ export function DashboardOverview() {
           icon={<Scale className="size-5" />}
           tone="teal"
         />
-        <MetricCard
-          label="Goal weight"
-          value="--"
-          detail={
-            totalWeightChange === null
-              ? "Add more logs to start shaping your target."
-              : `Total change: ${totalWeightChange > 0 ? "+" : ""}${totalWeightChange.toFixed(1)} kg.`
-          }
-          icon={<Target className="size-5" />}
-          tone="amber"
-        />
+        <FitnessCard className="hover:-translate-y-0.5 hover:shadow-[0_28px_80px_rgba(23,33,28,0.13)]">
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <p className="text-xs font-black uppercase tracking-[0.18em] text-muted">
+                Goal weight
+              </p>
+              <p className="mt-3 font-display text-3xl font-black tracking-tight">
+                {goalSummary.value}
+              </p>
+            </div>
+            <div className="rounded-2xl bg-sun p-3 text-stone-950 shadow-lg shadow-stone-900/10">
+              <Target className="size-5" />
+            </div>
+          </div>
+          <p className="mt-4 text-sm leading-6 text-muted">
+            {goalSummary.detail}
+          </p>
+          {data?.goalWeightKg === null ? (
+            <Link
+              href="/settings"
+              className="mt-4 inline-flex rounded-2xl bg-accent px-4 py-2 text-sm font-black text-white"
+            >
+              Set goal
+            </Link>
+          ) : totalWeightChange !== null ? (
+            <p className="mt-3 text-xs font-black uppercase tracking-[0.18em] text-muted">
+              Total change: {formatSignedWeight(totalWeightChange)}
+            </p>
+          ) : null}
+        </FitnessCard>
         <MetricCard
           label="Weekly workouts"
           value={`${data?.workoutsThisWeek.length ?? 0}`}
@@ -356,6 +487,28 @@ export function DashboardOverview() {
           </FitnessCard>
         ))}
       </section>
+
+      <FitnessCard>
+        <SectionHeader eyebrow="Tools" title="Explore LiftLog" />
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-6">
+          {toolLinks.map((item) => {
+            const Icon = item.icon;
+
+            return (
+              <Link
+                key={`${item.href}-${item.label}`}
+                href={item.href}
+                className="min-h-28 rounded-[1.25rem] border border-line bg-white/65 p-4 transition hover:-translate-y-0.5 hover:border-accent"
+              >
+                <span className="grid size-10 place-items-center rounded-2xl bg-accent text-white">
+                  <Icon className="size-4" />
+                </span>
+                <p className="mt-3 text-sm font-black">{item.label}</p>
+              </Link>
+            );
+          })}
+        </div>
+      </FitnessCard>
     </div>
   );
 }

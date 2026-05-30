@@ -122,8 +122,8 @@ export function AppShell({
               Your private hub
             </p>
             <p className="mt-1 text-sm leading-6 text-muted">
-              Track workouts, meals, habits, and training plans from one
-              private dashboard.
+              Track workouts, habits, meals, groceries, and training plans from
+              one private dashboard.
             </p>
           </div>
         </div>

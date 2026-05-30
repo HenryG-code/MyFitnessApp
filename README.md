@@ -62,6 +62,7 @@ Screenshot capture checklist:
 - Supabase email/password authentication.
 - Protected dashboard and app routes.
 - Real dashboard data from user-scoped Supabase records.
+- Profile-backed goal weight shown in dashboard progress.
 - Weight Tracker CRUD with stats and charting.
 - Daily Habits tracking with boolean habit toggles.
 - Workout Tracker CRUD with workout exercises.
@@ -75,6 +76,8 @@ Screenshot capture checklist:
 - Dark, screenshot-ready visual theme designed for comfortable longer use.
 - Suggested Training Plan sessions can be logged directly into the workout log.
 - PWA install support from supported desktop and mobile browsers.
+- Mobile dashboard tools grid for Recipes, Meal Planner, Grocery List,
+  Training Plan, Settings, and install guidance.
 
 ## Tech Stack
 
@@ -136,6 +139,16 @@ List use browser storage in v1, so they do not require Supabase tables yet.
 
 The schema creates tables, indexes, RLS policies, and a trigger that creates a
 profile row when a new Supabase Auth user signs up.
+
+If your existing Supabase project does not have profile goal weight support yet,
+run this once in the Supabase SQL Editor:
+
+```sql
+alter table public.profiles
+add column if not exists goal_weight_kg numeric(5, 2);
+
+notify pgrst, 'reload schema';
+```
 
 ## Environment Variables
 

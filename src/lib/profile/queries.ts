@@ -1,5 +1,8 @@
 import { createBrowserSupabaseClient } from "@/src/lib/supabase/client";
-import type { Profile } from "@/src/lib/supabase/database.types";
+import type {
+  Profile,
+  ProfileUpdate,
+} from "@/src/lib/supabase/database.types";
 
 export type AuthProfile = {
   userId: string;
@@ -47,4 +50,40 @@ export async function fetchAuthenticatedProfile(): Promise<AuthProfile> {
     fullName,
     profile,
   };
+}
+
+export async function updateAuthenticatedGoalWeight(
+  goalWeightKg: number | null
+) {
+  const supabase = createBrowserSupabaseClient();
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
+
+  if (userError) {
+    throw new Error(userError.message);
+  }
+
+  if (!user) {
+    throw new Error("You must be logged in to update goals.");
+  }
+
+  const payload: ProfileUpdate = {
+    email: user.email ?? null,
+    full_name: readMetadataFullName(user.user_metadata.full_name),
+    goal_weight_kg: goalWeightKg,
+  };
+
+  const { data: profile, error } = await supabase
+    .from("profiles")
+    .upsert({ id: user.id, ...payload })
+    .select("*")
+    .single();
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return profile satisfies Profile;
 }

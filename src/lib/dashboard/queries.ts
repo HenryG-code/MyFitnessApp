@@ -1,11 +1,14 @@
 import { createBrowserSupabaseClient } from "@/src/lib/supabase/client";
 import type {
   DailyHabit,
+  Profile,
   WeightLog,
   Workout,
 } from "@/src/lib/supabase/database.types";
 
 export type DashboardData = {
+  profile: Profile | null;
+  goalWeightKg: number | null;
   firstWeight: WeightLog | null;
   latestWeight: WeightLog | null;
   recentWeights: WeightLog[];
@@ -89,6 +92,7 @@ export async function fetchDashboardData(): Promise<DashboardData> {
     latestWorkoutResult,
     workoutsThisWeekResult,
     workoutsLastSevenDaysResult,
+    profileResult,
   ] = await Promise.all([
     supabase
       .from("weight_logs")
@@ -149,6 +153,11 @@ export async function fetchDashboardData(): Promise<DashboardData> {
       .lte("workout_date", today)
       .order("workout_date", { ascending: true })
       .order("created_at", { ascending: true }),
+    supabase
+      .from("profiles")
+      .select("*")
+      .eq("id", userId)
+      .maybeSingle(),
   ]);
 
   const results = [
@@ -160,6 +169,7 @@ export async function fetchDashboardData(): Promise<DashboardData> {
     latestWorkoutResult,
     workoutsThisWeekResult,
     workoutsLastSevenDaysResult,
+    profileResult,
   ];
   const failed = results.find((result) => result.error);
 
@@ -168,6 +178,8 @@ export async function fetchDashboardData(): Promise<DashboardData> {
   }
 
   return {
+    profile: profileResult.data,
+    goalWeightKg: profileResult.data?.goal_weight_kg ?? null,
     firstWeight: firstWeightResult.data,
     latestWeight: latestWeightResult.data,
     recentWeights: recentWeightsResult.data ?? [],

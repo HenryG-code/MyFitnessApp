@@ -18,9 +18,14 @@ create table if not exists public.profiles (
   email text,
   full_name text,
   avatar_url text,
+  goal_weight_kg numeric(5, 2) check (goal_weight_kg is null or goal_weight_kg > 0),
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
+
+alter table public.profiles
+  add column if not exists goal_weight_kg numeric(5, 2)
+  check (goal_weight_kg is null or goal_weight_kg > 0);
 
 create table if not exists public.weight_logs (
   id uuid primary key default gen_random_uuid(),
