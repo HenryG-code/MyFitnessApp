@@ -29,7 +29,7 @@ export function AuthPageShell({
         <section className="flex items-center px-5 py-8 sm:px-8 lg:px-12">
           <div className="w-full max-w-md">
             <Link href="/dashboard" className="inline-flex items-center gap-3">
-              <span className="grid size-12 place-items-center rounded-2xl bg-accent text-white shadow-lg shadow-teal-950/30">
+              <span className="grid size-12 place-items-center rounded-2xl bg-accent text-stone-950 shadow-lg shadow-yellow-950/30">
                 <BarChart3 className="size-5" />
               </span>
               <span>

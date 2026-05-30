@@ -99,14 +99,14 @@ export function GoalWeightForm({
           step="0.1"
           value={goalWeight}
           onChange={(event) => setGoalWeight(event.target.value)}
-          className="min-h-12 rounded-2xl border border-line bg-white/65 px-4 py-3 text-sm font-bold outline-none transition focus:border-accent focus:ring-4 focus:ring-teal-400/10"
+          className="min-h-12 rounded-2xl border border-line bg-surface/80 px-4 py-3 text-sm font-bold outline-none transition focus:border-accent focus:ring-4 focus:ring-yellow-400/10"
           placeholder="78.0"
         />
         <button
           type="button"
           onClick={() => void saveGoalWeight(goalWeight)}
           disabled={isSaving}
-          className="min-h-12 rounded-2xl bg-accent px-5 py-3 text-sm font-black text-white transition hover:-translate-y-0.5 hover:bg-accent-strong hover:text-stone-950 disabled:cursor-not-allowed disabled:opacity-70"
+          className="min-h-12 rounded-2xl bg-accent px-5 py-3 text-sm font-black text-stone-950 transition hover:-translate-y-0.5 hover:bg-accent-strong disabled:cursor-not-allowed disabled:opacity-70"
         >
           {isSaving ? "Saving..." : "Save goal"}
         </button>
@@ -122,7 +122,7 @@ export function GoalWeightForm({
       </div>
 
       {notice ? (
-        <p className="mt-3 rounded-2xl border border-accent/25 bg-accent/15 p-3 text-sm font-bold text-teal-100">
+        <p className="mt-3 rounded-2xl border border-accent/25 bg-accent/15 p-3 text-sm font-bold text-soft-yellow">
           {notice}
         </p>
       ) : null}

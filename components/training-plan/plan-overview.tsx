@@ -25,7 +25,7 @@ export function PlanOverview({ plan }: PlanOverviewProps) {
               {plan.description}
             </p>
           </div>
-          <span className="inline-flex items-center gap-2 rounded-full bg-[#eaf3dd] px-3 py-2 text-sm font-black text-accent-strong">
+          <span className="inline-flex items-center gap-2 rounded-full border border-accent/25 bg-accent/10 px-3 py-2 text-sm font-black text-soft-yellow">
             <ShieldCheck className="size-4" />
             General guidance
           </span>
@@ -57,7 +57,7 @@ export function PlanOverview({ plan }: PlanOverviewProps) {
           value={`${summary.sessions}`}
           detail="Suggested training days."
           icon={<Repeat className="size-5" />}
-          tone="teal"
+          tone="yellow"
         />
         <MetricCard
           label="Weekly minutes"
@@ -78,7 +78,7 @@ export function PlanOverview({ plan }: PlanOverviewProps) {
           value={`${summary.cardioSessions}`}
           detail="Cardio or hybrid sessions."
           icon={<HeartPulse className="size-5" />}
-          tone="teal"
+          tone="yellow"
         />
         <MetricCard
           label="Mobility"

@@ -12,7 +12,7 @@ export function RecipeCard({ recipe }: RecipeCardProps) {
     <FitnessCard className="group flex h-full flex-col overflow-hidden hover:-translate-y-1 hover:shadow-[0_30px_90px_rgba(23,33,28,0.14)]">
       <div className="-mx-5 -mt-5 mb-5 h-2 bg-gradient-to-r from-accent via-sun to-accent-strong opacity-90 transition group-hover:h-3" />
       <div className="flex items-start justify-between gap-4">
-        <span className="rounded-full bg-[#eaf3dd] px-3 py-1 text-xs font-black uppercase tracking-[0.16em] text-accent-strong">
+        <span className="rounded-full border border-accent/25 bg-accent/10 px-3 py-1 text-xs font-black uppercase tracking-[0.16em] text-soft-yellow">
           {recipe.mealType}
         </span>
         <span className="inline-flex items-center gap-1 rounded-full bg-stone-100 px-3 py-1 text-xs font-black text-muted">

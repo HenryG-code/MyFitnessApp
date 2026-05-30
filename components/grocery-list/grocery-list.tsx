@@ -98,7 +98,7 @@ export function GroceryList({ recipes }: GroceryListProps) {
   if (hasLoadedStorage && plannedMealsCount === 0) {
     return (
       <FitnessCard>
-        <div className="rounded-[1.5rem] bg-[#eaf3dd] p-6">
+        <div className="rounded-[1.5rem] border border-accent/25 bg-accent/10 p-6">
           <span className="grid size-14 place-items-center rounded-2xl bg-white/75 text-accent-strong">
             <ShoppingBasket className="size-6" />
           </span>
@@ -170,7 +170,7 @@ export function GroceryList({ recipes }: GroceryListProps) {
           </button>
           <Link
             href="/meal-planner"
-            className="inline-flex items-center gap-2 rounded-2xl bg-[#eaf3dd] px-4 py-3 text-sm font-black text-accent-strong transition hover:-translate-y-0.5"
+            className="inline-flex items-center gap-2 rounded-2xl border border-accent/25 bg-accent/10 px-4 py-3 text-sm font-black text-soft-yellow transition hover:-translate-y-0.5"
           >
             <CalendarDays className="size-4" />
             Go to Meal Planner

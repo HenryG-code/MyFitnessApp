@@ -17,6 +17,10 @@ export default {
         accent: "var(--accent)",
         "accent-strong": "var(--accent-strong)",
         sun: "var(--sun)",
+        "soft-yellow": "#fef3c7",
+        surface: "var(--surface)",
+        success: "var(--success)",
+        danger: "var(--danger)",
       },
       fontFamily: {
         sans: ["Satoshi", "Aptos Display", "Avenir", "Segoe UI", "sans-serif"],

@@ -75,7 +75,7 @@ export default function RecipesPage() {
               practical meals for training, fat loss, and general health.
             </p>
           </div>
-          <span className="grid size-14 place-items-center rounded-2xl bg-[#eaf3dd] text-accent-strong">
+          <span className="grid size-14 place-items-center rounded-2xl border border-accent/25 bg-accent/10 text-accent">
             <Salad className="size-6" />
           </span>
         </div>

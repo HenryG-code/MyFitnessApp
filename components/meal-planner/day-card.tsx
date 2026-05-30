@@ -39,7 +39,7 @@ export function DayCard({
           <h2 className="mt-1 font-display text-2xl font-black">{day}</h2>
         </div>
         <div className="grid grid-cols-2 gap-2 text-sm">
-          <div className="rounded-2xl bg-[#eaf3dd] px-3 py-2">
+          <div className="rounded-2xl border border-accent/25 bg-accent/10 px-3 py-2">
             <p className="text-xs font-black uppercase tracking-[0.12em] text-accent-strong">
               Calories
             </p>

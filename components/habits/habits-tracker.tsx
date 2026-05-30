@@ -216,7 +216,7 @@ export function HabitsTracker() {
       />
 
       {notice ? (
-        <p className="rounded-[1.5rem] border border-line bg-[#eaf3dd] p-4 text-sm font-black text-accent-strong">
+        <p className="rounded-[1.5rem] border border-accent/25 bg-accent/10 p-4 text-sm font-black text-soft-yellow">
           {notice}
         </p>
       ) : null}
@@ -233,7 +233,7 @@ export function HabitsTracker() {
           value={`${percentage}%`}
           detail={`${completedCount} of ${habitCount} habits complete.`}
           icon={<Sprout className="size-5" />}
-          tone="teal"
+          tone="yellow"
         />
         <MetricCard
           label="Completed"
@@ -258,7 +258,7 @@ export function HabitsTracker() {
               : "No completed habits yet today."
           }
           icon={<CalendarDays className="size-5" />}
-          tone="teal"
+          tone="yellow"
         />
       </section>
 
@@ -306,8 +306,8 @@ export function HabitsTracker() {
                         disabled={updatingHabitKey === habit.key}
                         className={`rounded-2xl px-4 py-2 text-sm font-black transition disabled:cursor-not-allowed disabled:opacity-70 ${
                           isComplete
-                            ? "bg-[#eaf3dd] text-accent-strong hover:bg-stone-100"
-                            : "bg-stone-950 text-white hover:bg-accent"
+                            ? "bg-accent/15 text-soft-yellow hover:bg-white/10"
+                            : "bg-accent text-stone-950 hover:bg-accent-strong"
                         }`}
                       >
                         {updatingHabitKey === habit.key
@@ -329,7 +329,7 @@ export function HabitsTracker() {
               })}
             </div>
           ) : (
-            <div className="rounded-[1.5rem] bg-[#eaf3dd] p-6">
+            <div className="rounded-[1.5rem] border border-accent/25 bg-accent/10 p-6">
               <p className="font-display text-xl font-black">
                 Today&apos;s habits are getting ready.
               </p>

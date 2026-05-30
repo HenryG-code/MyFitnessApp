@@ -157,7 +157,7 @@ export function WeightTracker() {
       </section>
 
       {notice ? (
-        <p className="rounded-[1.5rem] border border-line bg-[#eaf3dd] p-4 text-sm font-black text-accent-strong">
+        <p className="rounded-[1.5rem] border border-accent/25 bg-accent/10 p-4 text-sm font-black text-soft-yellow">
           {notice}
         </p>
       ) : null}
@@ -178,7 +178,7 @@ export function WeightTracker() {
               : "Add your first check-in to start the trend."
           }
           icon={<Scale className="size-5" />}
-          tone="teal"
+          tone="yellow"
         />
         <MetricCard
           label="First weight"
@@ -223,7 +223,7 @@ export function WeightTracker() {
               : "Your logbook is still empty."
           }
           icon={<ClipboardList className="size-5" />}
-          tone="teal"
+          tone="yellow"
         />
       </section>
 
@@ -329,7 +329,7 @@ export function WeightTracker() {
             })}
           </div>
         ) : (
-          <div className="rounded-[1.5rem] bg-[#eaf3dd] p-6">
+          <div className="rounded-[1.5rem] border border-accent/25 bg-accent/10 p-6">
             <p className="font-display text-xl font-black">
               Your weight log is empty.
             </p>

@@ -90,7 +90,7 @@ export function InstallAppCard() {
 
   if (isInstalled) {
     return (
-      <div className="rounded-2xl border border-accent/30 bg-accent/15 p-4 text-sm font-black text-teal-100">
+      <div className="rounded-2xl border border-accent/30 bg-accent/15 p-4 text-sm font-black text-soft-yellow">
         <span className="inline-flex items-center gap-2">
           <CheckCircle2 className="size-5" />
           LiftLog is installed.
@@ -104,7 +104,7 @@ export function InstallAppCard() {
       <button
         type="button"
         onClick={() => void handleInstallClick()}
-        className="w-full rounded-2xl bg-accent px-5 py-3 text-sm font-black text-white shadow-lg shadow-teal-950/20 transition hover:-translate-y-0.5 hover:bg-accent-strong hover:text-stone-950"
+        className="w-full rounded-2xl bg-accent px-5 py-3 text-sm font-black text-stone-950 shadow-lg shadow-yellow-950/20 transition hover:-translate-y-0.5 hover:bg-accent-strong"
       >
         Install app
       </button>

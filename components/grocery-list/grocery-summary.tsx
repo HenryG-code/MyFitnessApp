@@ -14,7 +14,7 @@ export function GrocerySummary({ summary }: GrocerySummaryProps) {
         value={`${summary.plannedMealsCount}`}
         detail="Meals selected this week."
         icon={<Utensils className="size-5" />}
-        tone="teal"
+        tone="yellow"
       />
       <MetricCard
         label="Unique ingredients"
@@ -35,7 +35,7 @@ export function GrocerySummary({ summary }: GrocerySummaryProps) {
         value={`${summary.remainingItemsCount}`}
         detail="Still on the list."
         icon={<ListChecks className="size-5" />}
-        tone="teal"
+        tone="yellow"
       />
     </section>
   );

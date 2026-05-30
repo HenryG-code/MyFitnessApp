@@ -55,7 +55,7 @@ export function SessionCard({ plan, session }: SessionCardProps) {
             <Clock className="size-4" />
             {session.durationMinutes} min
           </span>
-          <span className="inline-flex items-center gap-2 rounded-full bg-accent/20 px-3 py-2 text-sm font-black text-teal-100">
+          <span className="inline-flex items-center gap-2 rounded-full bg-accent/20 px-3 py-2 text-sm font-black text-soft-yellow">
             <Gauge className="size-4" />
             {session.intensity}
           </span>
@@ -113,11 +113,11 @@ export function SessionCard({ plan, session }: SessionCardProps) {
       </div>
 
       {createdWorkoutId ? (
-        <div className="mt-4 rounded-2xl border border-accent/30 bg-accent/15 p-4 text-sm font-bold text-teal-100">
+        <div className="mt-4 rounded-2xl border border-accent/30 bg-accent/15 p-4 text-sm font-bold text-soft-yellow">
           Workout logged.{" "}
           <Link
             href={`/workouts/${createdWorkoutId}`}
-            className="font-black underline decoration-teal-200/60 underline-offset-4"
+            className="font-black underline decoration-yellow-200/60 underline-offset-4"
           >
             View workout
           </Link>

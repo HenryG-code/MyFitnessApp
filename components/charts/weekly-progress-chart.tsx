@@ -29,43 +29,45 @@ export function WeeklyProgressChart({
   );
 
   if (!mounted) {
-    return <div className="h-64 w-full rounded-[1.5rem] bg-stone-100" />;
+    return <div className="h-64 w-full rounded-[1.5rem] bg-surface" />;
   }
 
   return (
     <div className="h-64 w-full">
       <ResponsiveContainer width="100%" height="100%">
         <BarChart data={data} margin={{ top: 8, right: 4, left: -28, bottom: 0 }}>
-          <CartesianGrid stroke="#e8e1d4" strokeDasharray="4 6" vertical={false} />
+          <CartesianGrid stroke="#2a2a24" strokeDasharray="4 6" vertical={false} />
           <XAxis
             dataKey="day"
             axisLine={false}
             tickLine={false}
-            tick={{ fill: "#69746f", fontSize: 12, fontWeight: 700 }}
+            tick={{ fill: "#a8a29e", fontSize: 12, fontWeight: 700 }}
           />
           <YAxis
             axisLine={false}
             tickLine={false}
-            tick={{ fill: "#69746f", fontSize: 12, fontWeight: 700 }}
+            tick={{ fill: "#a8a29e", fontSize: 12, fontWeight: 700 }}
           />
           <Tooltip
-            cursor={{ fill: "rgba(15, 118, 110, 0.08)" }}
+            cursor={{ fill: "rgba(250, 204, 21, 0.1)" }}
             contentStyle={{
-              border: "1px solid #e4ded0",
+              background: "#1a1a18",
+              color: "#f8f7f2",
+              border: "1px solid #2a2a24",
               borderRadius: "18px",
-              boxShadow: "0 18px 50px rgba(23,33,28,0.12)",
+              boxShadow: "0 18px 50px rgba(0,0,0,0.35)",
             }}
           />
           <Bar
             dataKey="habits"
-            fill="#f2b705"
+            fill="#facc15"
             radius={[10, 10, 0, 0]}
             name="Habit completion"
             unit="%"
           />
           <Bar
             dataKey="workouts"
-            fill="#0f766e"
+            fill="#78716c"
             radius={[10, 10, 0, 0]}
             name="Workouts"
           />

@@ -12,7 +12,7 @@ export default function NewWorkoutPage() {
         description="Save the workout, add exercises, and keep your training history moving."
         imageSrc={fitnessImages.strengthTraining}
         imageAlt="Athlete logging a strength workout"
-        variant="emerald"
+        variant="performance"
       />
 
       <FitnessCard>

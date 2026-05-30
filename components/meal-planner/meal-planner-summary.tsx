@@ -14,7 +14,7 @@ export function MealPlannerSummary({ totals }: MealPlannerSummaryProps) {
         value={`${totals.weeklyCalories}`}
         detail="Total planned energy."
         icon={<Flame className="size-5" />}
-        tone="teal"
+        tone="yellow"
       />
       <MetricCard
         label="Weekly protein"
@@ -35,7 +35,7 @@ export function MealPlannerSummary({ totals }: MealPlannerSummaryProps) {
         value={`${totals.averageDailyProtein}g`}
         detail="Protein average per day."
         icon={<Sigma className="size-5" />}
-        tone="teal"
+        tone="yellow"
       />
       <MetricCard
         label="Planned meals"

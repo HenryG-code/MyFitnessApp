@@ -61,7 +61,7 @@ export function MealSlotCard({
       <select
         value={selectedSlug ?? ""}
         onChange={(event) => onChange(event.target.value || null)}
-        className="mt-4 w-full rounded-2xl border border-line bg-card px-4 py-3 text-sm font-bold outline-none transition focus:border-accent focus:ring-4 focus:ring-teal-700/10"
+        className="mt-4 w-full rounded-2xl border border-line bg-surface px-4 py-3 text-sm font-bold outline-none transition focus:border-accent focus:ring-4 focus:ring-yellow-400/10"
       >
         <option value="">Select {slot.toLowerCase()}</option>
         {slotRecipes.length ? (

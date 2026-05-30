@@ -38,7 +38,7 @@ export function GoalSelector({ selectedGoal, onChange }: GoalSelectorProps) {
               onClick={() => onChange(goal)}
               className={`rounded-2xl border px-4 py-4 text-left shadow-sm transition hover:-translate-y-0.5 hover:shadow-[0_18px_44px_rgba(23,33,28,0.10)] ${
                 active
-                  ? "border-accent bg-accent text-white shadow-lg shadow-teal-900/15"
+                  ? "border-accent bg-accent text-stone-950 shadow-lg shadow-yellow-950/20"
                   : "border-line/80 bg-white/75 text-foreground hover:border-accent"
               }`}
             >

@@ -23,7 +23,7 @@ export function WeightTrendChart({ data }: { data: WeightPoint[] }) {
   );
 
   if (!mounted) {
-    return <div className="h-64 w-full rounded-[1.5rem] bg-stone-100" />;
+    return <div className="h-64 w-full rounded-[1.5rem] bg-surface" />;
   }
 
   return (
@@ -34,27 +34,29 @@ export function WeightTrendChart({ data }: { data: WeightPoint[] }) {
             dataKey="logged_at"
             axisLine={false}
             tickLine={false}
-            tick={{ fill: "#69746f", fontSize: 12, fontWeight: 700 }}
+            tick={{ fill: "#a8a29e", fontSize: 12, fontWeight: 700 }}
           />
           <YAxis
             axisLine={false}
             domain={["dataMin - 1", "dataMax + 1"]}
             tickLine={false}
-            tick={{ fill: "#69746f", fontSize: 12, fontWeight: 700 }}
+            tick={{ fill: "#a8a29e", fontSize: 12, fontWeight: 700 }}
           />
           <Tooltip
             contentStyle={{
-              border: "1px solid #e4ded0",
+              background: "#1a1a18",
+              color: "#f8f7f2",
+              border: "1px solid #2a2a24",
               borderRadius: "18px",
-              boxShadow: "0 18px 50px rgba(23,33,28,0.12)",
+              boxShadow: "0 18px 50px rgba(0,0,0,0.35)",
             }}
           />
           <Line
             type="monotone"
             dataKey="weight_kg"
-            stroke="#0f766e"
+            stroke="#facc15"
             strokeWidth={4}
-            dot={{ fill: "#f2b705", strokeWidth: 0, r: 5 }}
+            dot={{ fill: "#f8f7f2", strokeWidth: 0, r: 5 }}
             activeDot={{ r: 7 }}
             name="Weight"
             unit=" kg"

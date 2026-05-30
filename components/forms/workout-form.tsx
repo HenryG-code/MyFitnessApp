@@ -276,7 +276,7 @@ export function WorkoutForm({ mode = "create", workout }: WorkoutFormProps) {
         </label>
         <input
           id="title"
-          className="mt-2 w-full rounded-2xl border border-line bg-white/80 px-4 py-3 outline-none transition focus:border-accent focus:ring-4 focus:ring-teal-700/10"
+          className="mt-2 w-full rounded-2xl border border-line bg-surface/80 px-4 py-3 outline-none transition focus:border-accent focus:ring-4 focus:ring-yellow-400/10"
           placeholder="Upper Body Strength"
           {...register("title")}
         />
@@ -295,7 +295,7 @@ export function WorkoutForm({ mode = "create", workout }: WorkoutFormProps) {
           <input
             id="workout_date"
             type="date"
-            className="mt-2 w-full rounded-2xl border border-line bg-white/80 px-4 py-3 outline-none transition focus:border-accent focus:ring-4 focus:ring-teal-700/10"
+            className="mt-2 w-full rounded-2xl border border-line bg-surface/80 px-4 py-3 outline-none transition focus:border-accent focus:ring-4 focus:ring-yellow-400/10"
             {...register("workout_date")}
           />
           {errors.workout_date ? (
@@ -314,7 +314,7 @@ export function WorkoutForm({ mode = "create", workout }: WorkoutFormProps) {
             type="number"
             min="1"
             step="1"
-            className="mt-2 w-full rounded-2xl border border-line bg-white/80 px-4 py-3 outline-none transition focus:border-accent focus:ring-4 focus:ring-teal-700/10"
+            className="mt-2 w-full rounded-2xl border border-line bg-surface/80 px-4 py-3 outline-none transition focus:border-accent focus:ring-4 focus:ring-yellow-400/10"
             placeholder="45"
             {...register("duration_minutes")}
           />
@@ -333,7 +333,7 @@ export function WorkoutForm({ mode = "create", workout }: WorkoutFormProps) {
         <textarea
           id="notes"
           rows={4}
-          className="mt-2 w-full rounded-2xl border border-line bg-white/80 px-4 py-3 outline-none transition focus:border-accent focus:ring-4 focus:ring-teal-700/10"
+          className="mt-2 w-full rounded-2xl border border-line bg-surface/80 px-4 py-3 outline-none transition focus:border-accent focus:ring-4 focus:ring-yellow-400/10"
           placeholder="How did the session feel?"
           {...register("notes")}
         />
@@ -387,7 +387,7 @@ export function WorkoutForm({ mode = "create", workout }: WorkoutFormProps) {
                 <div className="sm:col-span-6">
                   <label className="text-sm font-black">Name</label>
                   <input
-                    className="mt-2 w-full rounded-2xl border border-line bg-white/80 px-4 py-3 outline-none transition focus:border-accent focus:ring-4 focus:ring-teal-700/10"
+                    className="mt-2 w-full rounded-2xl border border-line bg-surface/80 px-4 py-3 outline-none transition focus:border-accent focus:ring-4 focus:ring-yellow-400/10"
                     placeholder="Bench press"
                     {...register(`exercises.${index}.exercise_name`)}
                   />
@@ -404,7 +404,7 @@ export function WorkoutForm({ mode = "create", workout }: WorkoutFormProps) {
                     type="number"
                     min="0"
                     step="1"
-                    className="mt-2 w-full rounded-2xl border border-line bg-white/80 px-4 py-3 outline-none transition focus:border-accent focus:ring-4 focus:ring-teal-700/10"
+                    className="mt-2 w-full rounded-2xl border border-line bg-surface/80 px-4 py-3 outline-none transition focus:border-accent focus:ring-4 focus:ring-yellow-400/10"
                     {...register(`exercises.${index}.sets`)}
                   />
                   {errors.exercises?.[index]?.sets ? (
@@ -420,7 +420,7 @@ export function WorkoutForm({ mode = "create", workout }: WorkoutFormProps) {
                     type="number"
                     min="0"
                     step="1"
-                    className="mt-2 w-full rounded-2xl border border-line bg-white/80 px-4 py-3 outline-none transition focus:border-accent focus:ring-4 focus:ring-teal-700/10"
+                    className="mt-2 w-full rounded-2xl border border-line bg-surface/80 px-4 py-3 outline-none transition focus:border-accent focus:ring-4 focus:ring-yellow-400/10"
                     {...register(`exercises.${index}.reps`)}
                   />
                   {errors.exercises?.[index]?.reps ? (
@@ -436,7 +436,7 @@ export function WorkoutForm({ mode = "create", workout }: WorkoutFormProps) {
                     type="number"
                     min="0"
                     step="0.5"
-                    className="mt-2 w-full rounded-2xl border border-line bg-white/80 px-4 py-3 outline-none transition focus:border-accent focus:ring-4 focus:ring-teal-700/10"
+                    className="mt-2 w-full rounded-2xl border border-line bg-surface/80 px-4 py-3 outline-none transition focus:border-accent focus:ring-4 focus:ring-yellow-400/10"
                     {...register(`exercises.${index}.weight`)}
                   />
                   {errors.exercises?.[index]?.weight ? (
@@ -452,7 +452,7 @@ export function WorkoutForm({ mode = "create", workout }: WorkoutFormProps) {
                     type="number"
                     min="0"
                     step="0.1"
-                    className="mt-2 w-full rounded-2xl border border-line bg-white/80 px-4 py-3 outline-none transition focus:border-accent focus:ring-4 focus:ring-teal-700/10"
+                    className="mt-2 w-full rounded-2xl border border-line bg-surface/80 px-4 py-3 outline-none transition focus:border-accent focus:ring-4 focus:ring-yellow-400/10"
                     {...register(`exercises.${index}.distance_km`)}
                   />
                   {errors.exercises?.[index]?.distance_km ? (
@@ -470,7 +470,7 @@ export function WorkoutForm({ mode = "create", workout }: WorkoutFormProps) {
                     type="number"
                     min="0"
                     step="1"
-                    className="mt-2 w-full rounded-2xl border border-line bg-white/80 px-4 py-3 outline-none transition focus:border-accent focus:ring-4 focus:ring-teal-700/10"
+                    className="mt-2 w-full rounded-2xl border border-line bg-surface/80 px-4 py-3 outline-none transition focus:border-accent focus:ring-4 focus:ring-yellow-400/10"
                     {...register(`exercises.${index}.duration_minutes`)}
                   />
                   {errors.exercises?.[index]?.duration_minutes ? (
@@ -484,7 +484,7 @@ export function WorkoutForm({ mode = "create", workout }: WorkoutFormProps) {
                   <label className="text-sm font-black">Exercise notes</label>
                   <textarea
                     rows={2}
-                    className="mt-2 w-full rounded-2xl border border-line bg-white/80 px-4 py-3 outline-none transition focus:border-accent focus:ring-4 focus:ring-teal-700/10"
+                    className="mt-2 w-full rounded-2xl border border-line bg-surface/80 px-4 py-3 outline-none transition focus:border-accent focus:ring-4 focus:ring-yellow-400/10"
                     placeholder="Optional cues or set details."
                     {...register(`exercises.${index}.notes`)}
                   />
@@ -507,7 +507,7 @@ export function WorkoutForm({ mode = "create", workout }: WorkoutFormProps) {
       ) : null}
 
       {success ? (
-        <p className="rounded-2xl bg-[#eaf3dd] p-3 text-sm font-medium text-accent-strong">
+        <p className="rounded-2xl border border-accent/25 bg-accent/10 p-3 text-sm font-medium text-soft-yellow">
           {success}
         </p>
       ) : null}
@@ -515,7 +515,7 @@ export function WorkoutForm({ mode = "create", workout }: WorkoutFormProps) {
       <button
         type="submit"
         disabled={isSubmitting}
-        className="rounded-2xl bg-accent px-5 py-3 text-sm font-black text-white shadow-lg shadow-teal-900/15 transition hover:-translate-y-0.5 hover:bg-accent-strong disabled:cursor-not-allowed disabled:opacity-70"
+        className="rounded-2xl bg-accent px-5 py-3 text-sm font-black text-stone-950 shadow-lg shadow-yellow-950/20 transition hover:-translate-y-0.5 hover:bg-accent-strong disabled:cursor-not-allowed disabled:opacity-70"
       >
         {isSubmitting
           ? mode === "edit"

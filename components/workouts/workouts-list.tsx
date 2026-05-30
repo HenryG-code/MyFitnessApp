@@ -147,7 +147,7 @@ export function WorkoutsList() {
         description="Track your sessions, exercises, notes, and progress over time."
         imageSrc={fitnessImages.strengthTraining}
         imageAlt="Strength training session"
-        variant="emerald"
+        variant="performance"
       >
         <div className="flex flex-wrap gap-2">
           <Link
@@ -159,7 +159,7 @@ export function WorkoutsList() {
           </Link>
           <Link
             href="/workouts/new"
-            className="inline-flex items-center justify-center gap-2 rounded-2xl bg-accent px-5 py-3 text-sm font-black text-white shadow-lg shadow-teal-900/15"
+            className="inline-flex items-center justify-center gap-2 rounded-2xl bg-accent px-5 py-3 text-sm font-black text-stone-950 shadow-lg shadow-yellow-950/20"
           >
             <Plus className="size-4" />
             New workout
@@ -168,7 +168,7 @@ export function WorkoutsList() {
       </HeroPanel>
 
       {notice ? (
-        <p className="rounded-[1.5rem] border border-line bg-[#eaf3dd] p-4 text-sm font-black text-accent-strong">
+        <p className="rounded-[1.5rem] border border-accent/25 bg-accent/10 p-4 text-sm font-black text-soft-yellow">
           {notice}
         </p>
       ) : null}
@@ -185,7 +185,7 @@ export function WorkoutsList() {
           value={`${stats.workoutsThisWeek}`}
           detail="Workouts since Sunday."
           icon={<Flame className="size-5" />}
-          tone="teal"
+          tone="yellow"
         />
         <MetricCard
           label="Total workouts"
@@ -210,7 +210,7 @@ export function WorkoutsList() {
           value={`${stats.totalMinutes}`}
           detail="Total logged duration."
           icon={<Clock className="size-5" />}
-          tone="teal"
+          tone="yellow"
         />
       </section>
 
@@ -265,7 +265,7 @@ export function WorkoutsList() {
         </div>
       ) : (
         <FitnessCard>
-          <div className="rounded-[1.5rem] bg-[#eaf3dd] p-6">
+          <div className="rounded-[1.5rem] border border-accent/25 bg-accent/10 p-6">
             <p className="font-display text-xl font-black">
               No workouts logged yet.
             </p>

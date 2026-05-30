@@ -202,7 +202,7 @@ export function DashboardOverview() {
         description="See your weight, workouts, habits, and weekly momentum in one calm overview."
         imageSrc={fitnessImages.strengthTraining}
         imageAlt="Athlete strength training in a gym"
-        variant="emerald"
+        variant="performance"
       >
           <div className="mt-6 flex flex-wrap gap-3">
             <Link
@@ -346,7 +346,7 @@ export function DashboardOverview() {
               : "No weight logs yet."
           }
           icon={<Scale className="size-5" />}
-          tone="teal"
+          tone="yellow"
         />
         <FitnessCard className="hover:-translate-y-0.5 hover:shadow-[0_28px_80px_rgba(23,33,28,0.13)]">
           <div className="flex items-start justify-between gap-4">
@@ -390,7 +390,7 @@ export function DashboardOverview() {
           value={`${habitPercent}%`}
           detail={`${completedHabits} of 7 habits complete today.`}
           icon={<Sprout className="size-5" />}
-          tone="teal"
+          tone="yellow"
         />
       </section>
 
@@ -408,7 +408,7 @@ export function DashboardOverview() {
 
         <FitnessCard>
           <SectionHeader eyebrow="Latest workout" title="Fresh from the log" />
-          <div className="rounded-[1.5rem] bg-[#eaf3dd] p-5">
+          <div className="rounded-[1.5rem] border border-accent/25 bg-accent/10 p-5">
             {data?.latestWorkout ? (
               <>
                 <div className="flex items-center gap-3">

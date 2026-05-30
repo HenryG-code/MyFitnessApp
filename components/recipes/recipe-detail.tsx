@@ -57,7 +57,7 @@ export function RecipeDetail({ recipe }: RecipeDetailProps) {
           value={`${recipe.calories}`}
           detail="Approximate energy per serving."
           icon={<Flame className="size-5" />}
-          tone="teal"
+          tone="yellow"
         />
         <MetricCard
           label="Protein"
@@ -78,7 +78,7 @@ export function RecipeDetail({ recipe }: RecipeDetailProps) {
           value={recipe.difficulty}
           detail="Simple enough for repeat meals."
           icon={<Gauge className="size-5" />}
-          tone="teal"
+          tone="yellow"
         />
       </section>
 
@@ -139,10 +139,10 @@ export function RecipeDetail({ recipe }: RecipeDetailProps) {
         </FitnessCard>
       </section>
 
-      <FitnessCard className="bg-[#eaf3dd]">
+      <FitnessCard className="border-accent/25 bg-accent/10">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <p className="text-xs font-black uppercase tracking-[0.22em] text-accent-strong">
+            <p className="text-xs font-black uppercase tracking-[0.22em] text-accent">
               Planning
             </p>
             <h2 className="mt-1 font-display text-xl font-black">

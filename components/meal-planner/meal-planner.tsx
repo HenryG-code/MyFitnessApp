@@ -74,7 +74,7 @@ export function MealPlanner({ recipes }: MealPlannerProps) {
       <MealPlannerSummary totals={totals} />
 
       {totals.plannedMealsCount === 0 ? (
-        <section className="rounded-[1.75rem] border border-line/80 bg-[#eaf3dd] p-5">
+        <section className="rounded-[1.75rem] border border-accent/25 bg-accent/10 p-5">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <p className="text-xs font-black uppercase tracking-[0.22em] text-accent-strong">

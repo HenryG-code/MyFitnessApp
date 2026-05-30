@@ -16,7 +16,7 @@ export function GroceryItemRow({
     <label
       className={`flex cursor-pointer items-start gap-3 rounded-2xl border p-4 transition ${
         checked
-          ? "border-accent/20 bg-[#eaf3dd] text-muted"
+          ? "border-accent/25 bg-accent/10 text-muted"
           : "border-line bg-white/70 hover:-translate-y-0.5 hover:border-accent"
       }`}
     >

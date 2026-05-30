@@ -8,7 +8,7 @@ type FitnessCardProps = {
 export function FitnessCard({ children, className = "" }: FitnessCardProps) {
   return (
     <section
-      className={`rounded-[1.75rem] border border-white/70 bg-card/90 p-5 shadow-[0_22px_70px_rgba(23,33,28,0.09)] ring-1 ring-line/45 backdrop-blur transition duration-200 ${className}`}
+      className={`rounded-[1.75rem] border border-line/90 bg-card/90 p-5 shadow-[0_24px_80px_rgba(0,0,0,0.34)] ring-1 ring-white/[0.03] backdrop-blur transition duration-200 ${className}`}
     >
       {children}
     </section>
@@ -20,13 +20,13 @@ type MetricCardProps = {
   value: string;
   detail: string;
   icon: ReactNode;
-  tone?: "teal" | "amber" | "ink";
+  tone?: "yellow" | "amber" | "ink";
 };
 
 const toneStyles = {
-  teal: "bg-accent text-white",
+  yellow: "bg-accent text-stone-950",
   amber: "bg-sun text-stone-950",
-  ink: "bg-stone-900 text-white",
+  ink: "bg-surface text-sun border border-line",
 };
 
 export function MetricCard({
@@ -34,10 +34,10 @@ export function MetricCard({
   value,
   detail,
   icon,
-  tone = "teal",
+  tone = "yellow",
 }: MetricCardProps) {
   return (
-    <FitnessCard className="hover:-translate-y-0.5 hover:shadow-[0_28px_80px_rgba(23,33,28,0.13)]">
+    <FitnessCard className="hover:-translate-y-0.5 hover:border-accent/60 hover:shadow-[0_28px_80px_rgba(0,0,0,0.46)]">
       <div className="flex items-start justify-between gap-4">
         <div>
           <p className="text-xs font-black uppercase tracking-[0.18em] text-muted">
@@ -47,7 +47,7 @@ export function MetricCard({
             {value}
           </p>
         </div>
-        <div className={`rounded-2xl p-3 shadow-lg shadow-stone-900/10 ${toneStyles[tone]}`}>
+        <div className={`rounded-2xl p-3 shadow-lg shadow-black/35 ${toneStyles[tone]}`}>
           {icon}
         </div>
       </div>
