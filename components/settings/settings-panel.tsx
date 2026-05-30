@@ -1,6 +1,7 @@
 "use client";
 
 import { LogoutButton } from "@/components/auth/logout-button";
+import { InstallGuidance } from "@/components/pwa/install-guidance";
 import { FitnessCard, SectionHeader } from "@/components/ui/fitness-card";
 import {
   fetchAuthenticatedProfile,
@@ -10,6 +11,7 @@ import {
   Bell,
   BookOpen,
   CalendarDays,
+  Download,
   ExternalLink,
   HandHeart,
   Lock,
@@ -237,6 +239,29 @@ export function SettingsPanel() {
               </Link>
             );
           })}
+        </div>
+      </FitnessCard>
+
+      <FitnessCard>
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+          <div className="max-w-xl">
+            <span className="grid size-12 place-items-center rounded-2xl bg-accent text-white">
+              <Download className="size-5" />
+            </span>
+            <div className="mt-5">
+              <SectionHeader eyebrow="App install" title="Install LiftLog" />
+            </div>
+            <p className="text-sm leading-6 text-muted">
+              Add LiftLog to your device for quicker access from your home
+              screen or desktop.
+            </p>
+            <p className="mt-3 text-sm font-black text-accent">
+              Install from your browser menu
+            </p>
+          </div>
+          <div className="lg:min-w-[26rem]">
+            <InstallGuidance />
+          </div>
         </div>
       </FitnessCard>
 

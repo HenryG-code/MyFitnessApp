@@ -74,6 +74,7 @@ Screenshot capture checklist:
 - Responsive desktop sidebar and mobile bottom navigation.
 - Dark, screenshot-ready visual theme designed for comfortable longer use.
 - Suggested Training Plan sessions can be logged directly into the workout log.
+- PWA install support from supported desktop and mobile browsers.
 
 ## Tech Stack
 
@@ -200,6 +201,21 @@ Payment note: the Settings support card uses external links only. LiftLog does
 not load PayPal or Yoco SDKs, process payments internally, collect card details,
 store payment information, or run payment webhooks.
 
+## PWA Install Support
+
+LiftLog includes a web app manifest and install metadata so supported browsers
+can install it without an app store.
+
+- Desktop: open the browser menu and choose Install app.
+- Android: open the browser menu and choose Add to Home Screen or Install app.
+- iOS support varies: use Share > Add to Home Screen where supported.
+- Notifications and push notifications are not included yet.
+- Push notifications are planned as a later milestone after PWA install support.
+- Service worker caching is intentionally skipped for now to avoid stale private
+  dashboard, workout, weight, or habit data.
+- PWA icons live in `public/icons/` and can be replaced later with final brand
+  assets if needed.
+
 ## Manual QA Checklist
 
 Use this checklist before demos or deployments:
@@ -222,7 +238,7 @@ Use this checklist before demos or deployments:
 
 ## Future Improvements
 
-- PWA install support.
+- Safe static asset service worker support.
 - Notifications and reminders after the PWA milestone.
 - Desktop app version with Tauri.
 - Supabase persistence for Meal Planner, Grocery List, and training
