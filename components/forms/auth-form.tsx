@@ -31,6 +31,9 @@ const registerSchema = z
 type LoginValues = z.infer<typeof loginSchema>;
 type RegisterValues = z.infer<typeof registerSchema>;
 
+const inputClassName =
+  "mt-2 w-full rounded-2xl border border-white/10 bg-white/[0.06] px-4 py-3 text-sm text-foreground outline-none transition placeholder:text-muted/70 focus:border-accent focus:ring-4 focus:ring-teal-400/10";
+
 function formatAuthError(error: unknown) {
   if (error instanceof Error) {
     if (error.message.startsWith("Missing NEXT_PUBLIC_SUPABASE")) {
@@ -111,7 +114,7 @@ export function LoginForm() {
           id="email"
           type="email"
           autoComplete="email"
-          className="mt-2 w-full rounded-2xl border border-line bg-white/80 px-4 py-3 text-sm outline-none transition focus:border-accent focus:ring-4 focus:ring-teal-700/10"
+          className={inputClassName}
           placeholder="alex@example.com"
           {...register("email")}
         />
@@ -130,7 +133,7 @@ export function LoginForm() {
           id="password"
           type="password"
           autoComplete="current-password"
-          className="mt-2 w-full rounded-2xl border border-line bg-white/80 px-4 py-3 text-sm outline-none transition focus:border-accent focus:ring-4 focus:ring-teal-700/10"
+          className={inputClassName}
           placeholder="Your password"
           {...register("password")}
         />
@@ -142,7 +145,7 @@ export function LoginForm() {
       </div>
 
       {error ? (
-        <p className="rounded-2xl bg-red-50 p-3 text-sm font-medium text-red-700">
+        <p className="rounded-2xl border border-red-400/25 bg-red-950/40 p-3 text-sm font-medium text-red-100">
           {error}
         </p>
       ) : null}
@@ -150,9 +153,9 @@ export function LoginForm() {
       <button
         type="submit"
         disabled={isSubmitting}
-        className="w-full rounded-2xl bg-stone-950 px-5 py-3 text-sm font-black text-white shadow-lg shadow-stone-950/10 transition hover:-translate-y-0.5 hover:bg-accent disabled:cursor-not-allowed disabled:opacity-70"
+        className="w-full rounded-2xl bg-accent px-5 py-3 text-sm font-black text-white shadow-lg shadow-teal-950/25 transition hover:-translate-y-0.5 hover:bg-accent-strong hover:text-stone-950 disabled:cursor-not-allowed disabled:opacity-70"
       >
-        {isSubmitting ? "Logging in..." : "Log in"}
+        {isSubmitting ? "Signing in..." : "Sign in"}
       </button>
 
       <p className="text-center text-sm text-muted">
@@ -225,7 +228,7 @@ export function RegisterForm() {
           id="fullName"
           type="text"
           autoComplete="name"
-          className="mt-2 w-full rounded-2xl border border-line bg-white/80 px-4 py-3 text-sm outline-none transition focus:border-accent focus:ring-4 focus:ring-teal-700/10"
+          className={inputClassName}
           placeholder="Alex Morgan"
           {...register("fullName")}
         />
@@ -244,7 +247,7 @@ export function RegisterForm() {
           id="email"
           type="email"
           autoComplete="email"
-          className="mt-2 w-full rounded-2xl border border-line bg-white/80 px-4 py-3 text-sm outline-none transition focus:border-accent focus:ring-4 focus:ring-teal-700/10"
+          className={inputClassName}
           placeholder="alex@example.com"
           {...register("email")}
         />
@@ -263,7 +266,7 @@ export function RegisterForm() {
           id="password"
           type="password"
           autoComplete="new-password"
-          className="mt-2 w-full rounded-2xl border border-line bg-white/80 px-4 py-3 text-sm outline-none transition focus:border-accent focus:ring-4 focus:ring-teal-700/10"
+          className={inputClassName}
           placeholder="At least 8 characters"
           {...register("password")}
         />
@@ -285,7 +288,7 @@ export function RegisterForm() {
           id="confirmPassword"
           type="password"
           autoComplete="new-password"
-          className="mt-2 w-full rounded-2xl border border-line bg-white/80 px-4 py-3 text-sm outline-none transition focus:border-accent focus:ring-4 focus:ring-teal-700/10"
+          className={inputClassName}
           placeholder="Repeat your password"
           {...register("confirmPassword")}
         />
@@ -297,13 +300,13 @@ export function RegisterForm() {
       </div>
 
       {error ? (
-        <p className="rounded-2xl bg-red-50 p-3 text-sm font-medium text-red-700">
+        <p className="rounded-2xl border border-red-400/25 bg-red-950/40 p-3 text-sm font-medium text-red-100">
           {error}
         </p>
       ) : null}
 
       {success ? (
-        <p className="rounded-2xl bg-[#eaf3dd] p-3 text-sm font-medium text-accent-strong">
+        <p className="rounded-2xl border border-accent/25 bg-accent/15 p-3 text-sm font-medium text-teal-100">
           {success}
         </p>
       ) : null}
@@ -311,9 +314,9 @@ export function RegisterForm() {
       <button
         type="submit"
         disabled={isSubmitting}
-        className="w-full rounded-2xl bg-stone-950 px-5 py-3 text-sm font-black text-white shadow-lg shadow-stone-950/10 transition hover:-translate-y-0.5 hover:bg-accent disabled:cursor-not-allowed disabled:opacity-70"
+        className="w-full rounded-2xl bg-accent px-5 py-3 text-sm font-black text-white shadow-lg shadow-teal-950/25 transition hover:-translate-y-0.5 hover:bg-accent-strong hover:text-stone-950 disabled:cursor-not-allowed disabled:opacity-70"
       >
-        {isSubmitting ? "Creating account..." : "Create free account"}
+        {isSubmitting ? "Creating account..." : "Create account"}
       </button>
 
       <p className="text-center text-sm text-muted">
