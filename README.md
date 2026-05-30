@@ -71,6 +71,7 @@ Screenshot capture checklist:
 - Grocery List generated from planned meals with persistent checked state.
 - Suggested Training Plans using static goal-based templates.
 - Settings page with real profile data, privacy notes, logout, and quick links.
+- Profile avatar uploads through Supabase Storage.
 - External PayPal support link with Yoco marked as coming soon.
 - Responsive desktop sidebar and mobile bottom navigation.
 - Dark, screenshot-ready visual theme designed for comfortable longer use.
@@ -125,6 +126,9 @@ User-owned tables are scoped through Supabase Auth. RLS policies restrict rows
 so users can only access their own fitness data. Workout exercises are protected
 through their parent workout ownership.
 
+Profile avatars use Supabase Storage in a public `avatars` bucket. The profile
+row stores the public avatar URL in `profiles.avatar_url`.
+
 Recipes and training plans are static local data in v1. Meal Planner and Grocery
 List use browser storage in v1, so they do not require Supabase tables yet.
 
@@ -140,6 +144,56 @@ List use browser storage in v1, so they do not require Supabase tables yet.
 
 The schema creates tables, indexes, RLS policies, and a trigger that creates a
 profile row when a new Supabase Auth user signs up.
+
+Avatar storage setup:
+
+1. Create a Supabase Storage bucket named `avatars`.
+2. Set the bucket to public so avatar images can be displayed in the app.
+3. Add storage policies so authenticated users can upload, update, and delete
+   files in their own folder.
+4. Add a public read policy for avatar images.
+
+Avatar file paths use this format:
+
+```text
+{user_id}/avatar.{extension}
+```
+
+Example storage policies to adapt in Supabase SQL Editor:
+
+```sql
+create policy "Avatar images are publicly readable"
+on storage.objects for select
+using (bucket_id = 'avatars');
+
+create policy "Users can upload their own avatar"
+on storage.objects for insert
+to authenticated
+with check (
+  bucket_id = 'avatars'
+  and (storage.foldername(name))[1] = auth.uid()::text
+);
+
+create policy "Users can update their own avatar"
+on storage.objects for update
+to authenticated
+using (
+  bucket_id = 'avatars'
+  and (storage.foldername(name))[1] = auth.uid()::text
+)
+with check (
+  bucket_id = 'avatars'
+  and (storage.foldername(name))[1] = auth.uid()::text
+);
+
+create policy "Users can delete their own avatar"
+on storage.objects for delete
+to authenticated
+using (
+  bucket_id = 'avatars'
+  and (storage.foldername(name))[1] = auth.uid()::text
+);
+```
 
 If your existing Supabase project does not have profile goal weight support yet,
 run this once in the Supabase SQL Editor:
@@ -261,8 +315,8 @@ Use this checklist before demos or deployments:
    clear checked, and reset checked.
 9. Test `/training-plan` goal selection, refresh persistence, and Log workout
    links.
-10. Test `/settings` profile data, notification preferences, PayPal support
-    link, Yoco coming soon state, and logout.
+10. Test `/settings` profile data, avatar upload/remove, notification
+    preferences, PayPal support link, Yoco coming soon state, and logout.
 11. Log out and confirm protected pages redirect to `/login`.
 
 ## Future Improvements

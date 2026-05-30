@@ -2,6 +2,7 @@
 
 import { LogoutButton } from "@/components/auth/logout-button";
 import { getUserDisplayName } from "@/src/lib/auth/user";
+import { createBrowserSupabaseClient } from "@/src/lib/supabase/client";
 import type { User } from "@supabase/supabase-js";
 import {
   BarChart3,
@@ -18,7 +19,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import type { ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 
 const navItems = [
   { label: "Dashboard", href: "/dashboard", icon: Home },
@@ -48,6 +49,49 @@ function isActive(pathname: string, href: string) {
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
+function getInitials(name: string, email?: string) {
+  const source = name.trim() || email?.trim() || "LiftLog User";
+  const words = source.split(/\s+/).filter(Boolean);
+
+  if (words.length >= 2) {
+    return `${words[0][0]}${words[1][0]}`.toUpperCase();
+  }
+
+  return source.slice(0, 2).toUpperCase();
+}
+
+function UserAvatar({
+  avatarUrl,
+  userName,
+  email,
+  size = "md",
+}: {
+  avatarUrl: string | null;
+  userName: string;
+  email?: string;
+  size?: "sm" | "md";
+}) {
+  const sizeClassName = size === "sm" ? "size-11" : "size-14";
+  const textClassName = size === "sm" ? "text-sm" : "text-xl";
+
+  return (
+    <span
+      className={`grid ${sizeClassName} shrink-0 place-items-center overflow-hidden rounded-2xl border border-accent/25 bg-accent/10 font-display font-black text-accent`}
+    >
+      {avatarUrl ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={avatarUrl}
+          alt={`${userName} avatar`}
+          className="size-full object-cover"
+        />
+      ) : (
+        <span className={textClassName}>{getInitials(userName, email)}</span>
+      )}
+    </span>
+  );
+}
+
 export function AppShell({
   children,
   user,
@@ -57,6 +101,40 @@ export function AppShell({
 }) {
   const pathname = usePathname();
   const userName = getUserDisplayName(user);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    let isMounted = true;
+    const supabase = createBrowserSupabaseClient();
+
+    supabase
+      .from("profiles")
+      .select("avatar_url")
+      .eq("id", user.id)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (isMounted) {
+          setAvatarUrl(data?.avatar_url ?? null);
+        }
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [user.id]);
+
+  useEffect(() => {
+    function handleAvatarUpdated(event: Event) {
+      const customEvent = event as CustomEvent<{ avatarUrl: string | null }>;
+      setAvatarUrl(customEvent.detail.avatarUrl);
+    }
+
+    window.addEventListener("liftlog-avatar-updated", handleAvatarUpdated);
+
+    return () => {
+      window.removeEventListener("liftlog-avatar-updated", handleAvatarUpdated);
+    };
+  }, []);
 
   return (
     <div className="min-h-screen text-foreground">
@@ -100,17 +178,26 @@ export function AppShell({
 
         <div className="mt-auto space-y-3">
           <div className="rounded-[1.6rem] border border-line bg-surface/90 p-4">
-            <p className="text-xs font-black uppercase tracking-[0.18em] text-muted">
-              Signed in
-            </p>
-            <p className="mt-2 truncate font-display text-lg font-black">
-              {userName}
-            </p>
-            {user.email ? (
-              <p className="mt-1 truncate text-xs font-medium text-muted">
-                {user.email}
-              </p>
-            ) : null}
+            <div className="flex items-center gap-3">
+              <UserAvatar
+                avatarUrl={avatarUrl}
+                userName={userName}
+                email={user.email}
+              />
+              <div className="min-w-0">
+                <p className="text-xs font-black uppercase tracking-[0.18em] text-muted">
+                  Signed in
+                </p>
+                <p className="mt-1 truncate font-display text-lg font-black">
+                  {userName}
+                </p>
+                {user.email ? (
+                  <p className="mt-1 truncate text-xs font-medium text-muted">
+                    {user.email}
+                  </p>
+                ) : null}
+              </div>
+            </div>
             <LogoutButton className="mt-4 w-full bg-accent text-stone-950 hover:bg-accent-strong" />
           </div>
 
@@ -133,9 +220,12 @@ export function AppShell({
         <header className="mb-5 rounded-[1.75rem] border border-line/80 bg-card/90 p-4 shadow-[0_18px_60px_rgba(0,0,0,0.32)] backdrop-blur lg:hidden">
           <div className="flex items-center justify-between gap-3">
             <Link href="/dashboard" className="flex items-center gap-3">
-              <span className="grid size-11 place-items-center rounded-2xl bg-stone-950 text-sun">
-                <BarChart3 className="size-5" />
-              </span>
+              <UserAvatar
+                avatarUrl={avatarUrl}
+                userName={userName}
+                email={user.email}
+                size="sm"
+              />
               <span>
                 <span className="block font-display text-lg font-black">
                   LiftLog

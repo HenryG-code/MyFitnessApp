@@ -2,6 +2,7 @@
 
 import { LogoutButton } from "@/components/auth/logout-button";
 import { InstallAppCard } from "@/components/pwa/install-app-card";
+import { AvatarUploadCard } from "@/components/settings/avatar-upload-card";
 import { GoalWeightForm } from "@/components/settings/goal-weight-form";
 import { NotificationPreferencesCard } from "@/components/settings/notification-preferences-card";
 import { FitnessCard, SectionHeader } from "@/components/ui/fitness-card";
@@ -165,6 +166,27 @@ export function SettingsPanel() {
           );
         })}
       </section>
+
+      <FitnessCard>
+        <AvatarUploadCard
+          fullName={profile?.fullName ?? "Signed-in user"}
+          email={profile?.email ?? null}
+          avatarUrl={profile?.profile?.avatar_url ?? null}
+          onSaved={(savedProfile) =>
+            setProfile((currentProfile) =>
+              currentProfile
+                ? {
+                    ...currentProfile,
+                    fullName:
+                      savedProfile.full_name?.trim() ||
+                      currentProfile.fullName,
+                    profile: savedProfile,
+                  }
+                : currentProfile
+            )
+          }
+        />
+      </FitnessCard>
 
       <FitnessCard>
         <SectionHeader eyebrow="Account details" title="Signed-in profile" />
