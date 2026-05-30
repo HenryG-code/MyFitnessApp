@@ -3,6 +3,7 @@
 import { LogoutButton } from "@/components/auth/logout-button";
 import { InstallAppCard } from "@/components/pwa/install-app-card";
 import { GoalWeightForm } from "@/components/settings/goal-weight-form";
+import { NotificationPreferencesCard } from "@/components/settings/notification-preferences-card";
 import { FitnessCard, SectionHeader } from "@/components/ui/fitness-card";
 import {
   fetchAuthenticatedProfile,
@@ -81,7 +82,7 @@ export function SettingsPanel() {
     },
     {
       title: "Notifications",
-      detail: "Coming soon: local reminders for workouts and weekly check-ins.",
+      detail: "Choose opt-in reminders for workouts, habits, weekly check-ins, and meals.",
       icon: Bell,
     },
     {
@@ -228,6 +229,10 @@ export function SettingsPanel() {
             )
           }
         />
+      </FitnessCard>
+
+      <FitnessCard>
+        <NotificationPreferencesCard />
       </FitnessCard>
 
       <FitnessCard>

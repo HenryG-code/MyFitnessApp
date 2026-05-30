@@ -76,6 +76,7 @@ Screenshot capture checklist:
 - Dark, screenshot-ready visual theme designed for comfortable longer use.
 - Suggested Training Plan sessions can be logged directly into the workout log.
 - PWA install support from supported desktop and mobile browsers.
+- Opt-in notification preferences with a generic test notification.
 - Mobile dashboard tools grid for Recipes, Meal Planner, Grocery List,
   Training Plan, Settings, and install guidance.
 
@@ -225,12 +226,24 @@ prompt, plus manual instructions for browsers that do not.
 - iPhone: Safari > Share > Add to Home Screen.
 - Desktop: use the browser address bar install icon or browser menu.
 - Browser support varies, so manual instructions remain visible as a fallback.
-- Notifications and push notifications are not included yet.
-- Push notifications are planned as a later milestone after PWA install support.
+- Notification preferences are available in Settings.
 - Service worker caching is intentionally skipped for now to avoid stale private
   dashboard, workout, weight, or habit data.
 - PWA icons live in `public/icons/` and can be replaced later with final brand
   assets if needed.
+
+## Notifications
+
+LiftLog includes opt-in notification preferences in Settings. Users can request
+browser notification permission, choose reminder categories, set a preferred
+time, disable reminders, and send a generic test notification.
+
+- Preferences are stored on the device in v1.
+- Browser and device support varies.
+- Users can disable reminders anytime from Settings.
+- Notification content avoids private workout, weight, habit, or meal details.
+- This milestone supports permission handling and test notifications.
+- Full background push reminders are future work.
 
 ## Manual QA Checklist
 
@@ -248,19 +261,18 @@ Use this checklist before demos or deployments:
    clear checked, and reset checked.
 9. Test `/training-plan` goal selection, refresh persistence, and Log workout
    links.
-10. Test `/settings` profile data, PayPal support link, Yoco coming soon state,
-    and logout.
+10. Test `/settings` profile data, notification preferences, PayPal support
+    link, Yoco coming soon state, and logout.
 11. Log out and confirm protected pages redirect to `/login`.
 
 ## Future Improvements
 
 - Safe static asset service worker support.
-- Notifications and reminders after the PWA milestone.
+- Background push reminders.
 - Desktop app version with Tauri.
 - Supabase persistence for Meal Planner, Grocery List, and training
   preferences.
 - Custom training plan builder.
-- Real notification and reminder system.
 - More healthy recipes.
 - Mobile app version later.
 
