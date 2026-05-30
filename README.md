@@ -72,6 +72,8 @@ Screenshot capture checklist:
 - Settings page with real profile data, privacy notes, logout, and quick links.
 - External PayPal support link with Yoco marked as coming soon.
 - Responsive desktop sidebar and mobile bottom navigation.
+- Dark, screenshot-ready visual theme designed for comfortable longer use.
+- Suggested Training Plan sessions can be logged directly into the workout log.
 
 ## Tech Stack
 
@@ -221,6 +223,7 @@ Use this checklist before demos or deployments:
 ## Future Improvements
 
 - PWA install support.
+- Notifications and reminders after the PWA milestone.
 - Desktop app version with Tauri.
 - Supabase persistence for Meal Planner, Grocery List, and training
   preferences.

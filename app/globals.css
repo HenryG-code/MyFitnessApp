@@ -3,13 +3,13 @@
 @tailwind utilities;
 
 :root {
-  --background: #f6f4ee;
-  --foreground: #17211c;
-  --card: #fffdf8;
-  --muted: #69746f;
-  --line: #e4ded0;
-  --accent: #0f766e;
-  --accent-strong: #134e4a;
+  --background: #07110f;
+  --foreground: #f4f7f2;
+  --card: #111d1a;
+  --muted: #a8b4ad;
+  --line: rgba(255, 255, 255, 0.12);
+  --accent: #14b8a6;
+  --accent-strong: #8ff4df;
   --sun: #f2b705;
 }
 
@@ -20,9 +20,10 @@
 body {
   color: var(--foreground);
   background:
-    radial-gradient(circle at top left, rgba(242, 183, 5, 0.18), transparent 30rem),
-    radial-gradient(circle at 90% 10%, rgba(15, 118, 110, 0.14), transparent 26rem),
-    linear-gradient(135deg, #f8f5ed 0%, #eef4eb 100%);
+    radial-gradient(circle at top left, rgba(242, 183, 5, 0.08), transparent 28rem),
+    radial-gradient(circle at 90% 10%, rgba(20, 184, 166, 0.16), transparent 30rem),
+    radial-gradient(circle at 30% 90%, rgba(19, 78, 74, 0.22), transparent 32rem),
+    linear-gradient(135deg, #07110f 0%, #0d1714 48%, #101815 100%);
   font-family: Satoshi, "Aptos Display", Avenir, "Segoe UI", sans-serif;
 }
 
@@ -33,4 +34,42 @@ a {
 
 ::selection {
   background: rgba(15, 118, 110, 0.18);
+}
+
+input,
+select,
+textarea {
+  color-scheme: dark;
+}
+
+.bg-white\/50,
+.bg-white\/60,
+.bg-white\/65,
+.bg-white\/70,
+.bg-white\/75,
+.bg-white\/80 {
+  background-color: rgba(255, 255, 255, 0.06) !important;
+}
+
+.bg-stone-100,
+.bg-stone-200,
+.bg-\[\#eaf3dd\],
+.bg-amber-50\/80 {
+  background-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+.bg-red-50 {
+  background-color: rgba(127, 29, 29, 0.32) !important;
+}
+
+.text-red-700 {
+  color: #fecaca !important;
+}
+
+.text-stone-300 {
+  color: #d6ddd8 !important;
+}
+
+.border-red-100 {
+  border-color: rgba(248, 113, 113, 0.28) !important;
 }

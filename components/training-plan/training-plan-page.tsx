@@ -89,6 +89,7 @@ export function TrainingPlanPage() {
         {selectedPlan.days.map((session) => (
           <SessionCard
             key={`${selectedPlan.slug}-${session.dayLabel}`}
+            plan={selectedPlan}
             session={session}
           />
         ))}
