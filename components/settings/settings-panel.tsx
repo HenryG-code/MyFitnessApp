@@ -1,7 +1,7 @@
 "use client";
 
 import { LogoutButton } from "@/components/auth/logout-button";
-import { InstallGuidance } from "@/components/pwa/install-guidance";
+import { InstallAppCard } from "@/components/pwa/install-app-card";
 import { GoalWeightForm } from "@/components/settings/goal-weight-form";
 import { FitnessCard, SectionHeader } from "@/components/ui/fitness-card";
 import {
@@ -275,7 +275,7 @@ export function SettingsPanel() {
             </p>
           </div>
           <div className="lg:min-w-[26rem]">
-            <InstallGuidance />
+            <InstallAppCard />
           </div>
         </div>
       </FitnessCard>

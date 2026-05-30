@@ -217,11 +217,14 @@ store payment information, or run payment webhooks.
 ## PWA Install Support
 
 LiftLog includes a web app manifest and install metadata so supported browsers
-can install it without an app store.
+can install it without an app store. The Settings page includes an Install
+LiftLog card with an `Install app` button where the browser exposes the install
+prompt, plus manual instructions for browsers that do not.
 
-- Desktop: open the browser menu and choose Install app.
-- Android: open the browser menu and choose Add to Home Screen or Install app.
-- iOS support varies: use Share > Add to Home Screen where supported.
+- Android: Chrome menu > Install app or Add to Home Screen.
+- iPhone: Safari > Share > Add to Home Screen.
+- Desktop: use the browser address bar install icon or browser menu.
+- Browser support varies, so manual instructions remain visible as a fallback.
 - Notifications and push notifications are not included yet.
 - Push notifications are planned as a later milestone after PWA install support.
 - Service worker caching is intentionally skipped for now to avoid stale private
