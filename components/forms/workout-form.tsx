@@ -6,7 +6,6 @@ import {
   type WorkoutInput,
   type WorkoutWithExercises,
 } from "@/src/lib/workouts/queries";
-import { RestTimer } from "@/components/workouts/rest-timer";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Dumbbell, Plus, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -401,8 +400,6 @@ export function WorkoutForm({ mode = "create", workout }: WorkoutFormProps) {
           </p>
         ) : null}
       </div>
-
-      <RestTimer />
 
       <div className="rounded-[1.5rem] border border-line bg-white/45 p-3 sm:p-4">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">

@@ -6,6 +6,7 @@ import {
   SectionHeader,
 } from "@/components/ui/fitness-card";
 import { HeroPanel } from "@/components/ui/hero-panel";
+import { RestTimer } from "@/components/workouts/rest-timer";
 import {
   deleteWorkout,
   fetchWorkouts,
@@ -166,6 +167,33 @@ export function WorkoutsList() {
           </Link>
         </div>
       </HeroPanel>
+
+      <section className="grid gap-4 xl:grid-cols-[1.1fr_0.9fr]">
+        <RestTimer />
+        <FitnessCard className="border-accent/25 bg-gradient-to-br from-white/[0.04] via-card to-sun/10">
+          <SectionHeader eyebrow="Gym assistant" title="Ready when you train" />
+          <p className="text-sm leading-6 text-muted">
+            Keep this page open during your session. Time your rests, check your
+            recent training, then log the workout when you are done.
+          </p>
+          <div className="mt-5 grid gap-2 sm:grid-cols-2">
+            <Link
+              href="/workouts/new"
+              className="inline-flex items-center justify-center gap-2 rounded-2xl bg-accent px-4 py-3 text-sm font-black text-white transition hover:-translate-y-0.5 hover:bg-accent-strong"
+            >
+              <Plus className="size-4" />
+              Log workout
+            </Link>
+            <Link
+              href="/training-plan"
+              className="inline-flex items-center justify-center gap-2 rounded-2xl border border-line bg-white/65 px-4 py-3 text-sm font-black transition hover:-translate-y-0.5 hover:border-accent"
+            >
+              <Target className="size-4" />
+              View plan
+            </Link>
+          </div>
+        </FitnessCard>
+      </section>
 
       {notice ? (
         <p className="rounded-[1.5rem] border border-accent/25 bg-accent/10 p-4 text-sm font-black text-soft-yellow">
