@@ -2,8 +2,9 @@
 
 import {
   Bar,
-  BarChart,
   CartesianGrid,
+  ComposedChart,
+  Line,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -13,8 +14,10 @@ import { useSyncExternalStore } from "react";
 
 type WeeklyProgressPoint = {
   day: string;
-  workouts: number;
-  habits: number;
+  consistencyScore: number;
+  habitScore: number;
+  workoutScore: number;
+  weightScore: number;
 };
 
 export function WeeklyProgressChart({
@@ -35,7 +38,7 @@ export function WeeklyProgressChart({
   return (
     <div className="h-64 w-full">
       <ResponsiveContainer width="100%" height="100%">
-        <BarChart data={data} margin={{ top: 8, right: 4, left: -28, bottom: 0 }}>
+        <ComposedChart data={data} margin={{ top: 8, right: 4, left: -28, bottom: 0 }}>
           <CartesianGrid stroke="#2a2a24" strokeDasharray="4 6" vertical={false} />
           <XAxis
             dataKey="day"
@@ -46,7 +49,9 @@ export function WeeklyProgressChart({
           <YAxis
             axisLine={false}
             tickLine={false}
+            domain={[0, 100]}
             tick={{ fill: "#a8a29e", fontSize: 12, fontWeight: 700 }}
+            unit="%"
           />
           <Tooltip
             cursor={{ fill: "rgba(250, 204, 21, 0.1)" }}
@@ -59,19 +64,23 @@ export function WeeklyProgressChart({
             }}
           />
           <Bar
-            dataKey="habits"
+            dataKey="consistencyScore"
             fill="#facc15"
             radius={[10, 10, 0, 0]}
-            name="Habit completion"
+            name="Consistency"
             unit="%"
           />
-          <Bar
-            dataKey="workouts"
-            fill="#78716c"
-            radius={[10, 10, 0, 0]}
-            name="Workouts"
+          <Line
+            type="monotone"
+            dataKey="habitScore"
+            stroke="#fef3c7"
+            strokeWidth={3}
+            dot={{ fill: "#fef3c7", strokeWidth: 0, r: 4 }}
+            activeDot={{ r: 6 }}
+            name="Habits"
+            unit="%"
           />
-        </BarChart>
+        </ComposedChart>
       </ResponsiveContainer>
     </div>
   );

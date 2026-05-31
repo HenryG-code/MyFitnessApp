@@ -62,6 +62,8 @@ Screenshot capture checklist:
 - Supabase email/password authentication.
 - Protected dashboard and app routes.
 - Real dashboard data from user-scoped Supabase records.
+- Weekly consistency score based on habits, workouts, and weight check-ins.
+- Weekly report and deterministic progress insights powered by user activity.
 - Profile-backed goal weight shown in dashboard progress.
 - Weight Tracker CRUD with stats and charting.
 - Daily Habits tracking with boolean habit toggles.
@@ -104,6 +106,9 @@ types, static data, and browser-storage utilities live under `src/lib/`.
 The app uses a browser Supabase client from `src/lib/supabase/client.ts`.
 Supabase-backed features fetch only the signed-in user's rows and rely on Row
 Level Security as the final protection layer.
+
+Dashboard insights are deterministic calculations from workouts, daily habits,
+and weight logs. They do not use AI or paid services.
 
 Recipes and training plans are static local TypeScript data in v1. Meal Planner,
 Grocery List, and the selected training goal use `localStorage` so the app stays
@@ -304,7 +309,8 @@ time, disable reminders, and send a generic test notification.
 Use this checklist before demos or deployments:
 
 1. Register and log in with a Supabase email/password user.
-2. Confirm `/dashboard` loads real user-scoped data and handles empty states.
+2. Confirm `/dashboard` loads real user-scoped data, weekly consistency,
+   weekly report, deterministic insights, and empty states.
 3. Test `/weight` add, edit, delete, chart, and stats.
 4. Test `/habits` habit toggles and 7-day summary persistence.
 5. Test `/workouts` create, edit, delete, exercise rows, and detail page.

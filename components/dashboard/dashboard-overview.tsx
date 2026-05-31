@@ -8,12 +8,15 @@ import {
 } from "@/components/ui/fitness-card";
 import { HeroPanel } from "@/components/ui/hero-panel";
 import {
+  buildWeeklyConsistencyData,
+  calculateAverageHabitCompletion,
+  calculateWeeklyWorkoutStats,
+  calculateWeightProgress,
   countCompletedHabits,
   fetchDashboardData,
-  getDateDaysAgo,
+  generateProgressInsights,
   type DashboardData,
 } from "@/src/lib/dashboard/queries";
-import type { Workout } from "@/src/lib/supabase/database.types";
 import { fitnessImages } from "@/src/lib/visuals/fitness-images";
 import {
   Activity,
@@ -32,12 +35,6 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-
-type WeeklyPoint = {
-  day: string;
-  workouts: number;
-  habits: number;
-};
 
 const toolLinks = [
   { href: "/recipes", label: "Recipes", icon: BookOpen },
@@ -68,54 +65,6 @@ function formatWeight(value: number) {
 
 function formatSignedWeight(value: number) {
   return `${value > 0 ? "+" : ""}${value.toFixed(1)} kg`;
-}
-
-function getWorkoutDate(workout: Workout) {
-  return workout.workout_date;
-}
-
-function buildWeeklyProgress(data: DashboardData): WeeklyPoint[] {
-  return Array.from({ length: 7 }, (_item, index) => {
-    const date = getDateDaysAgo(6 - index);
-    const habitRow = data.recentHabits.find(
-      (habit) => habit.habit_date === date
-    );
-    const habitPercent = Math.round((countCompletedHabits(habitRow ?? null) / 7) * 100);
-    const workouts = data.workoutsLastSevenDays.filter(
-      (workout) => getWorkoutDate(workout) === date
-    ).length;
-
-    return {
-      day: formatDate(date),
-      habits: habitPercent,
-      workouts,
-    };
-  });
-}
-
-function getWeeklyMinutes(workouts: Workout[]) {
-  return workouts.reduce(
-    (total, workout) => total + (workout.duration_minutes ?? 0),
-    0
-  );
-}
-
-function getInsights(data: DashboardData) {
-  const completedHabits = countCompletedHabits(data.todayHabits);
-  const habitPercent = Math.round((completedHabits / 7) * 100);
-  const latestWeight = data.latestWeight
-    ? `Latest weight is ${formatWeight(data.latestWeight.weight_kg)}.`
-    : "Add your first weight log to unlock weight trends.";
-  const latestWorkout = data.latestWorkout
-    ? `Your latest workout was ${data.latestWorkout.title}.`
-    : "Add your first workout to start a training history.";
-
-  return [
-    `You completed ${data.workoutsThisWeek.length} workouts this week.`,
-    `Today's habit completion is ${habitPercent}%.`,
-    latestWeight,
-    latestWorkout,
-  ];
 }
 
 function getGoalSummary(latestWeight: number | null, goalWeight: number | null) {
@@ -185,14 +134,20 @@ export function DashboardOverview() {
   const completedHabits = countCompletedHabits(data?.todayHabits ?? null);
   const habitPercent = Math.round((completedHabits / 7) * 100);
   const totalWeightChange =
-    data?.firstWeight && data.latestWeight
-      ? data.latestWeight.weight_kg - data.firstWeight.weight_kg
-      : null;
-  const weeklyMinutes = data ? getWeeklyMinutes(data.workoutsThisWeek) : 0;
-  const weeklyProgress = data ? buildWeeklyProgress(data) : [];
-  const insights = data ? getInsights(data) : [];
+    data ? calculateWeightProgress(data).totalChange : null;
+  const weeklyWorkoutStats = data
+    ? calculateWeeklyWorkoutStats(data.workoutsLastSevenDays)
+    : { workoutsCompleted: 0, totalMinutes: 0, workoutDays: 0 };
+  const weeklyMinutes = weeklyWorkoutStats.totalMinutes;
+  const weeklyConsistency = data ? buildWeeklyConsistencyData(data) : [];
+  const averageHabitCompletion = data
+    ? calculateAverageHabitCompletion(data)
+    : 0;
+  const insights = data ? generateProgressInsights(data) : [];
   const latestWeightValue = data?.latestWeight?.weight_kg ?? null;
   const goalSummary = getGoalSummary(latestWeightValue, data?.goalWeightKg ?? null);
+  const weightProgress = data ? calculateWeightProgress(data) : null;
+  const weightLogsThisWeek = data?.recentWeights.length ?? 0;
 
   return (
     <div className="space-y-5">
@@ -291,7 +246,7 @@ export function DashboardOverview() {
                 This week
               </p>
               <p className="mt-2 font-display text-3xl font-black">
-                {data?.workoutsThisWeek.length ?? 0}
+                {weeklyWorkoutStats.workoutsCompleted}
               </p>
               <p className="mt-1 text-sm text-muted">workouts logged</p>
             </div>
@@ -380,8 +335,8 @@ export function DashboardOverview() {
         </FitnessCard>
         <MetricCard
           label="Weekly workouts"
-          value={`${data?.workoutsThisWeek.length ?? 0}`}
-          detail={`${weeklyMinutes} training minutes this week.`}
+          value={`${weeklyWorkoutStats.workoutsCompleted}`}
+          detail={`${weeklyMinutes} training minutes over the last 7 days.`}
           icon={<Dumbbell className="size-5" />}
           tone="ink"
         />
@@ -396,9 +351,15 @@ export function DashboardOverview() {
 
       <section className="grid gap-5 xl:grid-cols-[1.45fr_0.9fr]">
         <FitnessCard>
-          <SectionHeader eyebrow="Weekly progress" title="Workouts and habits" />
+          <SectionHeader
+            eyebrow="Weekly consistency"
+            title="Your weekly rhythm"
+          />
+          <p className="mb-4 text-sm leading-6 text-muted">
+            Your weekly rhythm across habits, training, and check-ins.
+          </p>
           {data ? (
-            <WeeklyProgressChart data={weeklyProgress} />
+            <WeeklyProgressChart data={weeklyConsistency} />
           ) : (
             <div className="grid h-64 place-items-center rounded-[1.5rem] bg-stone-100 text-sm font-black text-muted">
               Chart will appear once dashboard data loads.
@@ -467,13 +428,83 @@ export function DashboardOverview() {
                 <p className="font-black">This week</p>
               </div>
               <p className="mt-3 text-sm font-medium text-muted">
-                {data?.workoutsThisWeek.length ?? 0} workouts and {weeklyMinutes}{" "}
-                minutes logged.
+                {weeklyWorkoutStats.workoutsCompleted} workouts and{" "}
+                {weeklyMinutes} minutes logged.
               </p>
             </div>
           </div>
         </FitnessCard>
       </section>
+
+      <FitnessCard>
+        <SectionHeader eyebrow="Weekly report" title="Last 7 days" />
+        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+          <div className="rounded-[1.25rem] border border-line bg-white/65 p-4">
+            <p className="text-xs font-black uppercase tracking-[0.18em] text-muted">
+              Workouts
+            </p>
+            <p className="mt-2 text-sm font-bold leading-6 text-muted">
+              You logged {weeklyWorkoutStats.workoutsCompleted} workouts this
+              week.
+            </p>
+          </div>
+          <div className="rounded-[1.25rem] border border-line bg-white/65 p-4">
+            <p className="text-xs font-black uppercase tracking-[0.18em] text-muted">
+              Training time
+            </p>
+            <p className="mt-2 text-sm font-bold leading-6 text-muted">
+              You completed {weeklyWorkoutStats.totalMinutes} training minutes.
+            </p>
+          </div>
+          <div className="rounded-[1.25rem] border border-line bg-white/65 p-4">
+            <p className="text-xs font-black uppercase tracking-[0.18em] text-muted">
+              Habits
+            </p>
+            <p className="mt-2 text-sm font-bold leading-6 text-muted">
+              You completed {averageHabitCompletion}% of your habits over the
+              last 7 days.
+            </p>
+          </div>
+          <div className="rounded-[1.25rem] border border-line bg-white/65 p-4">
+            <p className="text-xs font-black uppercase tracking-[0.18em] text-muted">
+              Weight logs
+            </p>
+            <p className="mt-2 text-sm font-bold leading-6 text-muted">
+              You logged weight {weightLogsThisWeek} times this week.
+            </p>
+          </div>
+          <div className="rounded-[1.25rem] border border-line bg-white/65 p-4">
+            <p className="text-xs font-black uppercase tracking-[0.18em] text-muted">
+              Current weight
+            </p>
+            <p className="mt-2 text-sm font-bold leading-6 text-muted">
+              {weightProgress?.currentWeight !== null &&
+              weightProgress?.currentWeight !== undefined
+                ? `Your latest weight is ${formatWeight(
+                    weightProgress.currentWeight
+                  )}.`
+                : "Add your first weight log to unlock weight trends."}
+            </p>
+          </div>
+          <div className="rounded-[1.25rem] border border-line bg-white/65 p-4">
+            <p className="text-xs font-black uppercase tracking-[0.18em] text-muted">
+              Goal progress
+            </p>
+            <p className="mt-2 text-sm font-bold leading-6 text-muted">
+              {weightProgress?.goalWeight === null
+                ? "Set a goal weight to track progress."
+                : weightProgress?.goalReached
+                  ? "Goal reached based on your latest log."
+                  : weightProgress?.distanceFromGoal !== null &&
+                      weightProgress?.distanceFromGoal !== undefined
+                    ? `You are ${weightProgress.distanceFromGoal.toFixed(
+                        1
+                      )} kg from your goal.`
+                    : "Add your first weight log to track progress."}
+            </p>
+          </div>
+        </div>
+      </FitnessCard>
 
       <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {insights.map((insight) => (
