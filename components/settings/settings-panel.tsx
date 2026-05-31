@@ -5,6 +5,7 @@ import { InstallAppCard } from "@/components/pwa/install-app-card";
 import { AvatarUploadCard } from "@/components/settings/avatar-upload-card";
 import { GoalWeightForm } from "@/components/settings/goal-weight-form";
 import { NotificationPreferencesCard } from "@/components/settings/notification-preferences-card";
+import { PreferenceSyncStatusCard } from "@/components/settings/preference-sync-status-card";
 import { FitnessCard, SectionHeader } from "@/components/ui/fitness-card";
 import {
   fetchAuthenticatedProfile,
@@ -255,6 +256,10 @@ export function SettingsPanel() {
 
       <FitnessCard>
         <NotificationPreferencesCard />
+      </FitnessCard>
+
+      <FitnessCard>
+        <PreferenceSyncStatusCard />
       </FitnessCard>
 
       <FitnessCard>

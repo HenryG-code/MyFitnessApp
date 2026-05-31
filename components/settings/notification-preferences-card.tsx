@@ -16,6 +16,12 @@ import {
   type NotificationPermissionStatus,
   type NotificationPreferences,
 } from "@/src/lib/notifications/types";
+import {
+  announcePreferenceSyncStatus,
+  ensureUserPreferences,
+  parseNotificationPreferences,
+  updateNotificationPreferences,
+} from "@/src/lib/user-preferences/queries";
 import { Bell, BellOff, Clock, Send } from "lucide-react";
 import { useEffect, useState } from "react";
 
@@ -78,13 +84,44 @@ export function NotificationPreferencesCard() {
   const [isRequesting, setIsRequesting] = useState(false);
 
   useEffect(() => {
-    setPreferences(loadNotificationPreferences());
+    let isMounted = true;
+    const storedPreferences = loadNotificationPreferences();
+
+    setPreferences(storedPreferences);
     setPermissionStatus(getNotificationPermissionStatus());
+
+    async function loadSyncedPreferences() {
+      try {
+        const preferencesRow = await ensureUserPreferences();
+        const syncedPreferences = parseNotificationPreferences(preferencesRow);
+
+        if (syncedPreferences) {
+          if (isMounted) {
+            setPreferences(syncedPreferences);
+            saveNotificationPreferences(syncedPreferences);
+            announcePreferenceSyncStatus("synced");
+          }
+        } else {
+          await updateNotificationPreferences(storedPreferences);
+        }
+      } catch {
+        announcePreferenceSyncStatus("fallback", "Saved on this device.");
+      }
+    }
+
+    void loadSyncedPreferences();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   function persistPreferences(nextPreferences: NotificationPreferences) {
     setPreferences(nextPreferences);
     saveNotificationPreferences(nextPreferences);
+    updateNotificationPreferences(nextPreferences).catch(() => {
+      announcePreferenceSyncStatus("fallback", "Saved on this device.");
+    });
   }
 
   async function handleEnableNotifications() {

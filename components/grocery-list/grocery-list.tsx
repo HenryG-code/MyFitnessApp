@@ -11,16 +11,28 @@ import {
 } from "@/src/lib/grocery-list/build-list";
 import {
   clearCheckedGroceryItems,
+  hasCheckedGroceryItems,
   loadCheckedGroceryItems,
+  normalizeCheckedGroceryItems,
   saveCheckedGroceryItems,
 } from "@/src/lib/grocery-list/storage";
 import { groceryCategories, type CheckedGroceryItems } from "@/src/lib/grocery-list/types";
 import {
   createEmptyMealPlan,
   loadMealPlanFromStorage,
+  normalizeMealPlanState,
+  saveMealPlanToStorage,
 } from "@/src/lib/meal-planner/storage";
 import type { MealPlanState } from "@/src/lib/meal-planner/types";
 import type { Recipe } from "@/src/lib/recipes/data";
+import {
+  announcePreferenceSyncStatus,
+  ensureUserPreferences,
+  parseGroceryCheckedItems,
+  parseMealPlan,
+  updateGroceryCheckedItems,
+  updateMealPlan,
+} from "@/src/lib/user-preferences/queries";
 import { CalendarDays, EyeOff, RotateCcw, ShoppingBasket } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -36,18 +48,58 @@ export function GroceryList({ recipes }: GroceryListProps) {
   const [hasLoadedStorage, setHasLoadedStorage] = useState(false);
 
   useEffect(() => {
-    const timerId = window.setTimeout(() => {
-      setPlan(loadMealPlanFromStorage());
-      setCheckedItems(loadCheckedGroceryItems());
-      setHasLoadedStorage(true);
-    }, 0);
+    let isMounted = true;
 
-    return () => window.clearTimeout(timerId);
+    async function loadGroceryState() {
+      const storedPlan = loadMealPlanFromStorage();
+      const storedCheckedItems = loadCheckedGroceryItems();
+      setPlan(storedPlan);
+      setCheckedItems(storedCheckedItems);
+
+      try {
+        const preferences = await ensureUserPreferences();
+        const syncedPlan = parseMealPlan(preferences);
+        const syncedCheckedItems = parseGroceryCheckedItems(preferences);
+
+        if (syncedPlan && isMounted) {
+          const normalizedPlan = normalizeMealPlanState(syncedPlan);
+          setPlan(normalizedPlan);
+          saveMealPlanToStorage(normalizedPlan);
+        } else {
+          await updateMealPlan(storedPlan);
+        }
+
+        if (syncedCheckedItems && isMounted) {
+          const normalizedCheckedItems =
+            normalizeCheckedGroceryItems(syncedCheckedItems);
+          setCheckedItems(normalizedCheckedItems);
+          saveCheckedGroceryItems(normalizedCheckedItems);
+          announcePreferenceSyncStatus("synced");
+        } else if (hasCheckedGroceryItems(storedCheckedItems)) {
+          await updateGroceryCheckedItems(storedCheckedItems);
+        }
+      } catch {
+        announcePreferenceSyncStatus("fallback", "Saved on this device.");
+      } finally {
+        if (isMounted) {
+          setHasLoadedStorage(true);
+        }
+      }
+    }
+
+    void loadGroceryState();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   useEffect(() => {
     if (hasLoadedStorage) {
       saveCheckedGroceryItems(checkedItems);
+      updateGroceryCheckedItems(checkedItems).catch(() => {
+        announcePreferenceSyncStatus("fallback", "Saved on this device.");
+      });
     }
   }, [checkedItems, hasLoadedStorage]);
 

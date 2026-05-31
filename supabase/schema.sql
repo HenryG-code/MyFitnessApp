@@ -76,6 +76,17 @@ create table if not exists public.daily_habits (
   unique (user_id, habit_date)
 );
 
+create table if not exists public.user_preferences (
+  user_id uuid primary key references auth.users(id) on delete cascade,
+  selected_training_goal text,
+  notification_preferences jsonb not null default '{}'::jsonb,
+  preferred_reminder_time text,
+  meal_plan jsonb not null default '{}'::jsonb,
+  grocery_checked_items jsonb not null default '{}'::jsonb,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
 create index if not exists profiles_email_idx
   on public.profiles (email);
 
@@ -96,6 +107,7 @@ alter table public.weight_logs enable row level security;
 alter table public.workouts enable row level security;
 alter table public.workout_exercises enable row level security;
 alter table public.daily_habits enable row level security;
+alter table public.user_preferences enable row level security;
 
 drop policy if exists "Users can view their own profile" on public.profiles;
 drop policy if exists "Users can insert their own profile" on public.profiles;
@@ -117,6 +129,10 @@ drop policy if exists "Users can view their own daily habits" on public.daily_ha
 drop policy if exists "Users can insert their own daily habits" on public.daily_habits;
 drop policy if exists "Users can update their own daily habits" on public.daily_habits;
 drop policy if exists "Users can delete their own daily habits" on public.daily_habits;
+drop policy if exists "Users can view their own preferences" on public.user_preferences;
+drop policy if exists "Users can insert their own preferences" on public.user_preferences;
+drop policy if exists "Users can update their own preferences" on public.user_preferences;
+drop policy if exists "Users can delete their own preferences" on public.user_preferences;
 
 create policy "Users can view their own profile"
   on public.profiles for select
@@ -238,6 +254,23 @@ create policy "Users can delete their own daily habits"
   on public.daily_habits for delete
   using (auth.uid() = user_id);
 
+create policy "Users can view their own preferences"
+  on public.user_preferences for select
+  using (auth.uid() = user_id);
+
+create policy "Users can insert their own preferences"
+  on public.user_preferences for insert
+  with check (auth.uid() = user_id);
+
+create policy "Users can update their own preferences"
+  on public.user_preferences for update
+  using (auth.uid() = user_id)
+  with check (auth.uid() = user_id);
+
+create policy "Users can delete their own preferences"
+  on public.user_preferences for delete
+  using (auth.uid() = user_id);
+
 drop trigger if exists set_profiles_updated_at on public.profiles;
 create trigger set_profiles_updated_at
   before update on public.profiles
@@ -251,6 +284,11 @@ create trigger set_weight_logs_updated_at
 drop trigger if exists set_daily_habits_updated_at on public.daily_habits;
 create trigger set_daily_habits_updated_at
   before update on public.daily_habits
+  for each row execute function public.set_updated_at();
+
+drop trigger if exists set_user_preferences_updated_at on public.user_preferences;
+create trigger set_user_preferences_updated_at
+  before update on public.user_preferences
   for each row execute function public.set_updated_at();
 
 create or replace function public.handle_new_user()
@@ -281,3 +319,5 @@ drop trigger if exists on_auth_user_created on auth.users;
 create trigger on_auth_user_created
   after insert on auth.users
   for each row execute function public.handle_new_user();
+
+notify pgrst, 'reload schema';

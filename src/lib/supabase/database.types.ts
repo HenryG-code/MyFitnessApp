@@ -64,6 +64,17 @@ export type DailyHabit = {
   updated_at: string;
 };
 
+export type UserPreferences = {
+  user_id: string;
+  selected_training_goal: string | null;
+  notification_preferences: Json;
+  preferred_reminder_time: string | null;
+  meal_plan: Json;
+  grocery_checked_items: Json;
+  created_at: string;
+  updated_at: string;
+};
+
 export type HabitKey =
   | "sleep_8_hours"
   | "trained"
@@ -149,6 +160,21 @@ export type DailyHabitUpdate = Partial<
   Omit<DailyHabit, "id" | "user_id" | "created_at">
 >;
 
+export type UserPreferencesInsert = {
+  user_id: string;
+  selected_training_goal?: string | null;
+  notification_preferences?: Json;
+  preferred_reminder_time?: string | null;
+  meal_plan?: Json;
+  grocery_checked_items?: Json;
+  created_at?: string;
+  updated_at?: string;
+};
+
+export type UserPreferencesUpdate = Partial<
+  Omit<UserPreferences, "user_id" | "created_at">
+>;
+
 export type Database = {
   public: {
     Tables: {
@@ -211,6 +237,19 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "daily_habits_user_id_fkey";
+            columns: ["user_id"];
+            referencedRelation: "users";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      user_preferences: {
+        Row: UserPreferences;
+        Insert: UserPreferencesInsert;
+        Update: UserPreferencesUpdate;
+        Relationships: [
+          {
+            foreignKeyName: "user_preferences_user_id_fkey";
             columns: ["user_id"];
             referencedRelation: "users";
             referencedColumns: ["id"];

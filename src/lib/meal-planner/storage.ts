@@ -18,7 +18,7 @@ export function createEmptyMealPlan(): MealPlanState {
   }, {} as MealPlanState);
 }
 
-function isMealPlanState(value: unknown): value is MealPlanState {
+export function isMealPlanState(value: unknown): value is MealPlanState {
   if (!value || typeof value !== "object") {
     return false;
   }
@@ -54,6 +54,12 @@ export function normalizeMealPlanState(value: unknown): MealPlanState {
 
     return week;
   }, {} as MealPlanState);
+}
+
+export function hasPlannedMeals(plan: MealPlanState) {
+  return weekdays.some((day) =>
+    mealSlots.some((slot) => Boolean(plan[day][slot]))
+  );
 }
 
 export function loadMealPlanFromStorage() {

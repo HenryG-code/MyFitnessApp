@@ -9,7 +9,9 @@ import {
 import {
   clearMealPlanStorage,
   createEmptyMealPlan,
+  hasPlannedMeals,
   loadMealPlanFromStorage,
+  normalizeMealPlanState,
   saveMealPlanToStorage,
 } from "@/src/lib/meal-planner/storage";
 import {
@@ -19,6 +21,12 @@ import {
   type Weekday,
 } from "@/src/lib/meal-planner/types";
 import type { Recipe } from "@/src/lib/recipes/data";
+import {
+  announcePreferenceSyncStatus,
+  ensureUserPreferences,
+  parseMealPlan,
+  updateMealPlan,
+} from "@/src/lib/user-preferences/queries";
 import { CalendarDays, RotateCcw } from "lucide-react";
 import { useEffect, useState } from "react";
 
@@ -33,17 +41,49 @@ export function MealPlanner({ recipes }: MealPlannerProps) {
   const totals = calculateWeekTotals(plan, recipeMap);
 
   useEffect(() => {
-    const timerId = window.setTimeout(() => {
-      setPlan(loadMealPlanFromStorage());
-      setHasLoadedPlan(true);
-    }, 0);
+    let isMounted = true;
 
-    return () => window.clearTimeout(timerId);
+    async function loadPlan() {
+      const storedPlan = loadMealPlanFromStorage();
+      setPlan(storedPlan);
+
+      try {
+        const preferences = await ensureUserPreferences();
+        const syncedPlan = parseMealPlan(preferences);
+
+        if (syncedPlan) {
+          const normalizedPlan = normalizeMealPlanState(syncedPlan);
+
+          if (isMounted) {
+            setPlan(normalizedPlan);
+            saveMealPlanToStorage(normalizedPlan);
+            announcePreferenceSyncStatus("synced");
+          }
+        } else if (hasPlannedMeals(storedPlan)) {
+          await updateMealPlan(storedPlan);
+        }
+      } catch {
+        announcePreferenceSyncStatus("fallback", "Saved on this device.");
+      } finally {
+        if (isMounted) {
+          setHasLoadedPlan(true);
+        }
+      }
+    }
+
+    void loadPlan();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   useEffect(() => {
     if (hasLoadedPlan) {
       saveMealPlanToStorage(plan);
+      updateMealPlan(plan).catch(() => {
+        announcePreferenceSyncStatus("fallback", "Saved on this device.");
+      });
     }
   }, [hasLoadedPlan, plan]);
 

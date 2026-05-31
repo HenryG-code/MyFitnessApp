@@ -14,6 +14,12 @@ import {
   saveTrainingGoalToStorage,
 } from "@/src/lib/training-plans/storage";
 import type { TrainingGoal } from "@/src/lib/training-plans/types";
+import {
+  ensureUserPreferences,
+  parseSelectedTrainingGoal,
+  updateSelectedTrainingGoal,
+  announcePreferenceSyncStatus,
+} from "@/src/lib/user-preferences/queries";
 import { fitnessImages } from "@/src/lib/visuals/fitness-images";
 import { AlertTriangle, Dumbbell, HeartPulse, ShieldCheck } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -25,17 +31,47 @@ export function TrainingPlanPage() {
   const selectedPlan = getTrainingPlanByGoal(selectedGoal);
 
   useEffect(() => {
-    const timerId = window.setTimeout(() => {
-      setSelectedGoal(loadTrainingGoalFromStorage());
-      setHasLoadedGoal(true);
-    }, 0);
+    let isMounted = true;
 
-    return () => window.clearTimeout(timerId);
+    async function loadGoal() {
+      const storedGoal = loadTrainingGoalFromStorage();
+      setSelectedGoal(storedGoal);
+
+      try {
+        const preferences = await ensureUserPreferences();
+        const syncedGoal = parseSelectedTrainingGoal(preferences);
+
+        if (syncedGoal) {
+          if (isMounted) {
+            setSelectedGoal(syncedGoal);
+            saveTrainingGoalToStorage(syncedGoal);
+            announcePreferenceSyncStatus("synced");
+          }
+        } else {
+          await updateSelectedTrainingGoal(storedGoal);
+        }
+      } catch {
+        announcePreferenceSyncStatus("fallback", "Saved on this device.");
+      } finally {
+        if (isMounted) {
+          setHasLoadedGoal(true);
+        }
+      }
+    }
+
+    void loadGoal();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   useEffect(() => {
     if (hasLoadedGoal) {
       saveTrainingGoalToStorage(selectedGoal);
+      updateSelectedTrainingGoal(selectedGoal).catch(() => {
+        announcePreferenceSyncStatus("fallback", "Saved on this device.");
+      });
     }
   }, [hasLoadedGoal, selectedGoal]);
 

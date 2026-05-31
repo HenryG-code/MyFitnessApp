@@ -80,6 +80,8 @@ Screenshot capture checklist:
 - Suggested Training Plan sessions can be logged directly into the workout log.
 - PWA install support from supported desktop and mobile browsers.
 - Opt-in notification preferences with a generic test notification.
+- Supabase-synced user preferences for training goal, reminders, meal plan, and
+  grocery checklist state.
 - Mobile dashboard tools grid for Recipes, Meal Planner, Grocery List,
   Training Plan, Settings, and install guidance.
 
@@ -110,10 +112,11 @@ Level Security as the final protection layer.
 Dashboard insights are deterministic calculations from workouts, daily habits,
 and weight logs. They do not use AI or paid services.
 
-Recipes and training plans are static local TypeScript data in v1. Meal Planner,
-Grocery List, and the selected training goal use `localStorage` so the app stays
-free-tier friendly without extra tables or services. No AI APIs, paid recipe
-APIs, grocery APIs, payment SDKs, or scraping workflows are used.
+Recipes and training plan templates are static local TypeScript data in v1.
+Meal Planner, Grocery List checked state, selected training goal, and
+notification preferences sync through Supabase user preferences with
+`localStorage` retained as a fallback. No AI APIs, paid recipe APIs, grocery
+APIs, payment SDKs, or scraping workflows are used.
 
 ## Database Overview
 
@@ -126,6 +129,7 @@ Core tables:
 - `daily_habits`
 - `workouts`
 - `workout_exercises`
+- `user_preferences`
 
 User-owned tables are scoped through Supabase Auth. RLS policies restrict rows
 so users can only access their own fitness data. Workout exercises are protected
@@ -135,7 +139,77 @@ Profile avatars use Supabase Storage in a public `avatars` bucket. The profile
 row stores the public avatar URL in `profiles.avatar_url`.
 
 Recipes and training plans are static local data in v1. Meal Planner and Grocery
-List use browser storage in v1, so they do not require Supabase tables yet.
+List use browser storage as a fallback.
+
+## User Preferences Sync
+
+LiftLog stores long-term preferences in the `user_preferences` table so key
+settings can follow the user across devices.
+
+Synced preferences include:
+
+- Selected training goal.
+- Notification preference toggles.
+- Preferred reminder time.
+- Meal Planner weekly state.
+- Grocery List checked state.
+
+Local device storage is still retained as a fallback. If sync is unavailable,
+the app stays usable and saves preferences on the current device.
+
+Recipes and training plan templates remain static local app data. Weight logs,
+habits, workouts, profiles, avatars, goal weight, and user preferences are
+Supabase-backed.
+
+Run this SQL in Supabase if your project does not have the preferences table
+yet:
+
+```sql
+create table if not exists public.user_preferences (
+  user_id uuid primary key references auth.users(id) on delete cascade,
+  selected_training_goal text,
+  notification_preferences jsonb not null default '{}'::jsonb,
+  preferred_reminder_time text,
+  meal_plan jsonb not null default '{}'::jsonb,
+  grocery_checked_items jsonb not null default '{}'::jsonb,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+alter table public.user_preferences enable row level security;
+
+create policy "Users can view their own preferences"
+on public.user_preferences
+for select
+to authenticated
+using (auth.uid() = user_id);
+
+create policy "Users can insert their own preferences"
+on public.user_preferences
+for insert
+to authenticated
+with check (auth.uid() = user_id);
+
+create policy "Users can update their own preferences"
+on public.user_preferences
+for update
+to authenticated
+using (auth.uid() = user_id)
+with check (auth.uid() = user_id);
+
+create policy "Users can delete their own preferences"
+on public.user_preferences
+for delete
+to authenticated
+using (auth.uid() = user_id);
+
+drop trigger if exists set_user_preferences_updated_at on public.user_preferences;
+create trigger set_user_preferences_updated_at
+  before update on public.user_preferences
+  for each row execute function public.set_updated_at();
+
+notify pgrst, 'reload schema';
+```
 
 ## Supabase Setup
 

@@ -2,12 +2,20 @@ import type { CheckedGroceryItems } from "@/src/lib/grocery-list/types";
 
 export const groceryCheckedStorageKey = "liftlog-grocery-list-checked-v1";
 
-function isCheckedGroceryItems(value: unknown): value is CheckedGroceryItems {
+export function isCheckedGroceryItems(value: unknown): value is CheckedGroceryItems {
   if (!value || typeof value !== "object" || Array.isArray(value)) {
     return false;
   }
 
   return Object.values(value).every((item) => typeof item === "boolean");
+}
+
+export function normalizeCheckedGroceryItems(value: unknown): CheckedGroceryItems {
+  return isCheckedGroceryItems(value) ? value : {};
+}
+
+export function hasCheckedGroceryItems(value: CheckedGroceryItems) {
+  return Object.keys(value).length > 0;
 }
 
 export function loadCheckedGroceryItems() {
