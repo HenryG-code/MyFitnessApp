@@ -155,7 +155,7 @@ export function SettingsPanel() {
 
           return (
             <FitnessCard key={item.title}>
-              <span className="grid size-12 place-items-center rounded-2xl bg-accent text-white">
+              <span className="grid size-12 place-items-center rounded-2xl bg-accent text-stone-950">
                 <Icon className="size-5" />
               </span>
               <h2 className="mt-5 font-display text-xl font-black">
@@ -269,7 +269,7 @@ export function SettingsPanel() {
                 href={item.href}
                 className="rounded-[1.25rem] border border-line bg-white/65 p-4 transition hover:-translate-y-0.5 hover:border-accent"
               >
-                <span className="grid size-10 place-items-center rounded-2xl bg-accent text-white">
+                <span className="grid size-10 place-items-center rounded-2xl bg-accent text-stone-950">
                   <Icon className="size-4" />
                 </span>
                 <p className="mt-3 font-display text-lg font-black">
@@ -287,7 +287,7 @@ export function SettingsPanel() {
       <FitnessCard>
         <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
           <div className="max-w-xl">
-            <span className="grid size-12 place-items-center rounded-2xl bg-accent text-white">
+            <span className="grid size-12 place-items-center rounded-2xl bg-accent text-stone-950">
               <Download className="size-5" />
             </span>
             <div className="mt-5">
@@ -310,7 +310,7 @@ export function SettingsPanel() {
       <FitnessCard>
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div>
-            <span className="grid size-12 place-items-center rounded-2xl bg-accent text-white">
+            <span className="grid size-12 place-items-center rounded-2xl bg-accent text-stone-950">
               <HandHeart className="size-5" />
             </span>
             <div className="mt-5">

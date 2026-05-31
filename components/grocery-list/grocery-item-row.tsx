@@ -29,7 +29,7 @@ export function GroceryItemRow({
       <span
         className={`mt-1 grid size-6 shrink-0 place-items-center rounded-lg border ${
           checked
-            ? "border-accent bg-accent text-white"
+            ? "border-accent bg-accent text-stone-950"
             : "border-line bg-card text-transparent"
         }`}
       >

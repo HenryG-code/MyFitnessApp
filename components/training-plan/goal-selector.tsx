@@ -14,7 +14,7 @@ export function GoalSelector({ selectedGoal, onChange }: GoalSelectorProps) {
   return (
     <FitnessCard>
       <div className="mb-5 flex items-center gap-3">
-        <span className="grid size-12 place-items-center rounded-2xl bg-accent text-white">
+        <span className="grid size-12 place-items-center rounded-2xl bg-accent text-stone-950">
           <Target className="size-5" />
         </span>
         <div>
@@ -36,7 +36,7 @@ export function GoalSelector({ selectedGoal, onChange }: GoalSelectorProps) {
               key={goal}
               type="button"
               onClick={() => onChange(goal)}
-              className={`rounded-2xl border px-4 py-4 text-left shadow-sm transition hover:-translate-y-0.5 hover:shadow-[0_18px_44px_rgba(23,33,28,0.10)] ${
+              className={`rounded-2xl border px-4 py-4 text-left shadow-sm outline-none transition hover:-translate-y-0.5 hover:shadow-[0_18px_44px_rgba(0,0,0,0.28)] focus-visible:ring-4 focus-visible:ring-accent/35 ${
                 active
                   ? "border-accent bg-accent text-stone-950 shadow-lg shadow-yellow-950/20"
                   : "border-line/80 bg-white/75 text-foreground hover:border-accent"
@@ -45,7 +45,7 @@ export function GoalSelector({ selectedGoal, onChange }: GoalSelectorProps) {
               <span className="font-display text-lg font-black">{goal}</span>
               <span
                 className={`mt-1 block text-sm leading-6 ${
-                  active ? "text-white/80" : "text-muted"
+                  active ? "text-stone-900" : "text-muted"
                 }`}
               >
                 Beginner/intermediate, 4 days, gym/mixed.

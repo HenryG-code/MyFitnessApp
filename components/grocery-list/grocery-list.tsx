@@ -111,7 +111,7 @@ export function GroceryList({ recipes }: GroceryListProps) {
           </p>
           <Link
             href="/meal-planner"
-            className="mt-5 inline-flex items-center gap-2 rounded-2xl bg-accent px-5 py-3 text-sm font-black text-white transition hover:-translate-y-0.5"
+            className="mt-5 inline-flex items-center gap-2 rounded-2xl bg-accent px-5 py-3 text-sm font-black text-stone-950 transition hover:-translate-y-0.5"
           >
             <CalendarDays className="size-4" />
             Open Meal Planner

@@ -80,7 +80,7 @@ export function GoalWeightForm({
   return (
     <div className="rounded-[1.5rem] border border-line bg-white/65 p-4">
       <div className="flex items-start gap-3">
-        <span className="grid size-11 shrink-0 place-items-center rounded-2xl bg-accent text-white">
+        <span className="grid size-11 shrink-0 place-items-center rounded-2xl bg-accent text-stone-950">
           <Target className="size-5" />
         </span>
         <div>

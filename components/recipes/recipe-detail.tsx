@@ -85,7 +85,7 @@ export function RecipeDetail({ recipe }: RecipeDetailProps) {
       <section className="grid gap-5 lg:grid-cols-[0.9fr_1.1fr]">
         <FitnessCard>
           <div className="mb-5 flex items-center gap-3">
-            <span className="grid size-12 place-items-center rounded-2xl bg-accent text-white">
+            <span className="grid size-12 place-items-center rounded-2xl bg-accent text-stone-950">
               <Salad className="size-5" />
             </span>
             <div>

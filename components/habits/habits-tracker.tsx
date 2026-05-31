@@ -285,7 +285,7 @@ export function HabitsTracker() {
                         <span
                           className={`grid size-12 shrink-0 place-items-center rounded-2xl ${
                             isComplete
-                              ? "bg-accent text-white"
+                              ? "bg-accent text-stone-950"
                               : "bg-stone-950 text-sun"
                           }`}
                         >

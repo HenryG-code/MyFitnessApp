@@ -275,7 +275,7 @@ export function WorkoutsList() {
             </p>
             <Link
               href="/workouts/new"
-              className="mt-5 inline-flex items-center gap-2 rounded-2xl bg-accent px-5 py-3 text-sm font-black text-white"
+              className="mt-5 inline-flex items-center gap-2 rounded-2xl bg-accent px-5 py-3 text-sm font-black text-stone-950"
             >
               <Plus className="size-4" />
               Add workout

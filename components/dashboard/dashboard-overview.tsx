@@ -316,7 +316,7 @@ export function DashboardOverview() {
           <div className="grid gap-2">
             <Link
               href="/weight"
-              className="flex min-h-12 items-center justify-between rounded-2xl bg-accent px-4 py-3 text-sm font-black text-white transition hover:-translate-y-0.5"
+              className="flex min-h-12 items-center justify-between rounded-2xl bg-accent px-4 py-3 text-sm font-black text-stone-950 transition hover:-translate-y-0.5"
             >
               Add weight <Scale className="size-4" />
             </Link>
@@ -368,7 +368,7 @@ export function DashboardOverview() {
           {data?.goalWeightKg === null ? (
             <Link
               href="/settings"
-              className="mt-4 inline-flex rounded-2xl bg-accent px-4 py-2 text-sm font-black text-white"
+              className="mt-4 inline-flex rounded-2xl bg-accent px-4 py-2 text-sm font-black text-stone-950"
             >
               Set goal
             </Link>
@@ -412,7 +412,7 @@ export function DashboardOverview() {
             {data?.latestWorkout ? (
               <>
                 <div className="flex items-center gap-3">
-                  <span className="grid size-12 place-items-center rounded-2xl bg-accent text-white">
+                  <span className="grid size-12 place-items-center rounded-2xl bg-accent text-stone-950">
                     <Activity className="size-5" />
                   </span>
                   <div>
@@ -440,7 +440,7 @@ export function DashboardOverview() {
                 </p>
                 <Link
                   href="/workouts/new"
-                  className="mt-4 inline-flex rounded-2xl bg-accent px-4 py-2 text-sm font-black text-white"
+                  className="mt-4 inline-flex rounded-2xl bg-accent px-4 py-2 text-sm font-black text-stone-950"
                 >
                   Add workout
                 </Link>
@@ -500,7 +500,7 @@ export function DashboardOverview() {
                 href={item.href}
                 className="min-h-28 rounded-[1.25rem] border border-line bg-white/65 p-4 transition hover:-translate-y-0.5 hover:border-accent"
               >
-                <span className="grid size-10 place-items-center rounded-2xl bg-accent text-white">
+                <span className="grid size-10 place-items-center rounded-2xl bg-accent text-stone-950">
                   <Icon className="size-4" />
                 </span>
                 <p className="mt-3 text-sm font-black">{item.label}</p>

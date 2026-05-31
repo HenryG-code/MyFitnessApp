@@ -35,7 +35,7 @@ export function RecipeFiltersPanel({
     <section className="rounded-[1.75rem] border border-line/80 bg-card/85 p-5 shadow-[0_20px_60px_rgba(23,33,28,0.08)] backdrop-blur">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-3">
-          <span className="grid size-11 place-items-center rounded-2xl bg-accent text-white">
+          <span className="grid size-11 place-items-center rounded-2xl bg-accent text-stone-950">
             <SlidersHorizontal className="size-5" />
           </span>
           <div>

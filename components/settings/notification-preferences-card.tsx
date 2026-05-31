@@ -154,7 +154,7 @@ export function NotificationPreferencesCard() {
     <div className="space-y-5">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
         <div className="max-w-2xl">
-          <span className="grid size-12 place-items-center rounded-2xl bg-accent text-white shadow-sm shadow-accent/25">
+          <span className="grid size-12 place-items-center rounded-2xl bg-accent text-stone-950 shadow-sm shadow-accent/25">
             <Bell className="size-5" />
           </span>
           <p className="mt-5 text-xs font-black uppercase tracking-[0.22em] text-accent">
@@ -207,7 +207,7 @@ export function NotificationPreferencesCard() {
         </button>
       </div>
 
-      <div className="rounded-[1.25rem] border border-line bg-white/65 p-4">
+      <div className="rounded-[1.25rem] border border-line bg-surface/80 p-4">
         <label
           htmlFor="preferredTime"
           className="flex items-center gap-2 text-sm font-black"
@@ -215,12 +215,16 @@ export function NotificationPreferencesCard() {
           <Clock className="size-4 text-accent" />
           Preferred reminder time
         </label>
+        <p className="mt-2 text-sm leading-6 text-muted">
+          Used for your reminder preferences on this device.
+        </p>
         <input
           id="preferredTime"
           type="time"
           value={preferences.preferredTime}
+          disabled={!canUseReminders}
           onChange={(event) => handlePreferredTimeChange(event.target.value)}
-          className="mt-3 w-full rounded-2xl border border-line bg-white px-4 py-3 text-sm font-black outline-none transition focus:border-accent focus:ring-4 focus:ring-accent/10 sm:max-w-xs"
+          className="mt-4 min-h-12 w-full rounded-2xl border border-line bg-[#080807] px-4 py-3 text-base font-black text-foreground outline-none transition focus:border-accent focus:ring-4 focus:ring-accent/20 disabled:cursor-not-allowed disabled:bg-white/10 disabled:text-muted disabled:opacity-70 sm:max-w-xs"
         />
       </div>
 

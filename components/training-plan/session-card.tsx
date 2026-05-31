@@ -69,7 +69,7 @@ export function SessionCard({ plan, session }: SessionCardProps) {
             className="rounded-2xl border border-line/80 bg-white/[0.04] p-4"
           >
             <div className="flex items-start gap-3">
-              <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-accent text-white">
+              <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-accent text-stone-950">
                 <Dumbbell className="size-4" />
               </span>
               <div className="min-w-0 flex-1">
@@ -105,7 +105,7 @@ export function SessionCard({ plan, session }: SessionCardProps) {
           type="button"
           onClick={() => void handleLogSession()}
           disabled={isLogging}
-          className="inline-flex items-center justify-center gap-2 rounded-2xl bg-accent px-4 py-3 text-sm font-black text-white transition hover:-translate-y-0.5 hover:bg-accent-strong disabled:cursor-not-allowed disabled:opacity-70"
+          className="inline-flex items-center justify-center gap-2 rounded-2xl bg-accent px-4 py-3 text-sm font-black text-stone-950 transition hover:-translate-y-0.5 hover:bg-accent-strong disabled:cursor-not-allowed disabled:opacity-70"
         >
           <Plus className="size-4" />
           {isLogging ? "Logging..." : "Log workout"}
