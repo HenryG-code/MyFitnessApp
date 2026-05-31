@@ -18,7 +18,7 @@ export default {
         "accent-strong": "var(--accent-strong)",
         sun: "var(--sun)",
         energy: "var(--energy)",
-        "soft-yellow": "#cffafe",
+        "soft-yellow": "#fed7aa",
         surface: "var(--surface)",
         success: "var(--success)",
         danger: "var(--danger)",

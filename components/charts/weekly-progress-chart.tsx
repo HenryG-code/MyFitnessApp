@@ -54,7 +54,7 @@ export function WeeklyProgressChart({
             unit="%"
           />
           <Tooltip
-            cursor={{ fill: "rgba(0, 229, 255, 0.1)" }}
+            cursor={{ fill: "rgba(220, 38, 38, 0.12)" }}
             contentStyle={{
               background: "#18181f",
               color: "#f8fafc",
@@ -65,7 +65,7 @@ export function WeeklyProgressChart({
           />
           <Bar
             dataKey="consistencyScore"
-            fill="#00e5ff"
+            fill="#dc2626"
             radius={[10, 10, 0, 0]}
             name="Consistency"
             unit="%"
@@ -73,9 +73,9 @@ export function WeeklyProgressChart({
           <Line
             type="monotone"
             dataKey="habitScore"
-            stroke="#a855f7"
+            stroke="#f97316"
             strokeWidth={3}
-            dot={{ fill: "#a855f7", strokeWidth: 0, r: 4 }}
+            dot={{ fill: "#f97316", strokeWidth: 0, r: 4 }}
             activeDot={{ r: 6 }}
             name="Habits"
             unit="%"

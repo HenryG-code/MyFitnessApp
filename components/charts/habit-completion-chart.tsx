@@ -50,7 +50,7 @@ export function HabitCompletionChart({
             unit="%"
           />
           <Tooltip
-            cursor={{ fill: "rgba(0, 229, 255, 0.1)" }}
+            cursor={{ fill: "rgba(220, 38, 38, 0.12)" }}
             contentStyle={{
               background: "#18181f",
               color: "#f8fafc",
@@ -61,7 +61,7 @@ export function HabitCompletionChart({
           />
           <Bar
             dataKey="percentage"
-            fill="#00e5ff"
+            fill="#dc2626"
             name="Completion"
             radius={[10, 10, 0, 0]}
             unit="%"

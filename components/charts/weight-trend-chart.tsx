@@ -54,9 +54,9 @@ export function WeightTrendChart({ data }: { data: WeightPoint[] }) {
           <Line
             type="monotone"
             dataKey="weight_kg"
-            stroke="#00e5ff"
+            stroke="#dc2626"
             strokeWidth={4}
-            dot={{ fill: "#a855f7", strokeWidth: 0, r: 5 }}
+            dot={{ fill: "#f97316", strokeWidth: 0, r: 5 }}
             activeDot={{ r: 7 }}
             name="Weight"
             unit=" kg"

@@ -13,11 +13,11 @@ type HeroPanelProps = {
 
 const variantStyles = {
   default:
-    "from-[#050505] via-[#101014] to-[#18181f] after:bg-[radial-gradient(circle_at_80%_20%,rgba(0,229,255,0.26),transparent_18rem)]",
+    "from-[#050505] via-[#101014] to-[#18181f] after:bg-[radial-gradient(circle_at_80%_20%,rgba(220,38,38,0.28),transparent_18rem)]",
   performance:
-    "from-[#050505] via-[#101014] to-[#18181f] after:bg-[radial-gradient(circle_at_78%_20%,rgba(168,85,247,0.28),transparent_18rem)]",
+    "from-[#050505] via-[#101014] to-[#18181f] after:bg-[radial-gradient(circle_at_78%_20%,rgba(249,115,22,0.28),transparent_18rem)]",
   amber:
-    "from-[#050505] via-[#18111f] to-[#101014] after:bg-[radial-gradient(circle_at_80%_20%,rgba(255,45,85,0.22),transparent_18rem)]",
+    "from-[#050505] via-[#1f1111] to-[#101014] after:bg-[radial-gradient(circle_at_80%_20%,rgba(255,77,0,0.24),transparent_18rem)]",
 };
 
 export function HeroPanel({

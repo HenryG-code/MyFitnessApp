@@ -8,11 +8,11 @@
   --card: #18181f;
   --muted: #a1a1aa;
   --line: #2a2a33;
-  --accent: #00e5ff;
-  --accent-strong: #a855f7;
-  --sun: #a855f7;
+  --accent: #dc2626;
+  --accent-strong: #f97316;
+  --sun: #f97316;
   --surface: #101014;
-  --energy: #ff2d55;
+  --energy: #ff4d00;
   --success: #22c55e;
   --danger: #ef4444;
   --warning: #f97316;
@@ -25,9 +25,9 @@
 body {
   color: var(--foreground);
   background:
-    radial-gradient(circle at top left, rgba(0, 229, 255, 0.16), transparent 30rem),
-    radial-gradient(circle at 85% 5%, rgba(168, 85, 247, 0.16), transparent 34rem),
-    radial-gradient(circle at 25% 95%, rgba(255, 45, 85, 0.1), transparent 28rem),
+    radial-gradient(circle at top left, rgba(220, 38, 38, 0.18), transparent 30rem),
+    radial-gradient(circle at 85% 5%, rgba(249, 115, 22, 0.16), transparent 34rem),
+    radial-gradient(circle at 25% 95%, rgba(255, 77, 0, 0.11), transparent 28rem),
     linear-gradient(135deg, #050505 0%, #0a0a0d 48%, #101014 100%);
   font-family: Satoshi, "Aptos Display", Avenir, "Segoe UI", sans-serif;
 }
@@ -38,7 +38,7 @@ a {
 }
 
 ::selection {
-  background: rgba(0, 229, 255, 0.28);
+  background: rgba(220, 38, 38, 0.32);
 }
 
 input,
@@ -59,7 +59,7 @@ textarea {
 .bg-stone-100,
 .bg-stone-200,
 .bg-amber-50\/80 {
-  background-color: rgba(0, 229, 255, 0.08) !important;
+  background-color: rgba(220, 38, 38, 0.08) !important;
 }
 
 .bg-red-50 {
@@ -80,35 +80,35 @@ textarea {
 
 .bg-accent,
 .bg-accent {
-  color: #080807 !important;
+  color: #f8fafc !important;
 }
 
 .bg-sun {
-  color: #f8fafc !important;
+  color: #080807 !important;
 }
 
 .text-accent,
 .text-accent {
-  color: #00e5ff !important;
+  color: #ff6b4a !important;
 }
 
 .text-accent-strong,
 .text-sun {
-  color: #a855f7 !important;
+  color: #fb923c !important;
 }
 
 .hover\:bg-accent:hover {
-  background-color: #00e5ff !important;
-  color: #080807 !important;
-}
-
-.hover\:bg-accent-strong:hover {
-  background-color: #a855f7 !important;
+  background-color: #b91c1c !important;
   color: #f8fafc !important;
 }
 
+.hover\:bg-accent-strong:hover {
+  background-color: #f97316 !important;
+  color: #080807 !important;
+}
+
 .focus\:border-accent:focus {
-  border-color: #00e5ff !important;
+  border-color: #dc2626 !important;
 }
 
 @keyframes liftlog-fade-up {
@@ -126,11 +126,11 @@ textarea {
 @keyframes liftlog-pulse-glow {
   0%,
   100% {
-    box-shadow: 0 0 0 rgba(0, 229, 255, 0);
+    box-shadow: 0 0 0 rgba(220, 38, 38, 0);
   }
 
   50% {
-    box-shadow: 0 0 28px rgba(0, 229, 255, 0.22);
+    box-shadow: 0 0 28px rgba(249, 115, 22, 0.22);
   }
 }
 
