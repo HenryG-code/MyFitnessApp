@@ -45,6 +45,16 @@ const toolLinks = [
   { href: "/settings", label: "Install app", icon: Download },
 ];
 
+const quickActionLinks = [
+  { href: "/workouts/new", label: "Log workout", icon: Dumbbell, primary: true },
+  { href: "/weight", label: "Add weight", icon: Scale, primary: true },
+  { href: "/habits", label: "Update habits", icon: Sprout },
+  { href: "/training-plan", label: "Training plan", icon: Trophy },
+  { href: "/meal-planner", label: "Meal planner", icon: CalendarDays },
+  { href: "/recipes", label: "Recipes", icon: BookOpen },
+  { href: "/grocery-list", label: "Grocery list", icon: ShoppingBasket },
+];
+
 function formatDate(value: string) {
   return new Intl.DateTimeFormat("en", {
     month: "short",
@@ -268,25 +278,25 @@ export function DashboardOverview() {
 
         <FitnessCard>
           <SectionHeader eyebrow="Quick actions" title="Do the next thing" />
-          <div className="grid gap-2">
-            <Link
-              href="/weight"
-              className="flex min-h-12 items-center justify-between rounded-2xl bg-accent px-4 py-3 text-sm font-black text-stone-950 transition hover:-translate-y-0.5"
-            >
-              Add weight <Scale className="size-4" />
-            </Link>
-            <Link
-              href="/workouts/new"
-              className="flex min-h-12 items-center justify-between rounded-2xl bg-sun px-4 py-3 text-sm font-black text-stone-950 transition hover:-translate-y-0.5"
-            >
-              Log workout <Dumbbell className="size-4" />
-            </Link>
-            <Link
-              href="/habits"
-              className="flex min-h-12 items-center justify-between rounded-2xl border border-line bg-white/65 px-4 py-3 text-sm font-black text-foreground transition hover:-translate-y-0.5 hover:border-accent"
-            >
-              Update habits <Sprout className="size-4" />
-            </Link>
+          <div className="grid grid-cols-2 gap-2">
+            {quickActionLinks.map((item) => {
+              const Icon = item.icon;
+
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={`flex min-h-16 flex-col justify-between rounded-2xl px-3 py-3 text-sm font-black transition hover:-translate-y-0.5 ${
+                    item.primary
+                      ? "bg-accent text-stone-950"
+                      : "border border-line bg-white/65 text-foreground hover:border-accent"
+                  }`}
+                >
+                  <Icon className="size-5" />
+                  {item.label}
+                </Link>
+              );
+            })}
           </div>
         </FitnessCard>
       </section>

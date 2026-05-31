@@ -270,16 +270,23 @@ export function WorkoutsList() {
               No workouts logged yet.
             </p>
             <p className="mt-2 text-sm leading-6 text-muted">
-              Create your first workout and this page will become your training
-              timeline.
+              Start with a quick workout or choose a suggested training plan.
             </p>
-            <Link
-              href="/workouts/new"
-              className="mt-5 inline-flex items-center gap-2 rounded-2xl bg-accent px-5 py-3 text-sm font-black text-stone-950"
-            >
-              <Plus className="size-4" />
-              Add workout
-            </Link>
+            <div className="mt-5 flex flex-wrap gap-2">
+              <Link
+                href="/workouts/new"
+                className="inline-flex items-center gap-2 rounded-2xl bg-accent px-5 py-3 text-sm font-black text-stone-950"
+              >
+                <Plus className="size-4" />
+                Add workout
+              </Link>
+              <Link
+                href="/training-plan"
+                className="inline-flex items-center gap-2 rounded-2xl border border-line bg-white/65 px-5 py-3 text-sm font-black transition hover:border-accent"
+              >
+                Training plan
+              </Link>
+            </div>
           </div>
         </FitnessCard>
       )}
