@@ -39,7 +39,7 @@ export function WeeklyProgressChart({
     <div className="h-64 w-full">
       <ResponsiveContainer width="100%" height="100%">
         <ComposedChart data={data} margin={{ top: 8, right: 4, left: -28, bottom: 0 }}>
-          <CartesianGrid stroke="#2a2a24" strokeDasharray="4 6" vertical={false} />
+          <CartesianGrid stroke="#2a2a33" strokeDasharray="4 6" vertical={false} />
           <XAxis
             dataKey="day"
             axisLine={false}
@@ -54,18 +54,18 @@ export function WeeklyProgressChart({
             unit="%"
           />
           <Tooltip
-            cursor={{ fill: "rgba(250, 204, 21, 0.1)" }}
+            cursor={{ fill: "rgba(0, 229, 255, 0.1)" }}
             contentStyle={{
-              background: "#1a1a18",
-              color: "#f8f7f2",
-              border: "1px solid #2a2a24",
+              background: "#18181f",
+              color: "#f8fafc",
+              border: "1px solid #2a2a33",
               borderRadius: "18px",
               boxShadow: "0 18px 50px rgba(0,0,0,0.35)",
             }}
           />
           <Bar
             dataKey="consistencyScore"
-            fill="#facc15"
+            fill="#00e5ff"
             radius={[10, 10, 0, 0]}
             name="Consistency"
             unit="%"
@@ -73,9 +73,9 @@ export function WeeklyProgressChart({
           <Line
             type="monotone"
             dataKey="habitScore"
-            stroke="#fef3c7"
+            stroke="#a855f7"
             strokeWidth={3}
-            dot={{ fill: "#fef3c7", strokeWidth: 0, r: 4 }}
+            dot={{ fill: "#a855f7", strokeWidth: 0, r: 4 }}
             activeDot={{ r: 6 }}
             name="Habits"
             unit="%"

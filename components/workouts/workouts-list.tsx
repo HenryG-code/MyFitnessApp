@@ -159,7 +159,7 @@ export function WorkoutsList() {
           </Link>
           <Link
             href="/workouts/new"
-            className="inline-flex items-center justify-center gap-2 rounded-2xl bg-accent px-5 py-3 text-sm font-black text-stone-950 shadow-lg shadow-yellow-950/20"
+            className="inline-flex items-center justify-center gap-2 rounded-2xl bg-accent px-5 py-3 text-sm font-black text-stone-950 shadow-lg shadow-accent/20"
           >
             <Plus className="size-4" />
             New workout

@@ -6,6 +6,7 @@ import {
   type WorkoutInput,
   type WorkoutWithExercises,
 } from "@/src/lib/workouts/queries";
+import { RestTimer } from "@/components/workouts/rest-timer";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Dumbbell, Plus, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -321,7 +322,7 @@ export function WorkoutForm({ mode = "create", workout }: WorkoutFormProps) {
         </label>
         <input
           id="title"
-          className="mt-2 min-h-12 w-full rounded-2xl border border-line bg-surface/80 px-4 py-3 text-base outline-none transition focus:border-accent focus:ring-4 focus:ring-yellow-400/10"
+          className="mt-2 min-h-12 w-full rounded-2xl border border-line bg-surface/80 px-4 py-3 text-base outline-none transition focus:border-accent focus:ring-4 focus:ring-accent/20"
           placeholder="Upper Body Strength"
           {...register("title")}
         />
@@ -352,7 +353,7 @@ export function WorkoutForm({ mode = "create", workout }: WorkoutFormProps) {
           <input
             id="workout_date"
             type="date"
-            className="mt-2 min-h-12 w-full rounded-2xl border border-line bg-surface/80 px-4 py-3 outline-none transition focus:border-accent focus:ring-4 focus:ring-yellow-400/10"
+            className="mt-2 min-h-12 w-full rounded-2xl border border-line bg-surface/80 px-4 py-3 outline-none transition focus:border-accent focus:ring-4 focus:ring-accent/20"
             {...register("workout_date")}
           />
           {errors.workout_date ? (
@@ -371,7 +372,7 @@ export function WorkoutForm({ mode = "create", workout }: WorkoutFormProps) {
             type="number"
             min="1"
             step="1"
-            className="mt-2 min-h-12 w-full rounded-2xl border border-line bg-surface/80 px-4 py-3 outline-none transition focus:border-accent focus:ring-4 focus:ring-yellow-400/10"
+            className="mt-2 min-h-12 w-full rounded-2xl border border-line bg-surface/80 px-4 py-3 outline-none transition focus:border-accent focus:ring-4 focus:ring-accent/20"
             placeholder="45"
             {...register("duration_minutes")}
           />
@@ -390,7 +391,7 @@ export function WorkoutForm({ mode = "create", workout }: WorkoutFormProps) {
         <textarea
           id="notes"
           rows={3}
-          className="mt-2 w-full rounded-2xl border border-line bg-surface/80 px-4 py-3 outline-none transition focus:border-accent focus:ring-4 focus:ring-yellow-400/10"
+          className="mt-2 w-full rounded-2xl border border-line bg-surface/80 px-4 py-3 outline-none transition focus:border-accent focus:ring-4 focus:ring-accent/20"
           placeholder="How did the session feel?"
           {...register("notes")}
         />
@@ -400,6 +401,8 @@ export function WorkoutForm({ mode = "create", workout }: WorkoutFormProps) {
           </p>
         ) : null}
       </div>
+
+      <RestTimer />
 
       <div className="rounded-[1.5rem] border border-line bg-white/45 p-3 sm:p-4">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -457,7 +460,7 @@ export function WorkoutForm({ mode = "create", workout }: WorkoutFormProps) {
                 <div className="sm:col-span-6">
                   <label className="text-sm font-black">Name</label>
                   <input
-                    className="mt-2 min-h-11 w-full rounded-2xl border border-line bg-surface/80 px-4 py-2.5 outline-none transition focus:border-accent focus:ring-4 focus:ring-yellow-400/10"
+                    className="mt-2 min-h-11 w-full rounded-2xl border border-line bg-surface/80 px-4 py-2.5 outline-none transition focus:border-accent focus:ring-4 focus:ring-accent/20"
                     placeholder="Bench press"
                     {...register(`exercises.${index}.exercise_name`)}
                   />
@@ -474,7 +477,7 @@ export function WorkoutForm({ mode = "create", workout }: WorkoutFormProps) {
                     type="number"
                     min="0"
                     step="1"
-                    className="mt-2 min-h-11 w-full rounded-2xl border border-line bg-surface/80 px-3 py-2.5 outline-none transition focus:border-accent focus:ring-4 focus:ring-yellow-400/10"
+                    className="mt-2 min-h-11 w-full rounded-2xl border border-line bg-surface/80 px-3 py-2.5 outline-none transition focus:border-accent focus:ring-4 focus:ring-accent/20"
                     {...register(`exercises.${index}.sets`)}
                   />
                   {errors.exercises?.[index]?.sets ? (
@@ -490,7 +493,7 @@ export function WorkoutForm({ mode = "create", workout }: WorkoutFormProps) {
                     type="number"
                     min="0"
                     step="1"
-                    className="mt-2 min-h-11 w-full rounded-2xl border border-line bg-surface/80 px-3 py-2.5 outline-none transition focus:border-accent focus:ring-4 focus:ring-yellow-400/10"
+                    className="mt-2 min-h-11 w-full rounded-2xl border border-line bg-surface/80 px-3 py-2.5 outline-none transition focus:border-accent focus:ring-4 focus:ring-accent/20"
                     {...register(`exercises.${index}.reps`)}
                   />
                   {errors.exercises?.[index]?.reps ? (
@@ -506,7 +509,7 @@ export function WorkoutForm({ mode = "create", workout }: WorkoutFormProps) {
                     type="number"
                     min="0"
                     step="0.5"
-                    className="mt-2 min-h-11 w-full rounded-2xl border border-line bg-surface/80 px-3 py-2.5 outline-none transition focus:border-accent focus:ring-4 focus:ring-yellow-400/10"
+                    className="mt-2 min-h-11 w-full rounded-2xl border border-line bg-surface/80 px-3 py-2.5 outline-none transition focus:border-accent focus:ring-4 focus:ring-accent/20"
                     {...register(`exercises.${index}.weight`)}
                   />
                   {errors.exercises?.[index]?.weight ? (
@@ -522,7 +525,7 @@ export function WorkoutForm({ mode = "create", workout }: WorkoutFormProps) {
                     type="number"
                     min="0"
                     step="0.1"
-                    className="mt-2 min-h-11 w-full rounded-2xl border border-line bg-surface/80 px-3 py-2.5 outline-none transition focus:border-accent focus:ring-4 focus:ring-yellow-400/10"
+                    className="mt-2 min-h-11 w-full rounded-2xl border border-line bg-surface/80 px-3 py-2.5 outline-none transition focus:border-accent focus:ring-4 focus:ring-accent/20"
                     {...register(`exercises.${index}.distance_km`)}
                   />
                   {errors.exercises?.[index]?.distance_km ? (
@@ -540,7 +543,7 @@ export function WorkoutForm({ mode = "create", workout }: WorkoutFormProps) {
                     type="number"
                     min="0"
                     step="1"
-                    className="mt-2 min-h-11 w-full rounded-2xl border border-line bg-surface/80 px-3 py-2.5 outline-none transition focus:border-accent focus:ring-4 focus:ring-yellow-400/10"
+                    className="mt-2 min-h-11 w-full rounded-2xl border border-line bg-surface/80 px-3 py-2.5 outline-none transition focus:border-accent focus:ring-4 focus:ring-accent/20"
                     {...register(`exercises.${index}.duration_minutes`)}
                   />
                   {errors.exercises?.[index]?.duration_minutes ? (
@@ -554,7 +557,7 @@ export function WorkoutForm({ mode = "create", workout }: WorkoutFormProps) {
                   <label className="text-sm font-black">Exercise notes</label>
                   <textarea
                     rows={2}
-                    className="mt-2 w-full rounded-2xl border border-line bg-surface/80 px-4 py-2.5 outline-none transition focus:border-accent focus:ring-4 focus:ring-yellow-400/10"
+                    className="mt-2 w-full rounded-2xl border border-line bg-surface/80 px-4 py-2.5 outline-none transition focus:border-accent focus:ring-4 focus:ring-accent/20"
                     placeholder="Optional cues or set details."
                     {...register(`exercises.${index}.notes`)}
                   />
@@ -586,7 +589,7 @@ export function WorkoutForm({ mode = "create", workout }: WorkoutFormProps) {
         <button
           type="submit"
           disabled={isSubmitting}
-          className="rounded-2xl bg-accent px-5 py-3 text-sm font-black text-stone-950 shadow-lg shadow-yellow-950/20 transition hover:-translate-y-0.5 hover:bg-accent-strong disabled:cursor-not-allowed disabled:opacity-70"
+          className="rounded-2xl bg-accent px-5 py-3 text-sm font-black text-stone-950 shadow-lg shadow-accent/20 transition hover:-translate-y-0.5 hover:bg-accent-strong disabled:cursor-not-allowed disabled:opacity-70"
         >
           {isSubmitting
             ? mode === "edit"
@@ -603,7 +606,7 @@ export function WorkoutForm({ mode = "create", workout }: WorkoutFormProps) {
           <button
             type="submit"
             disabled={isSubmitting}
-            className="min-h-12 rounded-2xl bg-accent px-4 py-3 text-sm font-black text-stone-950 shadow-lg shadow-yellow-950/20 transition disabled:cursor-not-allowed disabled:opacity-70"
+            className="min-h-12 rounded-2xl bg-accent px-4 py-3 text-sm font-black text-stone-950 shadow-lg shadow-accent/20 transition disabled:cursor-not-allowed disabled:opacity-70"
           >
             {isSubmitting ? "Saving..." : "Save workout"}
           </button>

@@ -99,7 +99,7 @@ export function GoalWeightForm({
           step="0.1"
           value={goalWeight}
           onChange={(event) => setGoalWeight(event.target.value)}
-          className="min-h-12 rounded-2xl border border-line bg-surface/80 px-4 py-3 text-sm font-bold outline-none transition focus:border-accent focus:ring-4 focus:ring-yellow-400/10"
+          className="min-h-12 rounded-2xl border border-line bg-surface/80 px-4 py-3 text-sm font-bold outline-none transition focus:border-accent focus:ring-4 focus:ring-accent/20"
           placeholder="78.0"
         />
         <button

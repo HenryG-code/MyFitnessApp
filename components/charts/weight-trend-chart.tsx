@@ -44,9 +44,9 @@ export function WeightTrendChart({ data }: { data: WeightPoint[] }) {
           />
           <Tooltip
             contentStyle={{
-              background: "#1a1a18",
-              color: "#f8f7f2",
-              border: "1px solid #2a2a24",
+              background: "#18181f",
+              color: "#f8fafc",
+              border: "1px solid #2a2a33",
               borderRadius: "18px",
               boxShadow: "0 18px 50px rgba(0,0,0,0.35)",
             }}
@@ -54,9 +54,9 @@ export function WeightTrendChart({ data }: { data: WeightPoint[] }) {
           <Line
             type="monotone"
             dataKey="weight_kg"
-            stroke="#facc15"
+            stroke="#00e5ff"
             strokeWidth={4}
-            dot={{ fill: "#f8f7f2", strokeWidth: 0, r: 5 }}
+            dot={{ fill: "#a855f7", strokeWidth: 0, r: 5 }}
             activeDot={{ r: 7 }}
             name="Weight"
             unit=" kg"

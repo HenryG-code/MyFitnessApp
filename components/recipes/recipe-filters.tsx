@@ -70,7 +70,7 @@ export function RecipeFiltersPanel({
             onChange={(event) =>
               onChange(updateFilter(filters, "mealType", event.target.value))
             }
-            className="mt-2 w-full rounded-2xl border border-line bg-surface/80 px-4 py-3 font-medium outline-none transition focus:border-accent focus:ring-4 focus:ring-yellow-400/10"
+            className="mt-2 w-full rounded-2xl border border-line bg-surface/80 px-4 py-3 font-medium outline-none transition focus:border-accent focus:ring-4 focus:ring-accent/20"
           >
             <option value="">All meals</option>
             {mealTypeOptions.map((option) => (
@@ -88,7 +88,7 @@ export function RecipeFiltersPanel({
             onChange={(event) =>
               onChange(updateFilter(filters, "goal", event.target.value))
             }
-            className="mt-2 w-full rounded-2xl border border-line bg-surface/80 px-4 py-3 font-medium outline-none transition focus:border-accent focus:ring-4 focus:ring-yellow-400/10"
+            className="mt-2 w-full rounded-2xl border border-line bg-surface/80 px-4 py-3 font-medium outline-none transition focus:border-accent focus:ring-4 focus:ring-accent/20"
           >
             <option value="">All goals</option>
             {goalFilterOptions.map((option) => (
@@ -106,7 +106,7 @@ export function RecipeFiltersPanel({
             onChange={(event) =>
               onChange(updateFilter(filters, "prepTime", event.target.value))
             }
-            className="mt-2 w-full rounded-2xl border border-line bg-surface/80 px-4 py-3 font-medium outline-none transition focus:border-accent focus:ring-4 focus:ring-yellow-400/10"
+            className="mt-2 w-full rounded-2xl border border-line bg-surface/80 px-4 py-3 font-medium outline-none transition focus:border-accent focus:ring-4 focus:ring-accent/20"
           >
             <option value="">Any prep time</option>
             {prepTimeFilterOptions.map((option) => (
@@ -124,7 +124,7 @@ export function RecipeFiltersPanel({
             onChange={(event) =>
               onChange(updateFilter(filters, "protein", event.target.value))
             }
-            className="mt-2 w-full rounded-2xl border border-line bg-surface/80 px-4 py-3 font-medium outline-none transition focus:border-accent focus:ring-4 focus:ring-yellow-400/10"
+            className="mt-2 w-full rounded-2xl border border-line bg-surface/80 px-4 py-3 font-medium outline-none transition focus:border-accent focus:ring-4 focus:ring-accent/20"
           >
             <option value="">Any protein</option>
             {proteinFilterOptions.map((option) => (

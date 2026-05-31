@@ -17,10 +17,12 @@ export default {
         accent: "var(--accent)",
         "accent-strong": "var(--accent-strong)",
         sun: "var(--sun)",
-        "soft-yellow": "#fef3c7",
+        energy: "var(--energy)",
+        "soft-yellow": "#cffafe",
         surface: "var(--surface)",
         success: "var(--success)",
         danger: "var(--danger)",
+        warning: "var(--warning)",
       },
       fontFamily: {
         sans: ["Satoshi", "Aptos Display", "Avenir", "Segoe UI", "sans-serif"],

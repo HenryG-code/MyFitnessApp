@@ -3,17 +3,19 @@
 @tailwind utilities;
 
 :root {
-  --background: #080807;
-  --foreground: #f8f7f2;
-  --card: #1a1a18;
-  --muted: #a8a29e;
-  --line: #2a2a24;
-  --accent: #facc15;
-  --accent-strong: #eab308;
-  --sun: #facc15;
-  --surface: #121212;
+  --background: #050505;
+  --foreground: #f8fafc;
+  --card: #18181f;
+  --muted: #a1a1aa;
+  --line: #2a2a33;
+  --accent: #00e5ff;
+  --accent-strong: #a855f7;
+  --sun: #a855f7;
+  --surface: #101014;
+  --energy: #ff2d55;
   --success: #22c55e;
   --danger: #ef4444;
+  --warning: #f97316;
 }
 
 * {
@@ -23,10 +25,10 @@
 body {
   color: var(--foreground);
   background:
-    radial-gradient(circle at top left, rgba(250, 204, 21, 0.18), transparent 30rem),
-    radial-gradient(circle at 85% 5%, rgba(234, 179, 8, 0.12), transparent 34rem),
-    radial-gradient(circle at 25% 95%, rgba(250, 204, 21, 0.08), transparent 28rem),
-    linear-gradient(135deg, #080807 0%, #10100f 48%, #141410 100%);
+    radial-gradient(circle at top left, rgba(0, 229, 255, 0.16), transparent 30rem),
+    radial-gradient(circle at 85% 5%, rgba(168, 85, 247, 0.16), transparent 34rem),
+    radial-gradient(circle at 25% 95%, rgba(255, 45, 85, 0.1), transparent 28rem),
+    linear-gradient(135deg, #050505 0%, #0a0a0d 48%, #101014 100%);
   font-family: Satoshi, "Aptos Display", Avenir, "Segoe UI", sans-serif;
 }
 
@@ -36,7 +38,7 @@ a {
 }
 
 ::selection {
-  background: rgba(250, 204, 21, 0.28);
+  background: rgba(0, 229, 255, 0.28);
 }
 
 input,
@@ -57,7 +59,7 @@ textarea {
 .bg-stone-100,
 .bg-stone-200,
 .bg-amber-50\/80 {
-  background-color: rgba(250, 204, 21, 0.1) !important;
+  background-color: rgba(0, 229, 255, 0.08) !important;
 }
 
 .bg-red-50 {
@@ -77,22 +79,76 @@ textarea {
 }
 
 .bg-accent,
-.bg-sun {
+.bg-accent {
   color: #080807 !important;
+}
+
+.bg-sun {
+  color: #f8fafc !important;
 }
 
 .text-accent,
-.text-accent-strong,
-.text-sun {
-  color: #facc15 !important;
+.text-accent {
+  color: #00e5ff !important;
 }
 
-.hover\:bg-accent:hover,
-.hover\:bg-accent-strong:hover {
-  background-color: #eab308 !important;
+.text-accent-strong,
+.text-sun {
+  color: #a855f7 !important;
+}
+
+.hover\:bg-accent:hover {
+  background-color: #00e5ff !important;
   color: #080807 !important;
 }
 
+.hover\:bg-accent-strong:hover {
+  background-color: #a855f7 !important;
+  color: #f8fafc !important;
+}
+
 .focus\:border-accent:focus {
-  border-color: #facc15 !important;
+  border-color: #00e5ff !important;
+}
+
+@keyframes liftlog-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes liftlog-pulse-glow {
+  0%,
+  100% {
+    box-shadow: 0 0 0 rgba(0, 229, 255, 0);
+  }
+
+  50% {
+    box-shadow: 0 0 28px rgba(0, 229, 255, 0.22);
+  }
+}
+
+.liftlog-enter {
+  animation: liftlog-fade-up 420ms ease-out both;
+}
+
+.liftlog-glow {
+  animation: liftlog-pulse-glow 2.8s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
 }

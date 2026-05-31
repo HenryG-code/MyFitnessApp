@@ -8,7 +8,7 @@ type FitnessCardProps = {
 export function FitnessCard({ children, className = "" }: FitnessCardProps) {
   return (
     <section
-      className={`rounded-[1.75rem] border border-line/90 bg-card/90 p-5 shadow-[0_24px_80px_rgba(0,0,0,0.34)] ring-1 ring-white/[0.03] backdrop-blur transition duration-200 ${className}`}
+      className={`liftlog-enter rounded-[1.75rem] border border-line/90 bg-card/90 p-5 shadow-[0_24px_80px_rgba(0,0,0,0.34)] ring-1 ring-white/[0.03] backdrop-blur transition duration-200 ${className}`}
     >
       {children}
     </section>
@@ -25,7 +25,7 @@ type MetricCardProps = {
 
 const toneStyles = {
   yellow: "bg-accent text-stone-950",
-  amber: "bg-sun text-stone-950",
+  amber: "bg-sun text-white",
   ink: "bg-surface text-sun border border-line",
 };
 

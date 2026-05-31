@@ -165,7 +165,7 @@ export function AppShell({
                 href={item.href}
                 className={`flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-bold transition ${
                   active
-                    ? "bg-accent text-stone-950 shadow-lg shadow-yellow-950/20"
+                    ? "bg-accent text-stone-950 shadow-lg shadow-accent/20"
                     : "text-muted hover:bg-white/10 hover:text-foreground"
                 }`}
               >
@@ -258,7 +258,7 @@ export function AppShell({
               </Link>
               <Link
                 href="/workouts/new"
-                className="grid size-11 place-items-center rounded-2xl bg-accent text-stone-950 shadow-lg shadow-yellow-950/20"
+                className="grid size-11 place-items-center rounded-2xl bg-accent text-stone-950 shadow-lg shadow-accent/20"
                 aria-label="Add workout"
               >
                 <Plus className="size-5" />

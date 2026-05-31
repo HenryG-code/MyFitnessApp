@@ -104,7 +104,7 @@ export function InstallAppCard() {
       <button
         type="button"
         onClick={() => void handleInstallClick()}
-        className="w-full rounded-2xl bg-accent px-5 py-3 text-sm font-black text-stone-950 shadow-lg shadow-yellow-950/20 transition hover:-translate-y-0.5 hover:bg-accent-strong"
+        className="w-full rounded-2xl bg-accent px-5 py-3 text-sm font-black text-stone-950 shadow-lg shadow-accent/20 transition hover:-translate-y-0.5 hover:bg-accent-strong"
       >
         Install app
       </button>

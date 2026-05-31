@@ -28,6 +28,7 @@ import {
   Scale,
   Settings,
   ShoppingBasket,
+  Sparkles,
   Sprout,
   Target,
   Trophy,
@@ -107,6 +108,40 @@ function getGoalSummary(latestWeight: number | null, goalWeight: number | null) 
   };
 }
 
+function getMotivationMessage({
+  completedHabits,
+  habitPercent,
+  latestWeightValue,
+  weeklyWorkouts,
+}: {
+  completedHabits: number;
+  habitPercent: number;
+  latestWeightValue: number | null;
+  weeklyWorkouts: number;
+}) {
+  if (completedHabits === 7) {
+    return "Congratulations. You hit every habit today.";
+  }
+
+  if (weeklyWorkouts >= 4) {
+    return "Strong week. You are building real momentum.";
+  }
+
+  if (habitPercent >= 70) {
+    return "Good consistency today. Keep the streak alive.";
+  }
+
+  if (weeklyWorkouts === 0) {
+    return "Start small today. One logged session beats zero.";
+  }
+
+  if (latestWeightValue === null) {
+    return "Add a weight check-in to start tracking your trend.";
+  }
+
+  return "Keep moving. Small logged wins compound.";
+}
+
 export function DashboardOverview() {
   const [data, setData] = useState<DashboardData | null>(null);
   const [error, setError] = useState("");
@@ -158,6 +193,12 @@ export function DashboardOverview() {
   const goalSummary = getGoalSummary(latestWeightValue, data?.goalWeightKg ?? null);
   const weightProgress = data ? calculateWeightProgress(data) : null;
   const weightLogsThisWeek = data?.recentWeights.length ?? 0;
+  const motivationMessage = getMotivationMessage({
+    completedHabits,
+    habitPercent,
+    latestWeightValue,
+    weeklyWorkouts: weeklyWorkoutStats.workoutsCompleted,
+  });
 
   return (
     <div className="space-y-5">
@@ -233,6 +274,32 @@ export function DashboardOverview() {
           <p className="text-sm font-black text-muted">
             Loading dashboard data...
           </p>
+        </FitnessCard>
+      ) : null}
+
+      {!isLoading && !error ? (
+        <FitnessCard className="border-accent/30 bg-gradient-to-r from-accent/15 via-white/[0.04] to-sun/15 liftlog-glow">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-start gap-4">
+              <span className="grid size-12 shrink-0 place-items-center rounded-2xl bg-accent text-stone-950 shadow-lg shadow-accent/20">
+                <Sparkles className="size-5" />
+              </span>
+              <div>
+                <p className="text-xs font-black uppercase tracking-[0.22em] text-accent">
+                  Today&apos;s push
+                </p>
+                <h2 className="mt-2 font-display text-2xl font-black">
+                  {motivationMessage}
+                </h2>
+              </div>
+            </div>
+            <Link
+              href="/workouts/new"
+              className="inline-flex items-center justify-center rounded-2xl bg-accent px-4 py-3 text-sm font-black text-stone-950 transition hover:-translate-y-0.5 hover:bg-accent-strong"
+            >
+              Log a win
+            </Link>
+          </div>
         </FitnessCard>
       ) : null}
 

@@ -105,7 +105,7 @@ export function TrainingPlanPage() {
         </div>
       </HeroPanel>
 
-      <FitnessCard className="border-amber-200 bg-amber-50/80">
+      <FitnessCard className="border-warning/30 bg-warning/10">
         <div className="flex items-start gap-3">
           <span className="grid size-11 shrink-0 place-items-center rounded-2xl bg-sun text-stone-950">
             <AlertTriangle className="size-5" />

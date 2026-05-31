@@ -111,7 +111,7 @@ export function WeightLogForm({
             type="number"
             step="0.1"
             min="0"
-            className="mt-2 w-full rounded-2xl border border-line bg-surface/80 px-4 py-3 outline-none transition focus:border-accent focus:ring-4 focus:ring-yellow-400/10"
+            className="mt-2 w-full rounded-2xl border border-line bg-surface/80 px-4 py-3 outline-none transition focus:border-accent focus:ring-4 focus:ring-accent/20"
             placeholder="78.4"
             {...register("weight_kg", { valueAsNumber: true })}
           />
@@ -129,7 +129,7 @@ export function WeightLogForm({
           <input
             id={`${mode}-logged-at`}
             type="date"
-            className="mt-2 w-full rounded-2xl border border-line bg-surface/80 px-4 py-3 outline-none transition focus:border-accent focus:ring-4 focus:ring-yellow-400/10"
+            className="mt-2 w-full rounded-2xl border border-line bg-surface/80 px-4 py-3 outline-none transition focus:border-accent focus:ring-4 focus:ring-accent/20"
             {...register("logged_at")}
           />
           {errors.logged_at ? (
@@ -147,7 +147,7 @@ export function WeightLogForm({
         <textarea
           id={`${mode}-notes`}
           rows={mode === "edit" ? 3 : 4}
-          className="mt-2 w-full rounded-2xl border border-line bg-surface/80 px-4 py-3 outline-none transition focus:border-accent focus:ring-4 focus:ring-yellow-400/10"
+          className="mt-2 w-full rounded-2xl border border-line bg-surface/80 px-4 py-3 outline-none transition focus:border-accent focus:ring-4 focus:ring-accent/20"
           placeholder="Optional context, like morning weigh-in or post-travel."
           {...register("notes")}
         />
@@ -168,7 +168,7 @@ export function WeightLogForm({
         <button
           type="submit"
           disabled={isSubmitting}
-          className="rounded-2xl bg-accent px-5 py-3 text-sm font-black text-stone-950 shadow-lg shadow-yellow-950/20 transition hover:-translate-y-0.5 hover:bg-accent-strong disabled:cursor-not-allowed disabled:opacity-70"
+          className="rounded-2xl bg-accent px-5 py-3 text-sm font-black text-stone-950 shadow-lg shadow-accent/20 transition hover:-translate-y-0.5 hover:bg-accent-strong disabled:cursor-not-allowed disabled:opacity-70"
         >
           {isSubmitting
             ? mode === "edit"

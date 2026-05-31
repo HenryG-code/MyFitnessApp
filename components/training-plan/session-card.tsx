@@ -117,7 +117,7 @@ export function SessionCard({ plan, session }: SessionCardProps) {
           Workout logged.{" "}
           <Link
             href={`/workouts/${createdWorkoutId}`}
-            className="font-black underline decoration-yellow-200/60 underline-offset-4"
+            className="font-black underline decoration-accent/60 underline-offset-4"
           >
             View workout
           </Link>
