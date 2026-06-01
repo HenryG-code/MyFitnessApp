@@ -257,19 +257,21 @@ export function WeightTracker() {
         <FitnessCard>
           <SectionHeader eyebrow="Trend" title="Weight over time" />
           {isLoading ? (
-            <div className="grid h-64 place-items-center rounded-[1.5rem] bg-stone-100 text-sm font-black text-muted">
+            <div className="grid h-[18rem] place-items-center rounded-[1.5rem] bg-surface/80 text-sm font-black text-muted sm:h-[20rem] lg:h-[24rem]">
               Loading chart...
             </div>
-          ) : logs.length ? (
+          ) : logs.length > 1 ? (
             <WeightTrendChart data={chartData} />
           ) : (
-            <div className="grid h-64 place-items-center rounded-[1.5rem] bg-stone-100 p-6 text-center">
+            <div className="grid h-[18rem] place-items-center rounded-[1.5rem] border border-line bg-surface/80 p-6 text-center sm:h-[20rem] lg:h-[24rem]">
               <div>
                 <p className="font-display text-xl font-black">
-                  No weight logs yet.
+                  {logs.length === 1
+                    ? "One check-in logged."
+                    : "No weight logs yet."}
                 </p>
                 <p className="mt-2 text-sm leading-6 text-muted">
-                  Add your first weight check-in to start your trend.
+                  Add more weight check-ins to see your trend.
                 </p>
               </div>
             </div>

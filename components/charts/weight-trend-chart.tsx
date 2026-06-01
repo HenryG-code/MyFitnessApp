@@ -23,13 +23,18 @@ export function WeightTrendChart({ data }: { data: WeightPoint[] }) {
   );
 
   if (!mounted) {
-    return <div className="h-64 w-full rounded-[1.5rem] bg-surface" />;
+    return (
+      <div className="h-[18rem] w-full rounded-[1.5rem] bg-surface sm:h-[20rem] lg:h-[24rem]" />
+    );
   }
 
   return (
-    <div className="h-64 w-full">
+    <div className="h-[18rem] w-full min-w-0 sm:h-[20rem] lg:h-[24rem]">
       <ResponsiveContainer width="100%" height="100%">
-        <LineChart data={data} margin={{ top: 8, right: 8, left: -18, bottom: 0 }}>
+        <LineChart
+          data={data}
+          margin={{ top: 16, right: 18, left: 0, bottom: 8 }}
+        >
           <XAxis
             dataKey="logged_at"
             axisLine={false}
