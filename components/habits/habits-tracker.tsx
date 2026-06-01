@@ -258,6 +258,13 @@ export function HabitsTracker() {
         </p>
       ) : null}
 
+      {todaySummary.total > 0 && todaySummary.completed === todaySummary.total ? (
+        <p className="liftlog-complete-pulse rounded-[1.5rem] border border-accent/30 bg-gradient-to-r from-accent/20 to-sun/15 p-4 text-sm font-black text-soft-yellow">
+          Full routine complete. That is the kind of boring consistency that
+          wins.
+        </p>
+      ) : null}
+
       {error ? (
         <p className="rounded-[1.5rem] border border-red-100 bg-red-50 p-4 text-sm font-black text-red-700">
           {error}

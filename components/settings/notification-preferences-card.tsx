@@ -269,7 +269,11 @@ export function NotificationPreferencesCard() {
         {reminderOptions.map((option) => (
           <label
             key={option.key}
-            className="flex cursor-pointer items-start gap-3 rounded-[1.25rem] border border-line bg-white/65 p-4 transition hover:-translate-y-0.5 hover:border-accent"
+            className={`flex cursor-pointer items-start gap-3 rounded-[1.25rem] border p-4 transition hover:-translate-y-0.5 hover:border-accent ${
+              preferences[option.key]
+                ? "liftlog-complete-pulse border-accent/30 bg-accent/10"
+                : "border-line bg-white/65"
+            }`}
           >
             <input
               type="checkbox"
@@ -299,7 +303,7 @@ export function NotificationPreferencesCard() {
       ) : null}
 
       {message ? (
-        <p className="rounded-2xl border border-accent/20 bg-accent/10 p-4 text-sm font-black text-accent">
+        <p className="liftlog-pop-in rounded-2xl border border-accent/20 bg-accent/10 p-4 text-sm font-black text-accent">
           {message}
         </p>
       ) : null}

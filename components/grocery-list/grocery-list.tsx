@@ -46,6 +46,7 @@ export function GroceryList({ recipes }: GroceryListProps) {
   const [checkedItems, setCheckedItems] = useState<CheckedGroceryItems>({});
   const [hideCheckedItems, setHideCheckedItems] = useState(false);
   const [hasLoadedStorage, setHasLoadedStorage] = useState(false);
+  const [statusMessage, setStatusMessage] = useState("");
 
   useEffect(() => {
     let isMounted = true;
@@ -117,6 +118,7 @@ export function GroceryList({ recipes }: GroceryListProps) {
       ...currentItems,
       [id]: checked,
     }));
+    setStatusMessage(checked ? "Item checked off." : "Item returned to the list.");
   }
 
   function clearCheckedFromView() {
@@ -128,6 +130,7 @@ export function GroceryList({ recipes }: GroceryListProps) {
 
     if (confirmed) {
       setHideCheckedItems(true);
+      setStatusMessage("Checked items hidden.");
     }
   }
 
@@ -145,6 +148,7 @@ export function GroceryList({ recipes }: GroceryListProps) {
     setCheckedItems({});
     setHideCheckedItems(false);
     clearCheckedGroceryItems();
+    setStatusMessage("Checked states reset.");
   }
 
   if (hasLoadedStorage && plannedMealsCount === 0) {
@@ -176,6 +180,12 @@ export function GroceryList({ recipes }: GroceryListProps) {
   return (
     <div className="space-y-5">
       <GrocerySummary summary={summary} />
+
+      {statusMessage ? (
+        <p className="liftlog-pop-in rounded-[1.5rem] border border-accent/25 bg-accent/10 p-4 text-sm font-black text-soft-yellow">
+          {statusMessage}
+        </p>
+      ) : null}
 
       <section className="flex flex-col gap-3 rounded-[1.75rem] border border-line/80 bg-card/85 p-5 shadow-[0_20px_60px_rgba(23,33,28,0.08)] sm:flex-row sm:items-center sm:justify-between">
         <div>

@@ -296,7 +296,10 @@ export function DashboardOverview() {
                 <p className="text-xs font-black uppercase tracking-[0.22em] text-accent">
                   Today&apos;s push
                 </p>
-                <h2 className="mt-2 font-display text-2xl font-black">
+                <h2
+                  key={motivationMessage}
+                  className="liftlog-slide-in mt-2 font-display text-2xl font-black"
+                >
                   {motivationMessage}
                 </h2>
               </div>
@@ -401,7 +404,10 @@ export function DashboardOverview() {
                   <p className="text-xs font-black uppercase tracking-[0.16em]">
                     Calories
                   </p>
-                  <p className="mt-2 font-display text-3xl font-black">
+                  <p
+                    key={todayMacros.calories}
+                    className="liftlog-number-change mt-2 font-display text-3xl font-black"
+                  >
                     {formatNumber(todayMacros.calories)}
                   </p>
                 </div>
@@ -417,7 +423,10 @@ export function DashboardOverview() {
                     <p className="text-xs font-black uppercase tracking-[0.16em] text-muted">
                       {item.label}
                     </p>
-                    <p className="mt-2 font-display text-3xl font-black">
+                    <p
+                      key={item.value}
+                      className="liftlog-number-change mt-2 font-display text-3xl font-black"
+                    >
                       {item.value}
                     </p>
                   </div>
@@ -469,7 +478,10 @@ export function DashboardOverview() {
               <p className="mt-3 text-xs font-black uppercase tracking-[0.16em] text-muted">
                 Weekly calories
               </p>
-              <p className="mt-2 font-display text-2xl font-black">
+              <p
+                key={weeklyMacros.weeklyCalories}
+                className="liftlog-number-change mt-2 font-display text-2xl font-black"
+              >
                 {formatNumber(weeklyMacros.weeklyCalories)}
               </p>
             </div>
@@ -478,7 +490,10 @@ export function DashboardOverview() {
               <p className="mt-3 text-xs font-black uppercase tracking-[0.16em] text-muted">
                 Planned meals
               </p>
-              <p className="mt-2 font-display text-2xl font-black">
+              <p
+                key={weeklyMacros.plannedMealsCount}
+                className="liftlog-number-change mt-2 font-display text-2xl font-black"
+              >
                 {weeklyMacros.plannedMealsCount}
               </p>
             </div>

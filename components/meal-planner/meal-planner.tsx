@@ -37,6 +37,7 @@ type MealPlannerProps = {
 export function MealPlanner({ recipes }: MealPlannerProps) {
   const [plan, setPlan] = useState<MealPlanState>(() => createEmptyMealPlan());
   const [hasLoadedPlan, setHasLoadedPlan] = useState(false);
+  const [statusMessage, setStatusMessage] = useState("");
   const recipeMap = createRecipeMap(recipes);
   const totals = calculateWeekTotals(plan, recipeMap);
 
@@ -95,6 +96,7 @@ export function MealPlanner({ recipes }: MealPlannerProps) {
         [slot]: slug,
       },
     }));
+    setStatusMessage(slug ? `${day} ${slot.toLowerCase()} planned.` : `${day} ${slot.toLowerCase()} cleared.`);
   }
 
   function clearWeek() {
@@ -107,11 +109,18 @@ export function MealPlanner({ recipes }: MealPlannerProps) {
     const emptyPlan = createEmptyMealPlan();
     setPlan(emptyPlan);
     clearMealPlanStorage();
+    setStatusMessage("Week cleared.");
   }
 
   return (
     <div className="space-y-5">
       <MealPlannerSummary totals={totals} />
+
+      {statusMessage ? (
+        <p className="liftlog-pop-in rounded-[1.5rem] border border-accent/25 bg-accent/10 p-4 text-sm font-black text-soft-yellow">
+          {statusMessage}
+        </p>
+      ) : null}
 
       {totals.plannedMealsCount === 0 ? (
         <section className="rounded-[1.75rem] border border-accent/25 bg-accent/10 p-5">

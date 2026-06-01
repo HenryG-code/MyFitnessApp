@@ -217,7 +217,7 @@ export function AppShell({
         </div>
       </aside>
 
-      <main className="liftlog-page mx-auto w-full max-w-7xl px-4 pb-28 pt-5 sm:px-6 lg:ml-80 lg:mr-6 lg:px-0 lg:pb-10">
+      <main className="mx-auto w-full max-w-7xl px-4 pb-28 pt-5 sm:px-6 lg:ml-80 lg:mr-6 lg:px-0 lg:pb-10">
         <header className="mb-5 rounded-[1.75rem] border border-line/80 bg-card/90 p-4 shadow-[0_18px_60px_rgba(0,0,0,0.32)] backdrop-blur lg:hidden">
           <div className="flex items-center justify-between gap-3">
             <Link href="/dashboard" className="flex items-center gap-3">

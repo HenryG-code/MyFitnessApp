@@ -8,7 +8,7 @@ type FitnessCardProps = {
 export function FitnessCard({ children, className = "" }: FitnessCardProps) {
   return (
     <section
-      className={`liftlog-enter liftlog-card-motion rounded-[1.75rem] border border-transparent bg-gradient-to-br from-card/95 via-card/85 to-surface/80 p-5 shadow-[0_24px_80px_rgba(0,0,0,0.36)] ring-1 ring-white/[0.04] backdrop-blur transition duration-200 ${className}`}
+      className={`liftlog-card-motion rounded-[1.75rem] border border-transparent bg-gradient-to-br from-card/95 via-card/85 to-surface/80 p-5 shadow-[0_24px_80px_rgba(0,0,0,0.36)] ring-1 ring-white/[0.04] backdrop-blur transition duration-200 ${className}`}
     >
       {children}
     </section>
@@ -43,7 +43,10 @@ export function MetricCard({
           <p className="text-xs font-black uppercase tracking-[0.18em] text-muted">
             {label}
           </p>
-          <p className="mt-3 font-display text-3xl font-black tracking-tight text-foreground">
+          <p
+            key={value}
+            className="liftlog-number-change mt-3 font-display text-3xl font-black tracking-tight text-foreground"
+          >
             {value}
           </p>
         </div>

@@ -162,13 +162,13 @@ export function AvatarUploadCard({
       </div>
 
       {message ? (
-        <p className="rounded-2xl border border-accent/25 bg-accent/10 p-3 text-sm font-black text-soft-yellow lg:max-w-xs">
+        <p className="liftlog-pop-in rounded-2xl border border-accent/25 bg-accent/10 p-3 text-sm font-black text-soft-yellow lg:max-w-xs">
           {message}
         </p>
       ) : null}
 
       {error ? (
-        <p className="rounded-2xl border border-red-100 bg-red-50 p-3 text-sm font-black text-red-700 lg:max-w-xs">
+        <p className="liftlog-pop-in rounded-2xl border border-red-100 bg-red-50 p-3 text-sm font-black text-red-700 lg:max-w-xs">
           {error}
         </p>
       ) : null}

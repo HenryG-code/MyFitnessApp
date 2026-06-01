@@ -186,22 +186,6 @@ textarea {
   animation: liftlog-pulse-glow 2.8s ease-in-out infinite;
 }
 
-.liftlog-page > * {
-  animation: liftlog-fade-up 300ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
-}
-
-.liftlog-page > *:nth-child(2) {
-  animation-delay: 45ms;
-}
-
-.liftlog-page > *:nth-child(3) {
-  animation-delay: 90ms;
-}
-
-.liftlog-page > *:nth-child(n + 4) {
-  animation-delay: 120ms;
-}
-
 .liftlog-card-motion {
   transition:
     transform 180ms ease,
@@ -217,7 +201,9 @@ textarea {
 }
 
 .liftlog-hero-motion {
-  animation: liftlog-scale-in 360ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  transition:
+    border-color 180ms ease,
+    box-shadow 180ms ease;
 }
 
 .liftlog-pop-in {
@@ -229,12 +215,23 @@ textarea {
 }
 
 .liftlog-progress-bar {
-  animation: liftlog-bar-grow 520ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  animation: liftlog-bar-grow 260ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  transition: width 260ms cubic-bezier(0.2, 0.8, 0.2, 1);
   transform-origin: left center;
+}
+
+.liftlog-number-change {
+  animation: liftlog-pop 220ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
 }
 
 .liftlog-complete-pulse {
   animation: liftlog-pulse-glow 850ms ease-out 1;
+}
+
+.liftlog-timer-running {
+  box-shadow:
+    0 0 0 1px rgba(220, 38, 38, 0.18),
+    0 22px 80px rgba(249, 115, 22, 0.15);
 }
 
 .liftlog-nav-item {
@@ -298,6 +295,7 @@ a[href]:active {
 
   .liftlog-card-motion,
   .liftlog-card-motion:hover,
+  .liftlog-timer-running,
   .liftlog-nav-item:hover,
   .liftlog-mobile-nav-item:hover,
   button:not(:disabled):active,

@@ -89,7 +89,7 @@ export function RestTimer() {
   return (
     <section
       className={`rounded-[1.5rem] border border-accent/25 bg-gradient-to-br from-accent/10 via-white/[0.04] to-sun/10 p-4 shadow-[0_18px_60px_rgba(0,0,0,0.25)] transition ${
-        message ? "liftlog-complete-pulse" : ""
+        message ? "liftlog-complete-pulse" : isRunning ? "liftlog-timer-running" : ""
       }`}
     >
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -110,7 +110,10 @@ export function RestTimer() {
           </p>
         </div>
         <div className="text-left sm:text-right">
-          <p className="font-display text-5xl font-black tracking-tight text-foreground">
+          <p
+            key={remaining}
+            className="liftlog-number-change font-display text-5xl font-black tracking-tight text-foreground"
+          >
             {formatTime(remaining)}
           </p>
           <p className="mt-1 text-xs font-black uppercase tracking-[0.18em] text-muted">
