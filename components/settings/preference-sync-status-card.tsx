@@ -87,7 +87,7 @@ export function PreferenceSyncStatusCard() {
           checklist can sync with your account.
         </p>
       </div>
-      <div className="rounded-[1.25rem] border border-line bg-white/65 p-4 text-sm lg:min-w-64">
+      <div className="rounded-[1.25rem] bg-white/[0.055] p-4 text-sm shadow-inner shadow-white/[0.02] lg:min-w-64">
         <p className="font-display text-xl font-black">{statusCopy[status]}</p>
         <p className="mt-2 leading-6 text-muted">
           {message || "Preferences stay available while you use LiftLog."}

@@ -30,7 +30,7 @@ export function DayCard({
   const totals = calculateDayTotals(plan, day, recipeMap);
 
   return (
-    <FitnessCard className="hover:-translate-y-0.5 hover:shadow-[0_28px_80px_rgba(23,33,28,0.12)]">
+    <FitnessCard className="bg-gradient-to-br from-card/95 via-surface/90 to-accent/5 hover:-translate-y-0.5 hover:shadow-[0_28px_80px_rgba(0,0,0,0.42)]">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between xl:flex-col xl:items-start">
         <div>
           <p className="text-xs font-black uppercase tracking-[0.22em] text-accent">
@@ -39,7 +39,7 @@ export function DayCard({
           <h2 className="mt-1 font-display text-2xl font-black">{day}</h2>
         </div>
         <div className="grid grid-cols-2 gap-2 text-sm">
-          <div className="rounded-2xl border border-accent/25 bg-accent/10 px-3 py-2">
+          <div className="rounded-2xl bg-accent/10 px-3 py-2 shadow-inner shadow-white/[0.02]">
             <p className="text-xs font-black uppercase tracking-[0.12em] text-accent-strong">
               Calories
             </p>

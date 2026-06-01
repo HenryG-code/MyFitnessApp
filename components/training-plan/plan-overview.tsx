@@ -32,7 +32,7 @@ export function PlanOverview({ plan }: PlanOverviewProps) {
         </div>
 
         <div className="mt-5 grid gap-3 lg:grid-cols-2">
-          <div className="rounded-[1.25rem] border border-line bg-white/65 p-4">
+          <div className="rounded-[1.25rem] bg-white/[0.055] p-4 shadow-inner shadow-white/[0.02]">
             <p className="text-xs font-black uppercase tracking-[0.18em] text-muted">
               Recommended for
             </p>
@@ -40,7 +40,7 @@ export function PlanOverview({ plan }: PlanOverviewProps) {
               {plan.recommendedFor}
             </p>
           </div>
-          <div className="rounded-[1.25rem] border border-line bg-white/65 p-4">
+          <div className="rounded-[1.25rem] bg-white/[0.055] p-4 shadow-inner shadow-white/[0.02]">
             <p className="text-xs font-black uppercase tracking-[0.18em] text-muted">
               Weekly focus
             </p>

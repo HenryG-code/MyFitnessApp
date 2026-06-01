@@ -397,10 +397,10 @@ export function HabitsTracker() {
                 return (
                   <div
                     key={habit.id}
-                    className={`rounded-[1.5rem] border p-4 transition ${
+                    className={`rounded-[1.5rem] p-4 shadow-inner shadow-white/[0.02] transition ${
                       isComplete
-                        ? "border-accent/35 bg-accent/15"
-                        : "border-line bg-white/65"
+                        ? "border border-accent/35 bg-accent/15"
+                        : "bg-white/[0.055]"
                     }`}
                   >
                     <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">

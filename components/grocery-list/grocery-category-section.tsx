@@ -30,7 +30,7 @@ export function GroceryCategorySection({
   }
 
   return (
-    <FitnessCard className="hover:-translate-y-0.5 hover:shadow-[0_28px_80px_rgba(23,33,28,0.12)]">
+    <FitnessCard className="bg-gradient-to-br from-card/95 via-surface/90 to-white/[0.035] hover:-translate-y-0.5 hover:shadow-[0_28px_80px_rgba(0,0,0,0.42)]">
       <div className="mb-4 flex items-center justify-between gap-4">
         <div>
           <p className="text-xs font-black uppercase tracking-[0.22em] text-accent">

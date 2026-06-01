@@ -313,7 +313,7 @@ export function DashboardOverview() {
         <FitnessCard>
           <SectionHeader eyebrow="Today" title="Your home base" />
           <div className="grid gap-3 sm:grid-cols-3">
-            <div className="rounded-[1.25rem] border border-line bg-white/65 p-4">
+            <div className="rounded-[1.25rem] bg-white/[0.055] p-4 shadow-inner shadow-white/[0.02]">
               <p className="text-xs font-black uppercase tracking-[0.18em] text-muted">
                 Habits
               </p>
@@ -326,7 +326,7 @@ export function DashboardOverview() {
                   : "Build your habit list"}
               </p>
             </div>
-            <div className="rounded-[1.25rem] border border-line bg-white/65 p-4">
+            <div className="rounded-[1.25rem] bg-white/[0.055] p-4 shadow-inner shadow-white/[0.02]">
               <p className="text-xs font-black uppercase tracking-[0.18em] text-muted">
                 This week
               </p>
@@ -335,7 +335,7 @@ export function DashboardOverview() {
               </p>
               <p className="mt-1 text-sm text-muted">workouts logged</p>
             </div>
-            <div className="rounded-[1.25rem] border border-line bg-white/65 p-4">
+            <div className="rounded-[1.25rem] bg-white/[0.055] p-4 shadow-inner shadow-white/[0.02]">
               <p className="text-xs font-black uppercase tracking-[0.18em] text-muted">
                 Latest weight
               </p>
@@ -412,7 +412,7 @@ export function DashboardOverview() {
             >
               Set goal
             </Link>
-          ) : totalWeightChange !== null ? (
+              ) : totalWeightChange !== null ? (
             <p className="mt-3 text-xs font-black uppercase tracking-[0.18em] text-muted">
               Total change: {formatSignedWeight(totalWeightChange)}
             </p>
@@ -499,7 +499,7 @@ export function DashboardOverview() {
           </div>
 
           <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
-            <div className="rounded-[1.25rem] border border-line bg-white/65 p-4">
+            <div className="rounded-[1.25rem] bg-white/[0.055] p-4 shadow-inner shadow-white/[0.02]">
               <div className="flex items-center gap-3">
                 <TrendingUp className="size-5 text-accent" />
                 <p className="font-black">Today habits</p>
@@ -511,7 +511,7 @@ export function DashboardOverview() {
                 />
               </div>
             </div>
-            <div className="rounded-[1.25rem] border border-line bg-white/65 p-4">
+            <div className="rounded-[1.25rem] bg-white/[0.055] p-4 shadow-inner shadow-white/[0.02]">
               <div className="flex items-center gap-3">
                 <CalendarDays className="size-5 text-accent" />
                 <p className="font-black">This week</p>
@@ -528,7 +528,7 @@ export function DashboardOverview() {
       <FitnessCard>
         <SectionHeader eyebrow="Weekly report" title="Last 7 days" />
         <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-          <div className="rounded-[1.25rem] border border-line bg-white/65 p-4">
+          <div className="rounded-[1.25rem] bg-white/[0.055] p-4 shadow-inner shadow-white/[0.02]">
             <p className="text-xs font-black uppercase tracking-[0.18em] text-muted">
               Workouts
             </p>
@@ -537,7 +537,7 @@ export function DashboardOverview() {
               week.
             </p>
           </div>
-          <div className="rounded-[1.25rem] border border-line bg-white/65 p-4">
+          <div className="rounded-[1.25rem] bg-white/[0.055] p-4 shadow-inner shadow-white/[0.02]">
             <p className="text-xs font-black uppercase tracking-[0.18em] text-muted">
               Training time
             </p>
@@ -545,7 +545,7 @@ export function DashboardOverview() {
               You completed {weeklyWorkoutStats.totalMinutes} training minutes.
             </p>
           </div>
-          <div className="rounded-[1.25rem] border border-line bg-white/65 p-4">
+          <div className="rounded-[1.25rem] bg-white/[0.055] p-4 shadow-inner shadow-white/[0.02]">
             <p className="text-xs font-black uppercase tracking-[0.18em] text-muted">
               Habits
             </p>
@@ -554,7 +554,7 @@ export function DashboardOverview() {
               last 7 days.
             </p>
           </div>
-          <div className="rounded-[1.25rem] border border-line bg-white/65 p-4">
+          <div className="rounded-[1.25rem] bg-white/[0.055] p-4 shadow-inner shadow-white/[0.02]">
             <p className="text-xs font-black uppercase tracking-[0.18em] text-muted">
               Weight logs
             </p>
@@ -562,7 +562,7 @@ export function DashboardOverview() {
               You logged weight {weightLogsThisWeek} times this week.
             </p>
           </div>
-          <div className="rounded-[1.25rem] border border-line bg-white/65 p-4">
+          <div className="rounded-[1.25rem] bg-white/[0.055] p-4 shadow-inner shadow-white/[0.02]">
             <p className="text-xs font-black uppercase tracking-[0.18em] text-muted">
               Current weight
             </p>
@@ -575,7 +575,7 @@ export function DashboardOverview() {
                 : "Add your first weight log to unlock weight trends."}
             </p>
           </div>
-          <div className="rounded-[1.25rem] border border-line bg-white/65 p-4">
+          <div className="rounded-[1.25rem] bg-white/[0.055] p-4 shadow-inner shadow-white/[0.02]">
             <p className="text-xs font-black uppercase tracking-[0.18em] text-muted">
               Goal progress
             </p>

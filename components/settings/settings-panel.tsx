@@ -191,7 +191,7 @@ export function SettingsPanel() {
       <FitnessCard>
         <SectionHeader eyebrow="Account details" title="Signed-in profile" />
         <div className="grid gap-3 sm:grid-cols-2">
-          <div className="rounded-[1.25rem] border border-line bg-white/65 p-4">
+          <div className="rounded-[1.25rem] bg-white/[0.055] p-4 shadow-inner shadow-white/[0.02]">
             <p className="text-xs font-black uppercase tracking-[0.18em] text-muted">
               Name
             </p>
@@ -199,7 +199,7 @@ export function SettingsPanel() {
               {profile?.fullName ?? "Signed-in user"}
             </p>
           </div>
-          <div className="rounded-[1.25rem] border border-line bg-white/65 p-4">
+          <div className="rounded-[1.25rem] bg-white/[0.055] p-4 shadow-inner shadow-white/[0.02]">
             <p className="text-xs font-black uppercase tracking-[0.18em] text-muted">
               Email
             </p>
@@ -207,7 +207,7 @@ export function SettingsPanel() {
               {profile?.email ?? "--"}
             </p>
           </div>
-          <div className="rounded-[1.25rem] border border-line bg-white/65 p-4">
+          <div className="rounded-[1.25rem] bg-white/[0.055] p-4 shadow-inner shadow-white/[0.02]">
             <div className="flex items-center gap-3">
               <ShieldCheck className="size-5 text-accent" />
               <div>
@@ -220,7 +220,7 @@ export function SettingsPanel() {
               </div>
             </div>
           </div>
-          <div className="rounded-[1.25rem] border border-line bg-white/65 p-4">
+          <div className="rounded-[1.25rem] bg-white/[0.055] p-4 shadow-inner shadow-white/[0.02]">
             <p className="text-xs font-black uppercase tracking-[0.18em] text-muted">
               Plan
             </p>
@@ -257,7 +257,7 @@ export function SettingsPanel() {
               <Link
                 key={item.href}
                 href={item.href}
-                className="rounded-[1.25rem] border border-line bg-white/65 p-4 transition hover:-translate-y-0.5 hover:border-accent"
+                className="rounded-[1.25rem] bg-white/[0.055] p-4 shadow-inner shadow-white/[0.02] transition hover:-translate-y-0.5 hover:border-accent"
               >
                 <span className="grid size-10 place-items-center rounded-2xl bg-accent text-stone-950">
                   <Icon className="size-4" />

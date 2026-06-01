@@ -29,14 +29,14 @@ export function RecipeCard({ recipe }: RecipeCardProps) {
       </p>
 
       <div className="mt-5 grid grid-cols-2 gap-3">
-        <div className="rounded-2xl border border-line/60 bg-white/70 p-3 shadow-sm">
+        <div className="rounded-2xl bg-white/[0.06] p-3 shadow-inner shadow-white/[0.02]">
           <p className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.14em] text-muted">
             <Flame className="size-4 text-accent" />
             Calories
           </p>
           <p className="mt-2 text-xl font-black">{recipe.calories}</p>
         </div>
-        <div className="rounded-2xl border border-line/60 bg-white/70 p-3 shadow-sm">
+        <div className="rounded-2xl bg-white/[0.06] p-3 shadow-inner shadow-white/[0.02]">
           <p className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.14em] text-muted">
             <Utensils className="size-4 text-accent" />
             Protein
@@ -49,7 +49,7 @@ export function RecipeCard({ recipe }: RecipeCardProps) {
         {recipe.goals.slice(0, 3).map((goal) => (
           <span
             key={goal}
-            className="rounded-full border border-line bg-white/70 px-3 py-1 text-xs font-bold text-muted"
+            className="rounded-full bg-white/[0.07] px-3 py-1 text-xs font-bold text-muted"
           >
             {goal}
           </span>
