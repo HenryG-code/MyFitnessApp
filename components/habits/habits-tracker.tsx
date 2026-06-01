@@ -7,35 +7,39 @@ import {
   SectionHeader,
 } from "@/components/ui/fitness-card";
 import { HeroPanel } from "@/components/ui/hero-panel";
-import type {
-  DailyHabit,
-  HabitKey,
-} from "@/src/lib/supabase/database.types";
 import {
-  ensureHabitRowForDate,
-  fetchRecentHabitHistory,
+  buildHabitDaySummary,
+  createHabitDefinition,
+  ensureDefaultHabits,
+  fetchHabitCompletionsForDate,
+  fetchRecentHabitCompletions,
   getDateDaysAgo,
   getDateInputValue,
-  toggleHabitField,
+  hideHabitDefinition,
+  toggleHabitCompletion,
+  updateHabitDefinition,
 } from "@/src/lib/habits/queries";
+import type {
+  HabitCompletion,
+  HabitDefinition,
+} from "@/src/lib/supabase/database.types";
 import { fitnessImages } from "@/src/lib/visuals/fitness-images";
 import {
   CalendarDays,
   CheckCircle2,
   ClipboardCheck,
-  Moon,
-  Salad,
+  EyeOff,
+  Pencil,
+  Plus,
   Sparkles,
   Sprout,
-  TimerReset,
+  X,
 } from "lucide-react";
-import type { ComponentType, SVGProps } from "react";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
-type HabitCardMeta = {
-  key: HabitKey;
-  label: string;
-  icon: ComponentType<SVGProps<SVGSVGElement>>;
+type HabitFormValues = {
+  name: string;
+  description: string;
 };
 
 type WeeklySummaryPoint = {
@@ -45,22 +49,6 @@ type WeeklySummaryPoint = {
   total: number;
 };
 
-const habits: HabitCardMeta[] = [
-  { key: "sleep_8_hours", label: "Sleep 8 hours", icon: Moon },
-  { key: "trained", label: "Trained", icon: Sparkles },
-  { key: "walked_10k_steps", label: "Walked 10k steps", icon: TimerReset },
-  { key: "ate_healthy", label: "Ate healthy", icon: Salad },
-  {
-    key: "no_late_food",
-    label: "No food 3 hours before bed",
-    icon: CalendarDays,
-  },
-  { key: "limited_alcohol", label: "Limited alcohol", icon: Sprout },
-  { key: "clean_environment", label: "Clean environment", icon: Sparkles },
-];
-
-const habitCount = habits.length;
-
 function formatDate(date: string) {
   return new Intl.DateTimeFormat("en", {
     month: "short",
@@ -68,70 +56,94 @@ function formatDate(date: string) {
   }).format(new Date(`${date}T00:00:00`));
 }
 
-function countCompleted(row: DailyHabit | null) {
-  if (!row) {
-    return 0;
-  }
-
-  return habits.filter((habit) => row[habit.key]).length;
+function getInitialFormValues(habit?: HabitDefinition | null): HabitFormValues {
+  return {
+    name: habit?.name ?? "",
+    description: habit?.description ?? "",
+  };
 }
 
-function getPercentage(completed: number) {
-  return Math.round((completed / habitCount) * 100);
+function getCompletedSet(completions: HabitCompletion[]) {
+  return new Set(
+    completions
+      .filter((completion) => completion.is_completed)
+      .map((completion) => completion.habit_id)
+  );
 }
 
-function getLatestCompletedLabel(row: DailyHabit | null) {
-  if (!row) {
-    return null;
-  }
-
-  return habits
-    .slice()
-    .reverse()
-    .find((habit) => row[habit.key])?.label;
-}
-
-function buildWeeklySummary(history: DailyHabit[]) {
+function buildWeeklySummary(
+  definitions: HabitDefinition[],
+  completions: HabitCompletion[]
+) {
   return Array.from({ length: 7 }, (_item, index) => {
     const date = getDateDaysAgo(6 - index);
-    const row = history.find((habitRow) => habitRow.habit_date === date);
-    const completed = countCompleted(row ?? null);
+    const dayCompletions = completions.filter(
+      (completion) => completion.completed_date === date
+    );
+    const summary = buildHabitDaySummary(date, definitions, dayCompletions);
 
     return {
       date: formatDate(date),
-      percentage: getPercentage(completed),
-      completed,
-      total: habitCount,
+      percentage: summary.percentage,
+      completed: summary.completed,
+      total: summary.total,
     };
   }) satisfies WeeklySummaryPoint[];
 }
 
 export function HabitsTracker() {
   const today = getDateInputValue();
-  const [todayRow, setTodayRow] = useState<DailyHabit | null>(null);
-  const [history, setHistory] = useState<DailyHabit[]>([]);
+  const [definitions, setDefinitions] = useState<HabitDefinition[]>([]);
+  const [todayCompletions, setTodayCompletions] = useState<HabitCompletion[]>([]);
+  const [recentCompletions, setRecentCompletions] = useState<HabitCompletion[]>(
+    []
+  );
+  const [formValues, setFormValues] = useState<HabitFormValues>(
+    getInitialFormValues()
+  );
+  const [editingHabit, setEditingHabit] = useState<HabitDefinition | null>(null);
+  const [isFormOpen, setIsFormOpen] = useState(false);
   const [notice, setNotice] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(true);
-  const [updatingHabitKey, setUpdatingHabitKey] = useState<HabitKey | null>(
-    null
+  const [savingHabitId, setSavingHabitId] = useState<string | null>(null);
+  const [isSavingForm, setIsSavingForm] = useState(false);
+
+  const activeDefinitions = useMemo(
+    () => definitions.filter((habit) => habit.is_active),
+    [definitions]
   );
+  const completedHabitIds = useMemo(
+    () => getCompletedSet(todayCompletions),
+    [todayCompletions]
+  );
+  const todaySummary = buildHabitDaySummary(
+    today,
+    activeDefinitions,
+    todayCompletions
+  );
+  const weeklySummary = buildWeeklySummary(activeDefinitions, recentCompletions);
+  const latestCompletedHabit = activeDefinitions
+    .slice()
+    .reverse()
+    .find((habit) => completedHabitIds.has(habit.id));
 
   async function refreshHabits() {
     setError("");
 
     try {
-      const [row, recentHistory] = await Promise.all([
-        ensureHabitRowForDate(today),
-        fetchRecentHabitHistory(7),
+      const habitDefinitions = await ensureDefaultHabits();
+      const [dateCompletions, recentHistory] = await Promise.all([
+        fetchHabitCompletionsForDate(today),
+        fetchRecentHabitCompletions(7),
       ]);
-      setTodayRow(row);
-      setHistory(recentHistory);
+
+      setDefinitions(habitDefinitions);
+      setTodayCompletions(dateCompletions);
+      setRecentCompletions(recentHistory);
     } catch (loadError) {
       setError(
-        loadError instanceof Error
-          ? loadError.message
-          : "Could not load habits."
+        loadError instanceof Error ? loadError.message : "Could not load habits."
       );
     } finally {
       setIsLoading(false);
@@ -139,58 +151,71 @@ export function HabitsTracker() {
   }
 
   useEffect(() => {
-    let isMounted = true;
-
-    Promise.all([ensureHabitRowForDate(today), fetchRecentHabitHistory(7)])
-      .then(([row, recentHistory]) => {
-        if (isMounted) {
-          setTodayRow(row);
-          setHistory(recentHistory);
-        }
-      })
-      .catch((loadError: unknown) => {
-        if (isMounted) {
-          setError(
-            loadError instanceof Error
-              ? loadError.message
-              : "Could not load habits."
-          );
-        }
-      })
-      .finally(() => {
-        if (isMounted) {
-          setIsLoading(false);
-        }
-      });
-
-    return () => {
-      isMounted = false;
-    };
+    void refreshHabits();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [today]);
 
-  const completedCount = countCompleted(todayRow);
-  const remainingCount = habitCount - completedCount;
-  const percentage = getPercentage(completedCount);
-  const latestCompletedLabel = getLatestCompletedLabel(todayRow);
-  const weeklySummary = buildWeeklySummary(history);
-
-  async function handleToggle(habit: HabitCardMeta) {
-    if (!todayRow) {
-      return;
-    }
-
-    const nextValue = !todayRow[habit.key];
+  function openCreateForm() {
     setError("");
     setNotice("");
-    setUpdatingHabitKey(habit.key);
+    setEditingHabit(null);
+    setFormValues(getInitialFormValues());
+    setIsFormOpen(true);
+  }
+
+  function openEditForm(habit: HabitDefinition) {
+    setError("");
+    setNotice("");
+    setEditingHabit(habit);
+    setFormValues(getInitialFormValues(habit));
+    setIsFormOpen(true);
+  }
+
+  async function handleSubmitHabit() {
+    setError("");
+    setNotice("");
+    setIsSavingForm(true);
 
     try {
-      const updated = await toggleHabitField(today, habit.key, nextValue);
-      setTodayRow(updated);
+      if (editingHabit) {
+        await updateHabitDefinition(editingHabit.id, {
+          name: formValues.name,
+          description: formValues.description || null,
+        });
+        setNotice("Habit updated.");
+      } else {
+        await createHabitDefinition({
+          name: formValues.name,
+          description: formValues.description || null,
+        });
+        setNotice("Habit added.");
+      }
+
+      setIsFormOpen(false);
+      setEditingHabit(null);
+      setFormValues(getInitialFormValues());
+      await refreshHabits();
+    } catch (saveError) {
+      setError(
+        saveError instanceof Error ? saveError.message : "Could not save habit."
+      );
+    } finally {
+      setIsSavingForm(false);
+    }
+  }
+
+  async function handleToggleHabit(habit: HabitDefinition) {
+    const nextValue = !completedHabitIds.has(habit.id);
+    setError("");
+    setNotice("");
+    setSavingHabitId(habit.id);
+
+    try {
+      await toggleHabitCompletion(habit.id, today, nextValue);
       setNotice(
         nextValue
-          ? `${habit.label} marked complete.`
-          : `${habit.label} marked incomplete.`
+          ? `${habit.name} marked complete.`
+          : `${habit.name} marked incomplete.`
       );
       await refreshHabits();
     } catch (toggleError) {
@@ -200,7 +225,33 @@ export function HabitsTracker() {
           : "Could not update this habit."
       );
     } finally {
-      setUpdatingHabitKey(null);
+      setSavingHabitId(null);
+    }
+  }
+
+  async function handleHideHabit(habit: HabitDefinition) {
+    const confirmed = window.confirm(
+      "Hide this habit? It will no longer appear in your daily list."
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    setError("");
+    setNotice("");
+    setSavingHabitId(habit.id);
+
+    try {
+      await hideHabitDefinition(habit.id);
+      setNotice("Habit hidden.");
+      await refreshHabits();
+    } catch (hideError) {
+      setError(
+        hideError instanceof Error ? hideError.message : "Could not hide habit."
+      );
+    } finally {
+      setSavingHabitId(null);
     }
   }
 
@@ -208,15 +259,24 @@ export function HabitsTracker() {
     <div className="space-y-5">
       <HeroPanel
         eyebrow="Habits"
-        title="Build the boring magic."
-        description="Check off the daily habits that support better training, recovery, and consistency."
+        title="Build your daily routine."
+        description="Tap a habit when it is done, add your own routines, and keep the list personal."
         imageSrc={fitnessImages.treadmillRunner}
         imageAlt="Runner training on a treadmill"
         variant="amber"
-      />
+      >
+        <button
+          type="button"
+          onClick={openCreateForm}
+          className="mt-6 inline-flex items-center gap-2 rounded-2xl bg-accent px-5 py-3 text-sm font-black text-white transition hover:-translate-y-0.5 hover:bg-accent-strong"
+        >
+          <Plus className="size-4" />
+          Add habit
+        </button>
+      </HeroPanel>
 
       {notice ? (
-        <p className="rounded-[1.5rem] border border-accent/25 bg-accent/10 p-4 text-sm font-black text-soft-yellow">
+        <p className="rounded-[1.5rem] border border-accent/25 bg-accent/10 p-4 text-sm font-black text-soft-yellow liftlog-enter">
           {notice}
         </p>
       ) : null}
@@ -229,31 +289,31 @@ export function HabitsTracker() {
 
       <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <MetricCard
-          label="Today's completion"
-          value={`${percentage}%`}
-          detail={`${completedCount} of ${habitCount} habits complete.`}
+          label="Today's progress"
+          value={`${todaySummary.percentage}%`}
+          detail={`${todaySummary.completed} of ${todaySummary.total} habits complete.`}
           icon={<Sprout className="size-5" />}
           tone="yellow"
         />
         <MetricCard
           label="Completed"
-          value={`${completedCount}`}
+          value={`${todaySummary.completed}`}
           detail="Checked off today."
           icon={<CheckCircle2 className="size-5" />}
           tone="amber"
         />
         <MetricCard
           label="Remaining"
-          value={`${remainingCount}`}
+          value={`${Math.max(todaySummary.total - todaySummary.completed, 0)}`}
           detail="Still available for a late comeback."
           icon={<ClipboardCheck className="size-5" />}
           tone="ink"
         />
         <MetricCard
           label="Latest completed"
-          value={latestCompletedLabel ?? "--"}
+          value={latestCompletedHabit?.name ?? "--"}
           detail={
-            latestCompletedLabel
+            latestCompletedHabit
               ? "Most recent habit checked off today."
               : "No completed habits yet today."
           }
@@ -262,6 +322,65 @@ export function HabitsTracker() {
         />
       </section>
 
+      {isFormOpen ? (
+        <FitnessCard className="border-accent/25">
+          <div className="flex items-start justify-between gap-3">
+            <SectionHeader
+              eyebrow={editingHabit ? "Edit habit" : "New habit"}
+              title={editingHabit ? "Update routine" : "Add habit"}
+            />
+            <button
+              type="button"
+              onClick={() => setIsFormOpen(false)}
+              className="grid size-10 place-items-center rounded-2xl border border-line bg-white/65 text-muted transition hover:border-accent hover:text-foreground"
+              aria-label="Close habit form"
+            >
+              <X className="size-4" />
+            </button>
+          </div>
+          <div className="mt-4 grid gap-3 md:grid-cols-[1fr_1.4fr_auto]">
+            <label className="block">
+              <span className="text-sm font-black">Habit name</span>
+              <input
+                value={formValues.name}
+                onChange={(event) =>
+                  setFormValues((current) => ({
+                    ...current,
+                    name: event.target.value,
+                  }))
+                }
+                className="mt-2 min-h-12 w-full rounded-2xl border border-line bg-surface/80 px-4 py-3 outline-none transition focus:border-accent focus:ring-4 focus:ring-accent/20"
+                placeholder="Stretch for 10 minutes"
+                maxLength={60}
+              />
+            </label>
+            <label className="block">
+              <span className="text-sm font-black">Description optional</span>
+              <input
+                value={formValues.description}
+                onChange={(event) =>
+                  setFormValues((current) => ({
+                    ...current,
+                    description: event.target.value,
+                  }))
+                }
+                className="mt-2 min-h-12 w-full rounded-2xl border border-line bg-surface/80 px-4 py-3 outline-none transition focus:border-accent focus:ring-4 focus:ring-accent/20"
+                placeholder="Small cue or reason"
+                maxLength={160}
+              />
+            </label>
+            <button
+              type="button"
+              onClick={() => void handleSubmitHabit()}
+              disabled={isSavingForm}
+              className="min-h-12 self-end rounded-2xl bg-accent px-5 py-3 text-sm font-black text-white transition hover:-translate-y-0.5 hover:bg-accent-strong disabled:cursor-not-allowed disabled:opacity-70"
+            >
+              {isSavingForm ? "Saving..." : editingHabit ? "Save" : "Add"}
+            </button>
+          </div>
+        </FitnessCard>
+      ) : null}
+
       <section className="grid gap-5 xl:grid-cols-[1.35fr_0.9fr]">
         <FitnessCard>
           <SectionHeader eyebrow="Today" title={formatDate(today)} />
@@ -269,60 +388,88 @@ export function HabitsTracker() {
             <div className="rounded-[1.5rem] bg-stone-100 p-6 text-sm font-black text-muted">
               Loading today&apos;s habits...
             </div>
-          ) : todayRow ? (
-            <div className="grid gap-4 sm:grid-cols-2">
-              {habits.map((habit) => {
-                const Icon = habit.icon;
-                const isComplete = todayRow[habit.key];
+          ) : activeDefinitions.length ? (
+            <div className="space-y-3">
+              {activeDefinitions.map((habit) => {
+                const isComplete = completedHabitIds.has(habit.id);
+                const isSaving = savingHabitId === habit.id;
 
                 return (
                   <div
-                    key={habit.key}
-                    className="rounded-[1.5rem] border border-line bg-white/65 p-4"
+                    key={habit.id}
+                    className={`rounded-[1.5rem] border p-4 transition ${
+                      isComplete
+                        ? "border-accent/35 bg-accent/15"
+                        : "border-line bg-white/65"
+                    }`}
                   >
-                    <div className="flex items-start justify-between gap-4">
-                      <div className="flex gap-3">
+                    <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                      <button
+                        type="button"
+                        onClick={() => void handleToggleHabit(habit)}
+                        disabled={isSaving}
+                        className="flex min-h-16 flex-1 items-center gap-4 text-left disabled:cursor-not-allowed disabled:opacity-70"
+                      >
                         <span
                           className={`grid size-12 shrink-0 place-items-center rounded-2xl ${
                             isComplete
-                              ? "bg-accent text-stone-950"
+                              ? "bg-accent text-white"
                               : "bg-stone-950 text-sun"
                           }`}
                         >
-                          <Icon className="size-5" />
+                          {isComplete ? (
+                            <CheckCircle2 className="size-6" />
+                          ) : (
+                            <Sparkles className="size-5" />
+                          )}
                         </span>
-                        <div>
-                          <p className="font-display text-lg font-black leading-tight">
-                            {habit.label}
-                          </p>
-                          <p className="mt-1 text-sm font-medium text-muted">
-                            {isComplete ? "Complete" : "Not complete yet"}
-                          </p>
-                        </div>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => void handleToggle(habit)}
-                        disabled={updatingHabitKey === habit.key}
-                        className={`rounded-2xl px-4 py-2 text-sm font-black transition disabled:cursor-not-allowed disabled:opacity-70 ${
-                          isComplete
-                            ? "bg-accent/15 text-soft-yellow hover:bg-white/10"
-                            : "bg-accent text-stone-950 hover:bg-accent-strong"
-                        }`}
-                      >
-                        {updatingHabitKey === habit.key
-                          ? "Saving..."
-                          : isComplete
-                            ? "Undo"
-                            : "Mark done"}
+                        <span>
+                          <span className="block font-display text-xl font-black leading-tight">
+                            {habit.name}
+                          </span>
+                          <span className="mt-1 block text-sm leading-6 text-muted">
+                            {habit.description ||
+                              (isComplete ? "Complete" : "Tap when done.")}
+                          </span>
+                        </span>
                       </button>
-                    </div>
-
-                    <div className="mt-5 h-3 rounded-full bg-stone-200">
-                      <div
-                        className="h-full rounded-full bg-accent"
-                        style={{ width: isComplete ? "100%" : "0%" }}
-                      />
+                      <div className="flex flex-wrap gap-2 sm:justify-end">
+                        <button
+                          type="button"
+                          onClick={() => void handleToggleHabit(habit)}
+                          disabled={isSaving}
+                          className={`rounded-2xl px-4 py-2 text-sm font-black transition disabled:cursor-not-allowed disabled:opacity-70 ${
+                            isComplete
+                              ? "bg-white/10 text-soft-yellow hover:bg-white/15"
+                              : "bg-accent text-white hover:bg-accent-strong"
+                          }`}
+                        >
+                          {isSaving
+                            ? "Saving..."
+                            : isComplete
+                              ? "Undo"
+                              : "Mark done"}
+                        </button>
+                        {!habit.is_default ? (
+                          <button
+                            type="button"
+                            onClick={() => openEditForm(habit)}
+                            className="inline-flex items-center gap-2 rounded-2xl border border-line bg-white/65 px-3 py-2 text-sm font-black text-muted transition hover:border-accent hover:text-foreground"
+                          >
+                            <Pencil className="size-4" />
+                            Edit
+                          </button>
+                        ) : null}
+                        <button
+                          type="button"
+                          onClick={() => void handleHideHabit(habit)}
+                          disabled={isSaving}
+                          className="inline-flex items-center gap-2 rounded-2xl border border-line bg-white/65 px-3 py-2 text-sm font-black text-muted transition hover:border-accent hover:text-foreground disabled:cursor-not-allowed disabled:opacity-70"
+                        >
+                          <EyeOff className="size-4" />
+                          Hide
+                        </button>
+                      </div>
                     </div>
                   </div>
                 );
@@ -331,11 +478,18 @@ export function HabitsTracker() {
           ) : (
             <div className="rounded-[1.5rem] border border-accent/25 bg-accent/10 p-6">
               <p className="font-display text-xl font-black">
-                Today&apos;s habits are getting ready.
+                Your routine is empty.
               </p>
               <p className="mt-2 text-sm leading-6 text-muted">
-                Refresh the page if they do not appear in a moment.
+                Add a habit to start building your daily list.
               </p>
+              <button
+                type="button"
+                onClick={openCreateForm}
+                className="mt-5 inline-flex rounded-2xl bg-accent px-5 py-3 text-sm font-black text-white"
+              >
+                Add habit
+              </button>
             </div>
           )}
         </FitnessCard>

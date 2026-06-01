@@ -66,7 +66,8 @@ Screenshot capture checklist:
 - Weekly report and deterministic progress insights powered by user activity.
 - Profile-backed goal weight shown in dashboard progress.
 - Weight Tracker CRUD with stats and charting.
-- Daily Habits tracking with boolean habit toggles.
+- Flexible Daily Habits tracking with default habits, custom user habits,
+  soft-hide, editing, and per-day completions.
 - Workout Tracker CRUD with workout exercises.
 - Healthy Recipes using static local TypeScript data.
 - Meal Planner with browser `localStorage` persistence.
@@ -109,8 +110,8 @@ The app uses a browser Supabase client from `src/lib/supabase/client.ts`.
 Supabase-backed features fetch only the signed-in user's rows and rely on Row
 Level Security as the final protection layer.
 
-Dashboard insights are deterministic calculations from workouts, daily habits,
-and weight logs. They do not use AI or paid services.
+Dashboard insights are deterministic calculations from workouts, flexible daily
+habits, and weight logs. They do not use AI or paid services.
 
 Recipes and training plan templates are static local TypeScript data in v1.
 Meal Planner, Grocery List checked state, selected training goal, and
@@ -127,6 +128,8 @@ Core tables:
 - `profiles`
 - `weight_logs`
 - `daily_habits`
+- `habit_definitions`
+- `habit_completions`
 - `workouts`
 - `workout_exercises`
 - `user_preferences`
@@ -138,8 +141,71 @@ through their parent workout ownership.
 Profile avatars use Supabase Storage in a public `avatars` bucket. The profile
 row stores the public avatar URL in `profiles.avatar_url`.
 
+Daily habit definitions are created per user. Default habits are inserted the
+first time a user opens Habits, and custom habit completions are stored per
+habit per day. The older `daily_habits` table remains in the schema for
+compatibility while the new flexible habit system is the source of truth going
+forward.
+
 Recipes and training plans are static local data in v1. Meal Planner and Grocery
 List use browser storage as a fallback.
+
+## Flexible Daily Habits
+
+The Habits page now supports user-created habits in addition to the default
+LiftLog routine. Each user gets default habit definitions on first visit, can
+add custom habits, edit custom habit names/descriptions, hide habits they do not
+want, and track completions per habit per day.
+
+New tables:
+
+- `habit_definitions`: user-owned habit list, including default/custom status,
+  active state, description, and sort order.
+- `habit_completions`: one completion state per habit per date.
+
+Run the latest `supabase/schema.sql` in the Supabase SQL Editor if your live
+project does not have these tables yet. The schema keeps `daily_habits` for
+compatibility, but dashboard and habits now use the flexible habit tables.
+
+Core SQL added for this milestone:
+
+```sql
+create table if not exists public.habit_definitions (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users(id) on delete cascade,
+  name text not null,
+  description text,
+  icon text,
+  sort_order integer not null default 0,
+  is_active boolean not null default true,
+  is_default boolean not null default false,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create table if not exists public.habit_completions (
+  id uuid primary key default gen_random_uuid(),
+  habit_id uuid not null references public.habit_definitions(id) on delete cascade,
+  user_id uuid not null references auth.users(id) on delete cascade,
+  completed_date date not null,
+  is_completed boolean not null default true,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  unique (habit_id, completed_date)
+);
+
+create index if not exists habit_definitions_user_id_idx
+  on public.habit_definitions(user_id);
+
+create index if not exists habit_completions_user_date_idx
+  on public.habit_completions(user_id, completed_date);
+
+create index if not exists habit_completions_habit_date_idx
+  on public.habit_completions(habit_id, completed_date);
+
+alter table public.habit_definitions enable row level security;
+alter table public.habit_completions enable row level security;
+```
 
 ## User Preferences Sync
 

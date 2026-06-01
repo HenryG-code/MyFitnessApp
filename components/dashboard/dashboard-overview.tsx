@@ -13,8 +13,10 @@ import {
   calculateWeeklyWorkoutStats,
   calculateWeightProgress,
   countCompletedHabits,
+  countTotalHabits,
   fetchDashboardData,
   generateProgressInsights,
+  getHabitCompletionPercent,
   type DashboardData,
 } from "@/src/lib/dashboard/queries";
 import { fitnessImages } from "@/src/lib/visuals/fitness-images";
@@ -113,13 +115,15 @@ function getMotivationMessage({
   habitPercent,
   latestWeightValue,
   weeklyWorkouts,
+  totalHabits,
 }: {
   completedHabits: number;
   habitPercent: number;
   latestWeightValue: number | null;
   weeklyWorkouts: number;
+  totalHabits: number;
 }) {
-  if (completedHabits === 7) {
+  if (totalHabits > 0 && completedHabits === totalHabits) {
     return "Congratulations. You hit every habit today.";
   }
 
@@ -177,7 +181,8 @@ export function DashboardOverview() {
   }, []);
 
   const completedHabits = countCompletedHabits(data?.todayHabits ?? null);
-  const habitPercent = Math.round((completedHabits / 7) * 100);
+  const totalHabits = countTotalHabits(data?.todayHabits ?? null);
+  const habitPercent = getHabitCompletionPercent(data?.todayHabits ?? null);
   const totalWeightChange =
     data ? calculateWeightProgress(data).totalChange : null;
   const weeklyWorkoutStats = data
@@ -198,6 +203,7 @@ export function DashboardOverview() {
     habitPercent,
     latestWeightValue,
     weeklyWorkouts: weeklyWorkoutStats.workoutsCompleted,
+    totalHabits,
   });
 
   return (
@@ -315,7 +321,9 @@ export function DashboardOverview() {
                 {habitPercent}%
               </p>
               <p className="mt-1 text-sm text-muted">
-                {completedHabits} of 7 complete
+                {totalHabits
+                  ? `${completedHabits} of ${totalHabits} complete`
+                  : "Build your habit list"}
               </p>
             </div>
             <div className="rounded-[1.25rem] border border-line bg-white/65 p-4">
@@ -420,7 +428,11 @@ export function DashboardOverview() {
         <MetricCard
           label="Habit completion"
           value={`${habitPercent}%`}
-          detail={`${completedHabits} of 7 habits complete today.`}
+          detail={
+            totalHabits
+              ? `${completedHabits} of ${totalHabits} habits complete today.`
+              : "Add habits to start tracking today."
+          }
           icon={<Sprout className="size-5" />}
           tone="yellow"
         />

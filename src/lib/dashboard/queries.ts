@@ -1,6 +1,14 @@
 import { createBrowserSupabaseClient } from "@/src/lib/supabase/client";
+import {
+  buildHabitDaySummary,
+  ensureDefaultHabits,
+  getDateDaysAgo,
+  getDateInputValue,
+  type HabitDaySummary,
+} from "@/src/lib/habits/queries";
 import type {
-  DailyHabit,
+  HabitCompletion,
+  HabitDefinition,
   Profile,
   WeightLog,
   Workout,
@@ -12,8 +20,11 @@ export type DashboardData = {
   firstWeight: WeightLog | null;
   latestWeight: WeightLog | null;
   recentWeights: WeightLog[];
-  todayHabits: DailyHabit | null;
-  recentHabits: DailyHabit[];
+  habitDefinitions: HabitDefinition[];
+  todayHabitCompletions: HabitCompletion[];
+  recentHabitCompletions: HabitCompletion[];
+  todayHabits: HabitDaySummary;
+  recentHabits: HabitDaySummary[];
   latestWorkout: Workout | null;
   workoutsThisWeek: Workout[];
   workoutsLastSevenDays: Workout[];
@@ -43,16 +54,6 @@ export type WeightProgress = {
   goalReached: boolean;
 };
 
-export const habitKeys = [
-  "sleep_8_hours",
-  "trained",
-  "walked_10k_steps",
-  "ate_healthy",
-  "no_late_food",
-  "limited_alcohol",
-  "clean_environment",
-] as const;
-
 async function getAuthenticatedUserId() {
   const supabase = createBrowserSupabaseClient();
   const {
@@ -71,19 +72,6 @@ async function getAuthenticatedUserId() {
   return { supabase, userId: user.id };
 }
 
-export function getDateInputValue(date = new Date()) {
-  const month = `${date.getMonth() + 1}`.padStart(2, "0");
-  const day = `${date.getDate()}`.padStart(2, "0");
-
-  return `${date.getFullYear()}-${month}-${day}`;
-}
-
-export function getDateDaysAgo(daysAgo: number) {
-  const date = new Date();
-  date.setDate(date.getDate() - daysAgo);
-  return getDateInputValue(date);
-}
-
 function getStartOfWeekDate() {
   const now = new Date();
   const start = new Date(now);
@@ -93,12 +81,16 @@ function getStartOfWeekDate() {
   return getDateInputValue(start);
 }
 
-export function countCompletedHabits(row: DailyHabit | null) {
-  if (!row) {
-    return 0;
-  }
+export function countCompletedHabits(row: HabitDaySummary | null) {
+  return row?.completed ?? 0;
+}
 
-  return habitKeys.filter((key) => row[key]).length;
+export function countTotalHabits(row: HabitDaySummary | null) {
+  return row?.total ?? 0;
+}
+
+export function getHabitCompletionPercent(row: HabitDaySummary | null) {
+  return row?.percentage ?? 0;
 }
 
 function formatShortDay(value: string) {
@@ -119,12 +111,8 @@ export function buildWeeklyConsistencyData(
   data: DashboardData
 ): WeeklyConsistencyPoint[] {
   return getLastSevenDateValues().map((date) => {
-    const habitRow = data.recentHabits.find(
-      (habit) => habit.habit_date === date
-    );
-    const habitScore = Math.round(
-      (countCompletedHabits(habitRow ?? null) / habitKeys.length) * 100
-    );
+    const habitRow = data.recentHabits.find((habit) => habit.date === date);
+    const habitScore = getHabitCompletionPercent(habitRow ?? null);
     const workoutScore = data.workoutsLastSevenDays.some(
       (workout) => getWorkoutDate(workout) === date
     )
@@ -295,13 +283,16 @@ export async function fetchDashboardData(): Promise<DashboardData> {
   const today = getDateInputValue();
   const sevenDaysAgo = getDateDaysAgo(6);
   const startOfWeek = getStartOfWeekDate();
+  const habitDefinitions = (await ensureDefaultHabits()).filter(
+    (habit) => habit.is_active
+  );
 
   const [
     firstWeightResult,
     latestWeightResult,
     recentWeightsResult,
-    todayHabitsResult,
-    recentHabitsResult,
+    todayHabitCompletionsResult,
+    recentHabitCompletionsResult,
     latestWorkoutResult,
     workoutsThisWeekResult,
     workoutsLastSevenDaysResult,
@@ -331,18 +322,17 @@ export async function fetchDashboardData(): Promise<DashboardData> {
       .lte("logged_at", today)
       .order("logged_at", { ascending: true }),
     supabase
-      .from("daily_habits")
+      .from("habit_completions")
       .select("*")
       .eq("user_id", userId)
-      .eq("habit_date", today)
-      .maybeSingle(),
+      .eq("completed_date", today),
     supabase
-      .from("daily_habits")
+      .from("habit_completions")
       .select("*")
       .eq("user_id", userId)
-      .gte("habit_date", sevenDaysAgo)
-      .lte("habit_date", today)
-      .order("habit_date", { ascending: true }),
+      .gte("completed_date", sevenDaysAgo)
+      .lte("completed_date", today)
+      .order("completed_date", { ascending: true }),
     supabase
       .from("workouts")
       .select("*")
@@ -377,8 +367,8 @@ export async function fetchDashboardData(): Promise<DashboardData> {
     firstWeightResult,
     latestWeightResult,
     recentWeightsResult,
-    todayHabitsResult,
-    recentHabitsResult,
+    todayHabitCompletionsResult,
+    recentHabitCompletionsResult,
     latestWorkoutResult,
     workoutsThisWeekResult,
     workoutsLastSevenDaysResult,
@@ -390,14 +380,29 @@ export async function fetchDashboardData(): Promise<DashboardData> {
     throw new Error(failed.error.message);
   }
 
+  const todayHabitCompletions = todayHabitCompletionsResult.data ?? [];
+  const recentHabitCompletions = recentHabitCompletionsResult.data ?? [];
+  const recentHabits = getLastSevenDateValues().map((date) =>
+    buildHabitDaySummary(
+      date,
+      habitDefinitions,
+      recentHabitCompletions.filter(
+        (completion) => completion.completed_date === date
+      )
+    )
+  );
+
   return {
     profile: profileResult.data,
     goalWeightKg: profileResult.data?.goal_weight_kg ?? null,
     firstWeight: firstWeightResult.data,
     latestWeight: latestWeightResult.data,
     recentWeights: recentWeightsResult.data ?? [],
-    todayHabits: todayHabitsResult.data,
-    recentHabits: recentHabitsResult.data ?? [],
+    habitDefinitions,
+    todayHabitCompletions,
+    recentHabitCompletions,
+    todayHabits: buildHabitDaySummary(today, habitDefinitions, todayHabitCompletions),
+    recentHabits,
     latestWorkout: latestWorkoutResult.data,
     workoutsThisWeek: workoutsThisWeekResult.data ?? [],
     workoutsLastSevenDays: workoutsLastSevenDaysResult.data ?? [],

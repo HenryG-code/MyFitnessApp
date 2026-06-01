@@ -64,6 +64,29 @@ export type DailyHabit = {
   updated_at: string;
 };
 
+export type HabitDefinition = {
+  id: string;
+  user_id: string;
+  name: string;
+  description: string | null;
+  icon: string | null;
+  sort_order: number;
+  is_active: boolean;
+  is_default: boolean;
+  created_at: string;
+  updated_at: string;
+};
+
+export type HabitCompletion = {
+  id: string;
+  habit_id: string;
+  user_id: string;
+  completed_date: string;
+  is_completed: boolean;
+  created_at: string;
+  updated_at: string;
+};
+
 export type UserPreferences = {
   user_id: string;
   selected_training_goal: string | null;
@@ -160,6 +183,37 @@ export type DailyHabitUpdate = Partial<
   Omit<DailyHabit, "id" | "user_id" | "created_at">
 >;
 
+export type HabitDefinitionInsert = {
+  id?: string;
+  user_id: string;
+  name: string;
+  description?: string | null;
+  icon?: string | null;
+  sort_order?: number;
+  is_active?: boolean;
+  is_default?: boolean;
+  created_at?: string;
+  updated_at?: string;
+};
+
+export type HabitDefinitionUpdate = Partial<
+  Omit<HabitDefinition, "id" | "user_id" | "created_at">
+>;
+
+export type HabitCompletionInsert = {
+  id?: string;
+  habit_id: string;
+  user_id: string;
+  completed_date: string;
+  is_completed?: boolean;
+  created_at?: string;
+  updated_at?: string;
+};
+
+export type HabitCompletionUpdate = Partial<
+  Omit<HabitCompletion, "id" | "habit_id" | "user_id" | "created_at">
+>;
+
 export type UserPreferencesInsert = {
   user_id: string;
   selected_training_goal?: string | null;
@@ -237,6 +291,38 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "daily_habits_user_id_fkey";
+            columns: ["user_id"];
+            referencedRelation: "users";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      habit_definitions: {
+        Row: HabitDefinition;
+        Insert: HabitDefinitionInsert;
+        Update: HabitDefinitionUpdate;
+        Relationships: [
+          {
+            foreignKeyName: "habit_definitions_user_id_fkey";
+            columns: ["user_id"];
+            referencedRelation: "users";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      habit_completions: {
+        Row: HabitCompletion;
+        Insert: HabitCompletionInsert;
+        Update: HabitCompletionUpdate;
+        Relationships: [
+          {
+            foreignKeyName: "habit_completions_habit_id_fkey";
+            columns: ["habit_id"];
+            referencedRelation: "habit_definitions";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "habit_completions_user_id_fkey";
             columns: ["user_id"];
             referencedRelation: "users";
             referencedColumns: ["id"];

@@ -76,6 +76,30 @@ create table if not exists public.daily_habits (
   unique (user_id, habit_date)
 );
 
+create table if not exists public.habit_definitions (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users(id) on delete cascade,
+  name text not null,
+  description text,
+  icon text,
+  sort_order integer not null default 0,
+  is_active boolean not null default true,
+  is_default boolean not null default false,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create table if not exists public.habit_completions (
+  id uuid primary key default gen_random_uuid(),
+  habit_id uuid not null references public.habit_definitions(id) on delete cascade,
+  user_id uuid not null references auth.users(id) on delete cascade,
+  completed_date date not null,
+  is_completed boolean not null default true,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  unique (habit_id, completed_date)
+);
+
 create table if not exists public.user_preferences (
   user_id uuid primary key references auth.users(id) on delete cascade,
   selected_training_goal text,
@@ -102,11 +126,22 @@ create index if not exists workout_exercises_workout_idx
 create index if not exists daily_habits_user_date_idx
   on public.daily_habits (user_id, habit_date desc);
 
+create index if not exists habit_definitions_user_id_idx
+  on public.habit_definitions (user_id);
+
+create index if not exists habit_completions_user_date_idx
+  on public.habit_completions (user_id, completed_date);
+
+create index if not exists habit_completions_habit_date_idx
+  on public.habit_completions (habit_id, completed_date);
+
 alter table public.profiles enable row level security;
 alter table public.weight_logs enable row level security;
 alter table public.workouts enable row level security;
 alter table public.workout_exercises enable row level security;
 alter table public.daily_habits enable row level security;
+alter table public.habit_definitions enable row level security;
+alter table public.habit_completions enable row level security;
 alter table public.user_preferences enable row level security;
 
 drop policy if exists "Users can view their own profile" on public.profiles;
@@ -129,6 +164,14 @@ drop policy if exists "Users can view their own daily habits" on public.daily_ha
 drop policy if exists "Users can insert their own daily habits" on public.daily_habits;
 drop policy if exists "Users can update their own daily habits" on public.daily_habits;
 drop policy if exists "Users can delete their own daily habits" on public.daily_habits;
+drop policy if exists "Users can view their own habit definitions" on public.habit_definitions;
+drop policy if exists "Users can insert their own habit definitions" on public.habit_definitions;
+drop policy if exists "Users can update their own habit definitions" on public.habit_definitions;
+drop policy if exists "Users can delete their own habit definitions" on public.habit_definitions;
+drop policy if exists "Users can view their own habit completions" on public.habit_completions;
+drop policy if exists "Users can insert their own habit completions" on public.habit_completions;
+drop policy if exists "Users can update their own habit completions" on public.habit_completions;
+drop policy if exists "Users can delete their own habit completions" on public.habit_completions;
 drop policy if exists "Users can view their own preferences" on public.user_preferences;
 drop policy if exists "Users can insert their own preferences" on public.user_preferences;
 drop policy if exists "Users can update their own preferences" on public.user_preferences;
@@ -254,6 +297,48 @@ create policy "Users can delete their own daily habits"
   on public.daily_habits for delete
   using (auth.uid() = user_id);
 
+create policy "Users can view their own habit definitions"
+  on public.habit_definitions for select
+  to authenticated
+  using (auth.uid() = user_id);
+
+create policy "Users can insert their own habit definitions"
+  on public.habit_definitions for insert
+  to authenticated
+  with check (auth.uid() = user_id);
+
+create policy "Users can update their own habit definitions"
+  on public.habit_definitions for update
+  to authenticated
+  using (auth.uid() = user_id)
+  with check (auth.uid() = user_id);
+
+create policy "Users can delete their own habit definitions"
+  on public.habit_definitions for delete
+  to authenticated
+  using (auth.uid() = user_id);
+
+create policy "Users can view their own habit completions"
+  on public.habit_completions for select
+  to authenticated
+  using (auth.uid() = user_id);
+
+create policy "Users can insert their own habit completions"
+  on public.habit_completions for insert
+  to authenticated
+  with check (auth.uid() = user_id);
+
+create policy "Users can update their own habit completions"
+  on public.habit_completions for update
+  to authenticated
+  using (auth.uid() = user_id)
+  with check (auth.uid() = user_id);
+
+create policy "Users can delete their own habit completions"
+  on public.habit_completions for delete
+  to authenticated
+  using (auth.uid() = user_id);
+
 create policy "Users can view their own preferences"
   on public.user_preferences for select
   using (auth.uid() = user_id);
@@ -284,6 +369,16 @@ create trigger set_weight_logs_updated_at
 drop trigger if exists set_daily_habits_updated_at on public.daily_habits;
 create trigger set_daily_habits_updated_at
   before update on public.daily_habits
+  for each row execute function public.set_updated_at();
+
+drop trigger if exists set_habit_definitions_updated_at on public.habit_definitions;
+create trigger set_habit_definitions_updated_at
+  before update on public.habit_definitions
+  for each row execute function public.set_updated_at();
+
+drop trigger if exists set_habit_completions_updated_at on public.habit_completions;
+create trigger set_habit_completions_updated_at
+  before update on public.habit_completions
   for each row execute function public.set_updated_at();
 
 drop trigger if exists set_user_preferences_updated_at on public.user_preferences;
