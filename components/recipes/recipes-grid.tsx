@@ -50,8 +50,8 @@ export function RecipesGrid({ recipes }: RecipesGridProps) {
             No recipes match those filters.
           </h2>
           <p className="mx-auto mt-2 max-w-lg text-sm leading-6 text-muted">
-            Try clearing one filter or widening the protein/prep target. The
-            recipe goblin is picky, but fair.
+            Try clearing one filter or widening the protein or prep-time
+            target.
           </p>
         </section>
       )}

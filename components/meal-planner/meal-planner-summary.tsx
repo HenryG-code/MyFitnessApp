@@ -24,14 +24,14 @@ export function MealPlannerSummary({ totals }: MealPlannerSummaryProps) {
         tone="amber"
       />
       <MetricCard
-        label="Avg daily calories"
+        label="Average daily calories"
         value={`${totals.averageDailyCalories}`}
         detail="Weekly total divided by 7."
         icon={<Sigma className="size-5" />}
         tone="ink"
       />
       <MetricCard
-        label="Avg daily protein"
+        label="Average daily protein"
         value={`${totals.averageDailyProtein}g`}
         detail="Protein average per day."
         icon={<Sigma className="size-5" />}

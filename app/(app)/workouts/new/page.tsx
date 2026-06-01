@@ -7,8 +7,8 @@ export default function NewWorkoutPage() {
   return (
     <div className="mx-auto max-w-3xl space-y-5">
       <HeroPanel
-        eyebrow="New workout"
-        title="Log the session while it is still warm."
+        eyebrow="Log workout"
+        title="Log your workout"
         description="Save the workout, add exercises, and keep your training history moving."
         imageSrc={fitnessImages.strengthTraining}
         imageAlt="Athlete logging a strength workout"

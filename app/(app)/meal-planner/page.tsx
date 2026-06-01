@@ -39,8 +39,8 @@ export default function MealPlannerPage() {
           </div>
           <div className="rounded-[1.5rem] bg-white/10 p-4">
             <Sparkles className="size-5 text-sun" />
-            <p className="mt-3 text-2xl font-black">Saved</p>
-            <p className="text-sm text-stone-300">Available on this device</p>
+            <p className="mt-3 text-2xl font-black">Portable</p>
+            <p className="text-sm text-stone-300">Ready when you return</p>
           </div>
         </div>
       </HeroPanel>

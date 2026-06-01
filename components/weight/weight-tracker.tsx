@@ -269,7 +269,7 @@ export function WeightTracker() {
                   No weight logs yet.
                 </p>
                 <p className="mt-2 text-sm leading-6 text-muted">
-                  Add your first log and the chart will wake up.
+                  Add your first weight check-in to start your trend.
                 </p>
               </div>
             </div>
@@ -372,8 +372,8 @@ export function WeightTracker() {
               Your weight log is empty.
             </p>
             <p className="mt-2 text-sm leading-6 text-muted">
-              Add a check-in above. One dot today, a trend tomorrow. Tiny data
-              goblin, very helpful.
+              Add a check-in above. One entry today becomes a clearer trend
+              over time.
             </p>
           </div>
         )}

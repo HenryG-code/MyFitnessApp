@@ -236,7 +236,7 @@ export function HabitsTracker() {
     <div className="space-y-5">
       <HeroPanel
         eyebrow="Habits"
-        title="Build your daily routine."
+        title="Build your daily routine"
         description="Tap a habit when it is done, add your own routines, and keep the list personal."
         imageSrc={fitnessImages.treadmillRunner}
         imageAlt="Runner training on a treadmill"
@@ -273,11 +273,11 @@ export function HabitsTracker() {
 
       <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <MetricCard
-          label="Today's progress"
+          label="Today's habit completion"
           value={`${todaySummary.percentage}%`}
           detail={
             todaySummary.total
-              ? `${todaySummary.completed} of ${todaySummary.total} habits complete.`
+              ? `${todaySummary.completed} of ${todaySummary.total} habits completed.`
               : "No active habits yet. Add a habit to start tracking your routine."
           }
           icon={<Sprout className="size-5" />}
@@ -293,7 +293,7 @@ export function HabitsTracker() {
         <MetricCard
           label="Remaining"
           value={`${Math.max(todaySummary.total - todaySummary.completed, 0)}`}
-          detail="Still available for a late comeback."
+          detail="Still available today."
           icon={<ClipboardCheck className="size-5" />}
           tone="ink"
         />
@@ -314,7 +314,7 @@ export function HabitsTracker() {
         <FitnessCard className="border-accent/25">
           <div className="flex items-start justify-between gap-3">
             <SectionHeader
-              eyebrow={editingHabit ? "Edit habit" : "New habit"}
+              eyebrow={editingHabit ? "Edit habit" : "Add habit"}
               title={editingHabit ? "Update routine" : "Add habit"}
             />
             <button
@@ -371,7 +371,7 @@ export function HabitsTracker() {
 
       <section className="grid gap-5 xl:grid-cols-[1.35fr_0.9fr]">
         <FitnessCard>
-          <SectionHeader eyebrow="Today" title={formatDate(today)} />
+          <SectionHeader eyebrow="Today's habits" title={formatDate(today)} />
           {isLoading ? (
             <div className="rounded-[1.5rem] bg-stone-100 p-6 text-sm font-black text-muted">
               Loading today&apos;s habits...
@@ -417,7 +417,7 @@ export function HabitsTracker() {
                           </span>
                           <span className="mt-1 block text-sm leading-6 text-muted">
                             {habit.description ||
-                              (isComplete ? "Complete" : "Tap when done.")}
+                              (isComplete ? "Completed" : "Tap when done.")}
                           </span>
                         </span>
                       </button>
@@ -483,7 +483,7 @@ export function HabitsTracker() {
         </FitnessCard>
 
         <FitnessCard>
-          <SectionHeader eyebrow="7-day summary" title="Completion trend" />
+          <SectionHeader eyebrow="7-day summary" title="Habit completion trend" />
           {isLoading ? (
             <div className="grid h-64 place-items-center rounded-[1.5rem] bg-stone-100 text-sm font-black text-muted">
               Loading summary...

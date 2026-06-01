@@ -63,7 +63,7 @@ export async function getAuthenticatedUserId() {
   }
 
   if (!user) {
-    throw new Error("Sign in to sync preferences.");
+    throw new Error("Sign in to save preferences.");
   }
 
   return { supabase, userId: user.id };
@@ -78,7 +78,7 @@ export async function fetchUserPreferences() {
     .maybeSingle();
 
   if (error) {
-    throw new Error("Could not sync preferences.");
+    throw new Error("Could not save preferences.");
   }
 
   return data;
@@ -93,7 +93,7 @@ export async function ensureUserPreferences() {
     .single();
 
   if (error) {
-    throw new Error("Could not sync preferences.");
+    throw new Error("Could not save preferences.");
   }
 
   return data satisfies UserPreferences;
@@ -111,7 +111,7 @@ export async function updateUserPreferences(update: UserPreferencesUpdate) {
 
   if (error) {
     announcePreferenceSyncStatus("fallback", "Saved on this device.");
-    throw new Error("Could not sync preferences. Saved on this device.");
+    throw new Error("Could not save preferences. Saved on this device.");
   }
 
   announcePreferenceSyncStatus("synced");

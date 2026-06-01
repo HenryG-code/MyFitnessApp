@@ -27,7 +27,7 @@ export default function GroceryListPage() {
           <div className="rounded-[1.5rem] bg-white/10 p-4">
             <ClipboardList className="size-5 text-sun" />
             <p className="mt-3 text-2xl font-black">Checked</p>
-            <p className="text-sm text-stone-300">Saved in this browser</p>
+            <p className="text-sm text-stone-300">Saved on this device</p>
           </div>
           <div className="rounded-[1.5rem] bg-white/10 p-4">
             <Sparkles className="size-5 text-sun" />

@@ -37,7 +37,7 @@ export const trainingPlans: TrainingPlan[] = [
           { name: "Plank", sets: 3, duration: "30-45 sec", rest: "45 sec" },
         ],
         notes:
-          "Start light and leave a couple of reps in reserve. Manual logging keeps this version simple.",
+          "Start light and leave a couple of reps in reserve.",
       },
       {
         dayLabel: "Day 2",
@@ -68,7 +68,7 @@ export const trainingPlans: TrainingPlan[] = [
           { name: "Incline walk", duration: "12-15 min", notes: "Easy finish" },
         ],
         notes:
-          "Use smooth reps and stop before form breaks. Manual logging keeps this version simple.",
+          "Use smooth reps and stop before form breaks.",
       },
       {
         dayLabel: "Day 4",
@@ -111,7 +111,7 @@ export const trainingPlans: TrainingPlan[] = [
           { name: "Farmer carry", sets: 3, duration: "30 sec", rest: "60 sec" },
         ],
         notes:
-          "Add weight gradually when reps feel strong. Manual logging keeps this version simple.",
+          "Add weight gradually when reps feel strong.",
       },
       {
         dayLabel: "Day 2",
@@ -127,7 +127,7 @@ export const trainingPlans: TrainingPlan[] = [
           { name: "Plank", sets: 3, duration: "45 sec", rest: "45 sec" },
         ],
         notes:
-          "Prioritize range of motion and steady tempo. Manual logging keeps this version simple.",
+          "Prioritize range of motion and steady tempo.",
       },
       {
         dayLabel: "Day 3",
@@ -143,7 +143,7 @@ export const trainingPlans: TrainingPlan[] = [
           { name: "Easy bike", duration: "8-10 min", notes: "Cooldown" },
         ],
         notes:
-          "Keep effort honest but avoid grinding. Manual logging keeps this version simple.",
+          "Keep effort honest but avoid grinding.",
       },
       {
         dayLabel: "Day 4",
@@ -159,7 +159,7 @@ export const trainingPlans: TrainingPlan[] = [
           { name: "Child's pose", duration: "2 min" },
         ],
         notes:
-          "Finish feeling trained, not destroyed. Manual logging keeps this version simple.",
+          "Finish feeling trained, not destroyed.",
       },
     ],
   },
@@ -188,7 +188,7 @@ export const trainingPlans: TrainingPlan[] = [
           { name: "Plank", sets: 3, duration: "30 sec", rest: "45 sec" },
         ],
         notes:
-          "A practical all-around session. Manual logging keeps this version simple.",
+          "A practical all-around session.",
       },
       {
         dayLabel: "Day 2",
@@ -218,7 +218,7 @@ export const trainingPlans: TrainingPlan[] = [
           { name: "Farmer carry", sets: 3, duration: "30 sec", rest: "60 sec" },
         ],
         notes:
-          "Keep the pace steady without rushing. Manual logging keeps this version simple.",
+          "Keep the pace steady without rushing.",
       },
       {
         dayLabel: "Day 4",
@@ -260,7 +260,7 @@ export const trainingPlans: TrainingPlan[] = [
           { name: "Plank", sets: 3, duration: "45 sec", rest: "45 sec" },
         ],
         notes:
-          "Use a load you can control. Manual logging keeps this version simple.",
+          "Use a load you can control.",
       },
       {
         dayLabel: "Day 2",
@@ -290,7 +290,7 @@ export const trainingPlans: TrainingPlan[] = [
           { name: "Dead bug", sets: 3, reps: "8 per side", rest: "30 sec" },
         ],
         notes:
-          "Keep the spine neutral and stop sets before form changes. Manual logging keeps this version simple.",
+          "Keep the spine neutral and stop sets before form changes.",
       },
       {
         dayLabel: "Day 4",
@@ -347,7 +347,7 @@ export const trainingPlans: TrainingPlan[] = [
           { name: "Plank", sets: 2, duration: "40 sec", rest: "45 sec" },
         ],
         notes:
-          "Lift to maintain muscle and joint resilience. Manual logging keeps this version simple.",
+          "Lift to maintain muscle and joint resilience.",
       },
       {
         dayLabel: "Day 3",

@@ -83,7 +83,7 @@ export function SettingsPanel() {
     },
     {
       title: "Notifications",
-      detail: "Choose opt-in reminders for workouts, habits, weekly check-ins, and meals.",
+      detail: "Choose reminders for workouts, habits, weekly check-ins, and meals.",
       icon: Bell,
     },
     {
@@ -130,8 +130,8 @@ export function SettingsPanel() {
           Your LiftLog account.
         </h1>
         <p className="mt-3 max-w-2xl text-sm leading-6 text-muted">
-          Manage your profile, privacy, support options, and quick links from
-          one calm account space.
+          Manage your profile, privacy, reminders, support options, and quick
+          links from one account space.
         </p>
       </section>
 
@@ -225,7 +225,7 @@ export function SettingsPanel() {
               Plan
             </p>
             <p className="mt-2 font-display text-xl font-black">
-              Free portfolio version
+              Free version
             </p>
           </div>
         </div>
@@ -234,8 +234,8 @@ export function SettingsPanel() {
       <FitnessCard>
         <SectionHeader eyebrow="Privacy" title="Private to your account" />
         <p className="text-sm leading-6 text-muted">
-          Your workouts, weight logs, and habits stay connected to your signed-in
-          account.
+          Your workouts, weight check-ins, habits, and preferences stay private
+          to your signed-in account.
         </p>
       </FitnessCard>
 

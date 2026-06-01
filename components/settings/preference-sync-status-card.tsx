@@ -15,7 +15,7 @@ const statusCopy: Record<PreferenceSyncStatus, string> = {
   syncing: "Saving...",
   synced: "Synced",
   fallback: "Saved on this device",
-  error: "Could not sync preferences",
+  error: "Could not save preferences",
 };
 
 function getStatusIcon(status: PreferenceSyncStatus) {
@@ -83,8 +83,8 @@ export function PreferenceSyncStatusCard() {
           <SectionHeader eyebrow="Preferences" title="Synced preferences" />
         </div>
         <p className="text-sm leading-6 text-muted">
-          Your training goal, reminder settings, meal plan, and grocery
-          checklist can sync with your account.
+          Your training goal, reminders, meal plan, and grocery checklist can
+          stay available across devices.
         </p>
       </div>
       <div

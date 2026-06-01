@@ -163,7 +163,7 @@ export function WorkoutsList() {
             className="inline-flex items-center justify-center gap-2 rounded-2xl bg-accent px-5 py-3 text-sm font-black text-stone-950 shadow-lg shadow-accent/20"
           >
             <Plus className="size-4" />
-            New workout
+            Log workout
           </Link>
         </div>
       </HeroPanel>
@@ -209,7 +209,7 @@ export function WorkoutsList() {
 
       <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <MetricCard
-          label="This week"
+          label="Workouts this week"
           value={`${stats.workoutsThisWeek}`}
           detail="Workouts since Sunday."
           icon={<Flame className="size-5" />}
@@ -276,7 +276,7 @@ export function WorkoutsList() {
                   href={`/workouts/${workout.id}`}
                   className="rounded-2xl bg-stone-950 px-4 py-2 text-sm font-black text-white transition hover:bg-accent"
                 >
-                  View/Edit
+                  View and edit
                 </Link>
                 <button
                   type="button"
@@ -306,7 +306,7 @@ export function WorkoutsList() {
                 className="inline-flex items-center gap-2 rounded-2xl bg-accent px-5 py-3 text-sm font-black text-stone-950"
               >
                 <Plus className="size-4" />
-                Add workout
+                Log workout
               </Link>
               <Link
                 href="/training-plan"

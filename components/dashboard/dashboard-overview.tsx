@@ -61,7 +61,7 @@ const toolLinks = [
 
 const quickActionLinks = [
   { href: "/workouts/new", label: "Log workout", icon: Dumbbell, primary: true },
-  { href: "/weight", label: "Add weight", icon: Scale, primary: true },
+  { href: "/weight", label: "Add weight log", icon: Scale, primary: true },
   { href: "/habits", label: "Update habits", icon: Sprout },
   { href: "/training-plan", label: "Training plan", icon: Trophy },
   { href: "/meal-planner", label: "Meal planner", icon: CalendarDays },
@@ -211,9 +211,9 @@ export function DashboardOverview() {
   return (
     <div className="space-y-5">
       <HeroPanel
-        eyebrow="Real fitness dashboard"
+        eyebrow="Dashboard"
         title="Track the quiet wins that build the big ones."
-        description="See your weight, workouts, habits, and weekly momentum in one calm overview."
+        description="See your weight, workouts, habits, planned nutrition, and weekly momentum in one calm overview."
         imageSrc={fitnessImages.strengthTraining}
         imageAlt="Athlete strength training in a gym"
         variant="performance"
@@ -231,7 +231,7 @@ export function DashboardOverview() {
               className="inline-flex items-center gap-2 rounded-2xl bg-sun px-4 py-2 text-sm font-black text-stone-950"
             >
               <Plus className="size-4" />
-              Add workout
+              Log workout
             </Link>
             <Link
               href="/habits"
@@ -294,7 +294,7 @@ export function DashboardOverview() {
               </span>
               <div>
                 <p className="text-xs font-black uppercase tracking-[0.22em] text-accent">
-                  Today&apos;s push
+                  Today&apos;s focus
                 </p>
                 <h2
                   key={motivationMessage}
@@ -316,24 +316,24 @@ export function DashboardOverview() {
 
       <section className="grid gap-4 lg:grid-cols-[1.25fr_0.75fr]">
         <FitnessCard>
-          <SectionHeader eyebrow="Today" title="Your home base" />
+          <SectionHeader eyebrow="Today's overview" title="At a glance" />
           <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
             <div className="rounded-[1.25rem] bg-white/[0.055] p-4 shadow-inner shadow-white/[0.02]">
               <p className="text-xs font-black uppercase tracking-[0.18em] text-muted">
-                Habits
+                Today's habits
               </p>
               <p className="mt-2 font-display text-3xl font-black">
                 {habitPercent}%
               </p>
               <p className="mt-1 text-sm text-muted">
                 {totalHabits
-                  ? `${completedHabits} of ${totalHabits} complete`
+                  ? `${completedHabits} of ${totalHabits} completed`
                   : "Build your habit list"}
               </p>
             </div>
             <div className="rounded-[1.25rem] bg-white/[0.055] p-4 shadow-inner shadow-white/[0.02]">
               <p className="text-xs font-black uppercase tracking-[0.18em] text-muted">
-                This week
+                Workouts this week
               </p>
               <p className="mt-2 font-display text-3xl font-black">
                 {weeklyWorkoutStats.workoutsCompleted}
@@ -350,12 +350,12 @@ export function DashboardOverview() {
               <p className="mt-1 text-sm text-muted">
                 {data?.latestWeight
                   ? formatDate(data.latestWeight.logged_at)
-                  : "Add your first log"}
+                  : "Add your first weight log"}
               </p>
             </div>
             <div className="rounded-[1.25rem] bg-white/[0.055] p-4 shadow-inner shadow-white/[0.02]">
               <p className="text-xs font-black uppercase tracking-[0.18em] text-muted">
-                Meals today
+                Planned meals
               </p>
               <p className="mt-2 font-display text-3xl font-black">
                 {todayMacros.plannedMeals}
@@ -370,7 +370,7 @@ export function DashboardOverview() {
         </FitnessCard>
 
         <FitnessCard>
-          <SectionHeader eyebrow="Quick actions" title="Do the next thing" />
+          <SectionHeader eyebrow="Quick actions" title="Choose your next step" />
           <div className="grid grid-cols-2 gap-2">
             {quickActionLinks.map((item) => {
               const Icon = item.icon;
@@ -396,7 +396,7 @@ export function DashboardOverview() {
 
       <section className="grid gap-5 xl:grid-cols-[1.1fr_0.9fr]">
         <FitnessCard>
-          <SectionHeader eyebrow="Nutrition" title="Today's macros" />
+          <SectionHeader eyebrow="Planned nutrition" title="Today's macros" />
           {todayMacros.plannedMeals > 0 ? (
             <>
               <div className="grid gap-3 sm:grid-cols-4">
@@ -457,7 +457,7 @@ export function DashboardOverview() {
                 No meals planned for today.
               </p>
               <p className="mt-2 text-sm leading-6 text-muted">
-                Choose recipes in your meal planner to see calories and macros
+                Choose recipes in your meal planner to see planned nutrition
                 here.
               </p>
               <Link
@@ -476,7 +476,7 @@ export function DashboardOverview() {
             <div className="rounded-[1.25rem] bg-white/[0.055] p-4 shadow-inner shadow-white/[0.02]">
               <Flame className="size-5 text-accent" />
               <p className="mt-3 text-xs font-black uppercase tracking-[0.16em] text-muted">
-                Weekly calories
+                Weekly nutrition
               </p>
               <p
                 key={weeklyMacros.weeklyCalories}
@@ -499,7 +499,7 @@ export function DashboardOverview() {
             </div>
             <div className="rounded-[1.25rem] bg-white/[0.055] p-4 shadow-inner shadow-white/[0.02]">
               <p className="text-xs font-black uppercase tracking-[0.16em] text-muted">
-                Avg daily calories
+                Average daily calories
               </p>
               <p className="mt-2 font-display text-2xl font-black">
                 {formatNumber(weeklyMacros.averageDailyCalories)}
@@ -507,7 +507,7 @@ export function DashboardOverview() {
             </div>
             <div className="rounded-[1.25rem] bg-white/[0.055] p-4 shadow-inner shadow-white/[0.02]">
               <p className="text-xs font-black uppercase tracking-[0.16em] text-muted">
-                Avg daily protein
+                Average daily protein
               </p>
               <p className="mt-2 font-display text-2xl font-black">
                 {weeklyMacros.averageDailyProtein}g
@@ -517,7 +517,7 @@ export function DashboardOverview() {
           <div className="mt-4 rounded-[1.25rem] bg-white/[0.055] p-4 text-sm font-bold leading-6 text-muted shadow-inner shadow-white/[0.02]">
             {weeklyMacros.plannedMealsCount > 0
               ? `${weeklyMacros.weeklyProtein}g protein, ${weeklyMacros.weeklyCarbs}g carbs, and ${weeklyMacros.weeklyFat}g fat planned this week.`
-              : "Plan a few meals to turn this into a weekly nutrition snapshot."}
+              : "Plan a few meals to build your weekly nutrition snapshot."}
           </div>
         </FitnessCard>
       </section>
@@ -556,7 +556,7 @@ export function DashboardOverview() {
               href="/weight"
               className="mt-4 inline-flex rounded-2xl bg-accent px-4 py-2 text-sm font-black text-stone-950"
             >
-              Set goal
+              Set goal weight
             </Link>
               ) : totalWeightChange !== null ? (
             <p className="mt-3 text-xs font-black uppercase tracking-[0.18em] text-muted">
@@ -576,7 +576,7 @@ export function DashboardOverview() {
           value={`${habitPercent}%`}
           detail={
             totalHabits
-              ? `${completedHabits} of ${totalHabits} habits complete today.`
+              ? `${completedHabits} of ${totalHabits} habits completed today.`
               : "Add habits to start tracking today."
           }
           icon={<Sprout className="size-5" />}
@@ -603,7 +603,7 @@ export function DashboardOverview() {
         </FitnessCard>
 
         <FitnessCard>
-          <SectionHeader eyebrow="Latest workout" title="Fresh from the log" />
+          <SectionHeader eyebrow="Latest workout" title="Most recent session" />
           <div className="rounded-[1.5rem] border border-accent/25 bg-accent/10 p-5">
             {data?.latestWorkout ? (
               <>
@@ -623,7 +623,7 @@ export function DashboardOverview() {
                 </div>
                 <p className="mt-5 text-sm leading-6 text-muted">
                   {data.latestWorkout.notes ??
-                    "No notes yet. Still counts. The log goblin accepts all honest offerings."}
+                    "No notes added for this workout."}
                 </p>
               </>
             ) : (
@@ -638,7 +638,7 @@ export function DashboardOverview() {
                   href="/workouts/new"
                   className="mt-4 inline-flex rounded-2xl bg-accent px-4 py-2 text-sm font-black text-stone-950"
                 >
-                  Add workout
+                  Log workout
                 </Link>
               </div>
             )}
@@ -648,7 +648,7 @@ export function DashboardOverview() {
             <div className="rounded-[1.25rem] bg-white/[0.055] p-4 shadow-inner shadow-white/[0.02]">
               <div className="flex items-center gap-3">
                 <TrendingUp className="size-5 text-accent" />
-                <p className="font-black">Today habits</p>
+                <p className="font-black">Today's habit completion</p>
               </div>
               <div className="mt-3 h-2 rounded-full bg-stone-200">
                 <div
@@ -660,7 +660,7 @@ export function DashboardOverview() {
             <div className="rounded-[1.25rem] bg-white/[0.055] p-4 shadow-inner shadow-white/[0.02]">
               <div className="flex items-center gap-3">
                 <CalendarDays className="size-5 text-accent" />
-                <p className="font-black">This week</p>
+                <p className="font-black">Workouts this week</p>
               </div>
               <p className="mt-3 text-sm font-medium text-muted">
                 {weeklyWorkoutStats.workoutsCompleted} workouts and{" "}
@@ -742,7 +742,7 @@ export function DashboardOverview() {
       </FitnessCard>
 
       <FitnessCard>
-        <SectionHeader eyebrow="Fitness journey" title="Your bigger picture" />
+        <SectionHeader eyebrow="Fitness journey" title="Your progress snapshot" />
         <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
           {fitnessJourney.map((item) => (
             <Link

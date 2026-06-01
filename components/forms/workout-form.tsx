@@ -114,9 +114,9 @@ type NumberOptions = {
 };
 
 const workoutTitleSuggestions = [
-  "Full Body",
-  "Upper Body",
-  "Lower Body",
+  "Full body",
+  "Upper body",
+  "Lower body",
   "Cardio",
   "Mobility",
   "Yoga",
@@ -279,7 +279,7 @@ export function WorkoutForm({ mode = "create", workout }: WorkoutFormProps) {
       exercise.duration_minutes ? `${exercise.duration_minutes} min` : null,
     ].filter(Boolean);
 
-    return summaryParts.length ? summaryParts.join(" - ") : "Details optional";
+    return summaryParts.length ? summaryParts.join(" - ") : "Optional details";
   }
 
   async function onSubmit(values: WorkoutFormValues) {
@@ -317,12 +317,12 @@ export function WorkoutForm({ mode = "create", workout }: WorkoutFormProps) {
     >
       <div>
         <label className="text-sm font-black" htmlFor="title">
-          Workout title
+          Workout name
         </label>
         <input
           id="title"
           className="mt-2 min-h-12 w-full rounded-2xl border border-line bg-surface/80 px-4 py-3 text-base outline-none transition focus:border-accent focus:ring-4 focus:ring-accent/20"
-          placeholder="Upper Body Strength"
+          placeholder="Upper body strength"
           {...register("title")}
         />
         {errors.title ? (
@@ -408,7 +408,7 @@ export function WorkoutForm({ mode = "create", workout }: WorkoutFormProps) {
               Exercises
             </p>
             <p className="mt-1 text-sm leading-6 text-muted">
-              Add as many rows as you need. Empty rows are ignored.
+              Add each exercise you completed. Empty rows will be skipped.
             </p>
           </div>
           <button
@@ -601,7 +601,7 @@ export function WorkoutForm({ mode = "create", workout }: WorkoutFormProps) {
             disabled={isSubmitting}
             className="min-h-12 rounded-2xl bg-accent px-4 py-3 text-sm font-black text-stone-950 shadow-lg shadow-accent/20 transition disabled:cursor-not-allowed disabled:opacity-70"
           >
-            {isSubmitting ? "Saving..." : "Save workout"}
+          {isSubmitting ? "Saving..." : "Save workout"}
           </button>
           <button
             type="button"
@@ -609,7 +609,7 @@ export function WorkoutForm({ mode = "create", workout }: WorkoutFormProps) {
             className="inline-flex min-h-12 items-center gap-2 rounded-2xl border border-line bg-white/65 px-4 py-3 text-sm font-black"
           >
             <Plus className="size-4" />
-            Add
+            Add exercise
           </button>
         </div>
       </div>
