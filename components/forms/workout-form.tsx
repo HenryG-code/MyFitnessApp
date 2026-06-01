@@ -7,7 +7,7 @@ import {
   type WorkoutWithExercises,
 } from "@/src/lib/workouts/queries";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Dumbbell, Plus, Trash2 } from "lucide-react";
+import { Plus, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
@@ -421,25 +421,21 @@ export function WorkoutForm({ mode = "create", workout }: WorkoutFormProps) {
           </button>
         </div>
 
-        <div className="mt-4 space-y-3">
+        <div className="mt-4 divide-y divide-line rounded-[1.35rem] border border-line bg-card/70">
           {fields.map((field, index) => (
             <div
               key={field.id}
-              className="rounded-[1.35rem] border border-line bg-card/95 p-3 shadow-[0_16px_45px_rgba(0,0,0,0.25)] ring-1 ring-white/[0.03] sm:p-4"
+              className="relative p-4 sm:p-5"
             >
-              <div className="flex items-start justify-between gap-3 rounded-2xl border border-accent/20 bg-accent/10 p-3">
-                <div className="flex min-w-0 items-start gap-3">
-                  <span className="grid size-10 shrink-0 place-items-center rounded-2xl bg-accent text-stone-950">
-                    <Dumbbell className="size-4" />
-                  </span>
-                  <div className="min-w-0">
-                    <p className="font-display text-lg font-black">
-                      Exercise {index + 1}
-                    </p>
-                    <p className="mt-1 truncate text-xs font-bold text-muted">
-                      {getExerciseSummary(index)}
-                    </p>
-                  </div>
+              <div className="absolute inset-y-4 left-0 w-1 rounded-r-full bg-accent/80" />
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0 pl-2">
+                  <p className="font-display text-lg font-black">
+                    Exercise {index + 1}
+                  </p>
+                  <p className="mt-1 truncate text-xs font-bold text-muted">
+                    {getExerciseSummary(index)}
+                  </p>
                 </div>
                 {fields.length > 1 ? (
                   <button
@@ -453,11 +449,11 @@ export function WorkoutForm({ mode = "create", workout }: WorkoutFormProps) {
                 ) : null}
               </div>
 
-              <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-6">
+              <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-6">
                 <div className="sm:col-span-6">
-                  <label className="text-sm font-black">Name</label>
+                  <label className="text-sm font-black">Exercise name</label>
                   <input
-                    className="mt-2 min-h-11 w-full rounded-2xl border border-line bg-surface/80 px-4 py-2.5 outline-none transition focus:border-accent focus:ring-4 focus:ring-accent/20"
+                    className="mt-2 min-h-12 w-full rounded-2xl border border-line bg-surface/80 px-4 py-3 text-base outline-none transition focus:border-accent focus:ring-4 focus:ring-accent/20"
                     placeholder="Bench press"
                     {...register(`exercises.${index}.exercise_name`)}
                   />
@@ -468,7 +464,7 @@ export function WorkoutForm({ mode = "create", workout }: WorkoutFormProps) {
                   ) : null}
                 </div>
 
-                <div className="col-span-1">
+                <div className="col-span-1 sm:col-span-1">
                   <label className="text-sm font-black">Sets</label>
                   <input
                     type="number"
@@ -484,7 +480,7 @@ export function WorkoutForm({ mode = "create", workout }: WorkoutFormProps) {
                   ) : null}
                 </div>
 
-                <div className="col-span-1">
+                <div className="col-span-1 sm:col-span-1">
                   <label className="text-sm font-black">Reps</label>
                   <input
                     type="number"
@@ -500,7 +496,7 @@ export function WorkoutForm({ mode = "create", workout }: WorkoutFormProps) {
                   ) : null}
                 </div>
 
-                <div className="col-span-1 sm:col-span-2">
+                <div className="col-span-2 sm:col-span-2">
                   <label className="text-sm font-black">Weight, kg</label>
                   <input
                     type="number"
@@ -516,7 +512,7 @@ export function WorkoutForm({ mode = "create", workout }: WorkoutFormProps) {
                   ) : null}
                 </div>
 
-                <div className="col-span-1 sm:col-span-2">
+                <div className="col-span-1 sm:col-span-3">
                   <label className="text-sm font-black">Distance, km</label>
                   <input
                     type="number"
@@ -532,7 +528,7 @@ export function WorkoutForm({ mode = "create", workout }: WorkoutFormProps) {
                   ) : null}
                 </div>
 
-                <div className="col-span-1 sm:col-span-2">
+                <div className="col-span-1 sm:col-span-3">
                   <label className="text-sm font-black">
                     Exercise duration, min
                   </label>

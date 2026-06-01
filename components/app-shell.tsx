@@ -1,6 +1,7 @@
 "use client";
 
 import { LogoutButton } from "@/components/auth/logout-button";
+import { BackToTopButton } from "@/components/ui/back-to-top-button";
 import { getUserDisplayName } from "@/src/lib/auth/user";
 import { createBrowserSupabaseClient } from "@/src/lib/supabase/client";
 import type { User } from "@supabase/supabase-js";
@@ -269,6 +270,8 @@ export function AppShell({
 
         {children}
       </main>
+
+      <BackToTopButton />
 
       <nav className="fixed inset-x-3 bottom-3 z-40 rounded-[1.5rem] border border-line/90 bg-card/95 p-2 shadow-[0_18px_60px_rgba(0,0,0,0.48)] backdrop-blur-xl lg:hidden">
         <div className="grid grid-cols-5 gap-1">

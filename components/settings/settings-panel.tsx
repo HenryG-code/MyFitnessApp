@@ -3,7 +3,6 @@
 import { LogoutButton } from "@/components/auth/logout-button";
 import { InstallAppCard } from "@/components/pwa/install-app-card";
 import { AvatarUploadCard } from "@/components/settings/avatar-upload-card";
-import { GoalWeightForm } from "@/components/settings/goal-weight-form";
 import { NotificationPreferencesCard } from "@/components/settings/notification-preferences-card";
 import { PreferenceSyncStatusCard } from "@/components/settings/preference-sync-status-card";
 import { FitnessCard, SectionHeader } from "@/components/ui/fitness-card";
@@ -238,20 +237,6 @@ export function SettingsPanel() {
           Your workouts, weight logs, and habits stay connected to your signed-in
           account.
         </p>
-      </FitnessCard>
-
-      <FitnessCard>
-        <SectionHeader eyebrow="Fitness goals" title="Goal weight" />
-        <GoalWeightForm
-          initialGoalWeight={profile?.profile?.goal_weight_kg ?? null}
-          onSaved={(savedProfile) =>
-            setProfile((currentProfile) =>
-              currentProfile
-                ? { ...currentProfile, profile: savedProfile }
-                : currentProfile
-            )
-          }
-        />
       </FitnessCard>
 
       <FitnessCard>

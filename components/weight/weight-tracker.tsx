@@ -7,10 +7,11 @@ import {
   MetricCard,
   SectionHeader,
 } from "@/components/ui/fitness-card";
+import { GoalWeightForm } from "@/components/weight/goal-weight-form";
+import { fetchAuthenticatedProfile } from "@/src/lib/profile/queries";
 import type { WeightLog } from "@/src/lib/supabase/database.types";
 import { deleteWeightLog, fetchWeightLogs } from "@/src/lib/weight/queries";
 import {
-  CalendarDays,
   ClipboardList,
   Pencil,
   Scale,
@@ -48,6 +49,7 @@ function getStats(logs: WeightLog[]) {
 
 export function WeightTracker() {
   const [logs, setLogs] = useState<WeightLog[]>([]);
+  const [goalWeight, setGoalWeight] = useState<number | null>(null);
   const [editingLogId, setEditingLogId] = useState<string | null>(null);
   const [notice, setNotice] = useState("");
   const [error, setError] = useState("");
@@ -95,6 +97,22 @@ export function WeightTracker() {
         }
       });
 
+    fetchAuthenticatedProfile()
+      .then((profile) => {
+        if (isMounted) {
+          setGoalWeight(profile.profile?.goal_weight_kg ?? null);
+        }
+      })
+      .catch((loadError: unknown) => {
+        if (isMounted) {
+          setError(
+            loadError instanceof Error
+              ? loadError.message
+              : "Could not load goal weight."
+          );
+        }
+      });
+
     return () => {
       isMounted = false;
     };
@@ -102,6 +120,8 @@ export function WeightTracker() {
 
   const newestFirstLogs = logs.slice().reverse();
   const stats = getStats(logs);
+  const distanceToGoal =
+    stats.latest && goalWeight !== null ? stats.latest.weight_kg - goalWeight : null;
   const chartData = logs.map((log) => ({
     logged_at: formatDate(log.logged_at),
     weight_kg: log.weight_kg,
@@ -181,15 +201,38 @@ export function WeightTracker() {
           tone="yellow"
         />
         <MetricCard
-          label="First weight"
-          value={stats.first ? formatWeight(stats.first.weight_kg) : "--"}
+          label="Goal weight"
+          value={goalWeight !== null ? formatWeight(goalWeight) : "--"}
           detail={
-            stats.first
-              ? `Started ${formatDate(stats.first.logged_at)}.`
-              : "No baseline yet."
+            goalWeight !== null
+              ? "Managed from this Weight page."
+              : "Set a goal to track distance."
           }
-          icon={<CalendarDays className="size-5" />}
+          icon={<Scale className="size-5" />}
           tone="amber"
+        />
+        <MetricCard
+          label="Distance to goal"
+          value={
+            distanceToGoal !== null
+              ? `${distanceToGoal > 0 ? "+" : ""}${distanceToGoal.toFixed(1)} kg`
+              : "--"
+          }
+          detail={
+            distanceToGoal !== null
+              ? Math.abs(distanceToGoal) < 0.05
+                ? "Goal reached based on your latest log."
+                : "Based on your latest check-in."
+              : "Add a latest weight and goal."
+          }
+          icon={
+            distanceToGoal !== null && distanceToGoal > 0 ? (
+              <TrendingUp className="size-5" />
+            ) : (
+              <TrendingDown className="size-5" />
+            )
+          }
+          tone="ink"
         />
         <MetricCard
           label="Total change"
@@ -202,25 +245,8 @@ export function WeightTracker() {
           }
           detail={
             stats.count > 1
-              ? "Difference from first to latest log."
+              ? `${stats.count} logs from first to latest.`
               : "Needs at least two logs."
-          }
-          icon={
-            stats.totalChange > 0 ? (
-              <TrendingUp className="size-5" />
-            ) : (
-              <TrendingDown className="size-5" />
-            )
-          }
-          tone="ink"
-        />
-        <MetricCard
-          label="Number of logs"
-          value={`${stats.count}`}
-          detail={
-            stats.latest
-              ? `Latest date: ${formatDate(stats.latest.logged_at)}.`
-              : "Your logbook is still empty."
           }
           icon={<ClipboardList className="size-5" />}
           tone="yellow"
@@ -250,10 +276,22 @@ export function WeightTracker() {
           )}
         </FitnessCard>
 
-        <FitnessCard>
-          <SectionHeader eyebrow="New log" title="Add a check-in" />
-          <WeightLogForm onSaved={handleSaved} />
-        </FitnessCard>
+        <div className="space-y-5">
+          <FitnessCard>
+            <SectionHeader eyebrow="Goal" title="Set your target" />
+            <GoalWeightForm
+              initialGoalWeight={goalWeight}
+              onSaved={(savedProfile) =>
+                setGoalWeight(savedProfile.goal_weight_kg)
+              }
+            />
+          </FitnessCard>
+
+          <FitnessCard>
+            <SectionHeader eyebrow="New log" title="Add a check-in" />
+            <WeightLogForm onSaved={handleSaved} />
+          </FitnessCard>
+        </div>
       </section>
 
       <FitnessCard>

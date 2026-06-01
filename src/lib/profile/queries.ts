@@ -27,7 +27,7 @@ export async function fetchAuthenticatedProfile(): Promise<AuthProfile> {
   }
 
   if (!user) {
-    throw new Error("You must be logged in to view settings.");
+    throw new Error("You must be logged in to view your profile.");
   }
 
   const { data: profile, error: profileError } = await supabase
