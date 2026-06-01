@@ -13,7 +13,11 @@ import { useSyncExternalStore } from "react";
 
 export type HabitCompletionPoint = {
   date: string;
+  dayLabel: string;
+  displayDate: string;
   percentage: number;
+  completed: number;
+  total: number;
 };
 
 export function HabitCompletionChart({
@@ -37,7 +41,7 @@ export function HabitCompletionChart({
         <BarChart data={data} margin={{ top: 8, right: 8, left: -18, bottom: 0 }}>
           <CartesianGrid stroke="#2a2a33" strokeDasharray="4 6" vertical={false} />
           <XAxis
-            dataKey="date"
+            dataKey="dayLabel"
             axisLine={false}
             tickLine={false}
             tick={{ fill: "#a8a29e", fontSize: 12, fontWeight: 700 }}
@@ -51,6 +55,28 @@ export function HabitCompletionChart({
           />
           <Tooltip
             cursor={{ fill: "rgba(220, 38, 38, 0.12)" }}
+            content={({ active, payload }) => {
+              const point = payload?.[0]?.payload as
+                | HabitCompletionPoint
+                | undefined;
+
+              if (!active || !point) {
+                return null;
+              }
+
+              return (
+                <div className="rounded-[1.1rem] border border-line bg-stone-950 px-4 py-3 text-sm shadow-2xl shadow-black/40">
+                  <p className="font-black text-white">
+                    {point.displayDate}: {point.percentage}% complete
+                  </p>
+                  <p className="mt-1 font-bold text-muted">
+                    {point.total
+                      ? `${point.completed} of ${point.total} habits`
+                      : "No active habits"}
+                  </p>
+                </div>
+              );
+            }}
             contentStyle={{
               background: "#18181f",
               color: "#f8fafc",

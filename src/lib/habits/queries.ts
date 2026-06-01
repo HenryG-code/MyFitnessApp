@@ -14,10 +14,17 @@ export type HabitDefinitionInput = {
 
 export type HabitDaySummary = {
   date: string;
+  dayLabel: string;
+  displayDate: string;
   completed: number;
   total: number;
   percentage: number;
 };
+
+export type HabitDayStats = Pick<
+  HabitDaySummary,
+  "completed" | "total" | "percentage"
+>;
 
 export const defaultHabits = [
   { name: "Sleep 8 hours", description: "Support recovery with enough rest." },
@@ -64,6 +71,20 @@ export function getDateDaysAgo(daysAgo: number) {
   const date = new Date();
   date.setDate(date.getDate() - daysAgo);
   return getDateInputValue(date);
+}
+
+function formatHabitDayLabel(value: string) {
+  return new Intl.DateTimeFormat("en", {
+    weekday: "short",
+  }).format(new Date(`${value}T00:00:00`));
+}
+
+function formatHabitDisplayDate(value: string) {
+  return new Intl.DateTimeFormat("en", {
+    weekday: "long",
+    month: "short",
+    day: "numeric",
+  }).format(new Date(`${value}T00:00:00`));
 }
 
 function normalizeName(value: string) {
@@ -311,16 +332,21 @@ export async function fetchRecentHabitCompletions(days = 7) {
   return data satisfies HabitCompletion[];
 }
 
-export function calculateHabitCompletionPercent(
+export function calculateHabitDayStats(
   definitions: HabitDefinition[],
   completions: HabitCompletion[]
-) {
+): HabitDayStats {
   const activeDefinitions = definitions.filter((habit) => habit.is_active);
   const activeHabitIds = new Set(activeDefinitions.map((habit) => habit.id));
-  const completed = completions.filter(
-    (completion) =>
-      completion.is_completed && activeHabitIds.has(completion.habit_id)
-  ).length;
+  const completedHabitIds = new Set(
+    completions
+      .filter(
+        (completion) =>
+          completion.is_completed && activeHabitIds.has(completion.habit_id)
+      )
+      .map((completion) => completion.habit_id)
+  );
+  const completed = completedHabitIds.size;
   const total = activeDefinitions.length;
 
   return {
@@ -330,6 +356,8 @@ export function calculateHabitCompletionPercent(
   };
 }
 
+export const calculateHabitCompletionPercent = calculateHabitDayStats;
+
 export function buildHabitDaySummary(
   date: string,
   definitions: HabitDefinition[],
@@ -337,6 +365,23 @@ export function buildHabitDaySummary(
 ): HabitDaySummary {
   return {
     date,
-    ...calculateHabitCompletionPercent(definitions, completions),
+    dayLabel: formatHabitDayLabel(date),
+    displayDate: formatHabitDisplayDate(date),
+    ...calculateHabitDayStats(definitions, completions),
   };
+}
+
+export function buildHabitChartData(
+  definitions: HabitDefinition[],
+  completions: HabitCompletion[],
+  days = 7
+): HabitDaySummary[] {
+  return Array.from({ length: days }, (_item, index) => {
+    const date = getDateDaysAgo(days - 1 - index);
+    const dayCompletions = completions.filter(
+      (completion) => completion.completed_date === date
+    );
+
+    return buildHabitDaySummary(date, definitions, dayCompletions);
+  });
 }

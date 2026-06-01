@@ -8,16 +8,17 @@ import {
 } from "@/components/ui/fitness-card";
 import { HeroPanel } from "@/components/ui/hero-panel";
 import {
+  buildHabitChartData,
   buildHabitDaySummary,
   createHabitDefinition,
   ensureDefaultHabits,
   fetchHabitCompletionsForDate,
   fetchRecentHabitCompletions,
-  getDateDaysAgo,
   getDateInputValue,
   hideHabitDefinition,
   toggleHabitCompletion,
   updateHabitDefinition,
+  type HabitDaySummary,
 } from "@/src/lib/habits/queries";
 import type {
   HabitCompletion,
@@ -42,13 +43,6 @@ type HabitFormValues = {
   description: string;
 };
 
-type WeeklySummaryPoint = {
-  date: string;
-  percentage: number;
-  completed: number;
-  total: number;
-};
-
 function formatDate(date: string) {
   return new Intl.DateTimeFormat("en", {
     month: "short",
@@ -69,26 +63,6 @@ function getCompletedSet(completions: HabitCompletion[]) {
       .filter((completion) => completion.is_completed)
       .map((completion) => completion.habit_id)
   );
-}
-
-function buildWeeklySummary(
-  definitions: HabitDefinition[],
-  completions: HabitCompletion[]
-) {
-  return Array.from({ length: 7 }, (_item, index) => {
-    const date = getDateDaysAgo(6 - index);
-    const dayCompletions = completions.filter(
-      (completion) => completion.completed_date === date
-    );
-    const summary = buildHabitDaySummary(date, definitions, dayCompletions);
-
-    return {
-      date: formatDate(date),
-      percentage: summary.percentage,
-      completed: summary.completed,
-      total: summary.total,
-    };
-  }) satisfies WeeklySummaryPoint[];
 }
 
 export function HabitsTracker() {
@@ -122,7 +96,10 @@ export function HabitsTracker() {
     activeDefinitions,
     todayCompletions
   );
-  const weeklySummary = buildWeeklySummary(activeDefinitions, recentCompletions);
+  const weeklySummary: HabitDaySummary[] = buildHabitChartData(
+    activeDefinitions,
+    recentCompletions
+  );
   const latestCompletedHabit = activeDefinitions
     .slice()
     .reverse()
@@ -291,7 +268,11 @@ export function HabitsTracker() {
         <MetricCard
           label="Today's progress"
           value={`${todaySummary.percentage}%`}
-          detail={`${todaySummary.completed} of ${todaySummary.total} habits complete.`}
+          detail={
+            todaySummary.total
+              ? `${todaySummary.completed} of ${todaySummary.total} habits complete.`
+              : "No active habits yet. Add a habit to start tracking your routine."
+          }
           icon={<Sprout className="size-5" />}
           tone="yellow"
         />
@@ -478,10 +459,10 @@ export function HabitsTracker() {
           ) : (
             <div className="rounded-[1.5rem] border border-accent/25 bg-accent/10 p-6">
               <p className="font-display text-xl font-black">
-                Your routine is empty.
+                No active habits yet.
               </p>
               <p className="mt-2 text-sm leading-6 text-muted">
-                Add a habit to start building your daily list.
+                Add a habit to start tracking your routine.
               </p>
               <button
                 type="button"
@@ -509,9 +490,11 @@ export function HabitsTracker() {
                 key={day.date}
                 className="flex items-center justify-between rounded-2xl bg-white/60 px-4 py-3 text-sm"
               >
-                <span className="font-black">{day.date}</span>
+                <span className="font-black">{day.displayDate}</span>
                 <span className="font-bold text-muted">
-                  {day.percentage}% - {day.completed}/{day.total}
+                  {day.total
+                    ? `${day.percentage}% - ${day.completed}/${day.total}`
+                    : "No active habits"}
                 </span>
               </div>
             ))}
