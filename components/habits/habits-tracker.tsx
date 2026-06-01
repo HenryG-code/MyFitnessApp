@@ -253,7 +253,7 @@ export function HabitsTracker() {
       </HeroPanel>
 
       {notice ? (
-        <p className="rounded-[1.5rem] border border-accent/25 bg-accent/10 p-4 text-sm font-black text-soft-yellow liftlog-enter">
+        <p className="liftlog-pop-in rounded-[1.5rem] border border-accent/25 bg-accent/10 p-4 text-sm font-black text-soft-yellow">
           {notice}
         </p>
       ) : null}
@@ -378,9 +378,9 @@ export function HabitsTracker() {
                 return (
                   <div
                     key={habit.id}
-                    className={`rounded-[1.5rem] p-4 shadow-inner shadow-white/[0.02] transition ${
+                    className={`rounded-[1.5rem] p-4 shadow-inner shadow-white/[0.02] transition hover:-translate-y-0.5 hover:border-accent/30 ${
                       isComplete
-                        ? "border border-accent/35 bg-accent/15"
+                        ? "liftlog-complete-pulse border border-accent/35 bg-accent/15"
                         : "bg-white/[0.055]"
                     }`}
                   >
@@ -394,7 +394,7 @@ export function HabitsTracker() {
                         <span
                           className={`grid size-12 shrink-0 place-items-center rounded-2xl ${
                             isComplete
-                              ? "bg-accent text-white"
+                              ? "liftlog-pop-in bg-accent text-white"
                               : "bg-stone-950 text-sun"
                           }`}
                         >

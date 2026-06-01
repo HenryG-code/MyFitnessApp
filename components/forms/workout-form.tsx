@@ -425,7 +425,7 @@ export function WorkoutForm({ mode = "create", workout }: WorkoutFormProps) {
           {fields.map((field, index) => (
             <div
               key={field.id}
-              className="relative p-4 sm:p-5"
+              className="liftlog-slide-in relative p-4 transition hover:bg-white/[0.035] sm:p-5"
             >
               <div className="absolute inset-y-4 left-0 w-1 rounded-r-full bg-accent/80" />
               <div className="flex items-start justify-between gap-3">
@@ -567,13 +567,13 @@ export function WorkoutForm({ mode = "create", workout }: WorkoutFormProps) {
       </div>
 
       {formError ? (
-        <p className="rounded-2xl bg-red-50 p-3 text-sm font-medium text-red-700">
+        <p className="liftlog-pop-in rounded-2xl bg-red-50 p-3 text-sm font-medium text-red-700">
           {formError}
         </p>
       ) : null}
 
       {success ? (
-        <p className="rounded-2xl border border-accent/25 bg-accent/10 p-3 text-sm font-medium text-soft-yellow">
+        <p className="liftlog-pop-in rounded-2xl border border-accent/25 bg-accent/10 p-3 text-sm font-medium text-soft-yellow">
           {success}
         </p>
       ) : null}

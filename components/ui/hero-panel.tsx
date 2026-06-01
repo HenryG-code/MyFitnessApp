@@ -31,7 +31,7 @@ export function HeroPanel({
 }: HeroPanelProps) {
   return (
     <section
-      className={`liftlog-enter relative overflow-hidden rounded-[2rem] border border-line bg-gradient-to-br p-6 text-white shadow-[0_30px_100px_rgba(0,0,0,0.45)] after:absolute after:inset-0 after:pointer-events-none sm:p-8 ${variantStyles[variant]}`}
+      className={`liftlog-hero-motion relative overflow-hidden rounded-[2rem] border border-line bg-gradient-to-br p-6 text-white shadow-[0_30px_100px_rgba(0,0,0,0.45)] after:absolute after:inset-0 after:pointer-events-none sm:p-8 ${variantStyles[variant]}`}
     >
       <div className="absolute inset-0 opacity-70 [background-image:linear-gradient(120deg,rgba(255,255,255,0.08)_0_1px,transparent_1px_14px)]" />
       {imageSrc ? (

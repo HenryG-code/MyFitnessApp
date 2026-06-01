@@ -16,7 +16,7 @@ export function GroceryItemRow({
     <label
       className={`flex cursor-pointer items-start gap-3 rounded-2xl border p-4 transition ${
         checked
-          ? "border-accent/25 bg-accent/10 text-muted"
+          ? "liftlog-complete-pulse border-accent/25 bg-accent/10 text-muted"
           : "border-line bg-white/70 hover:-translate-y-0.5 hover:border-accent"
       }`}
     >
@@ -29,7 +29,7 @@ export function GroceryItemRow({
       <span
         className={`mt-1 grid size-6 shrink-0 place-items-center rounded-lg border ${
           checked
-            ? "border-accent bg-accent text-stone-950"
+            ? "liftlog-pop-in border-accent bg-accent text-stone-950"
             : "border-line bg-card text-transparent"
         }`}
       >

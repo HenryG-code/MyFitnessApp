@@ -434,7 +434,7 @@ export function DashboardOverview() {
                     </div>
                     <div className="h-3 overflow-hidden rounded-full bg-white/[0.08]">
                       <div
-                        className={`h-full rounded-full ${macro.barClassName}`}
+                        className={`liftlog-progress-bar h-full rounded-full ${macro.barClassName}`}
                         style={{ width: `${macro.percentage}%` }}
                       />
                     </div>
@@ -637,7 +637,7 @@ export function DashboardOverview() {
               </div>
               <div className="mt-3 h-2 rounded-full bg-stone-200">
                 <div
-                  className="h-full rounded-full bg-accent"
+                  className="liftlog-progress-bar h-full rounded-full bg-accent"
                   style={{ width: `${habitPercent}%` }}
                 />
               </div>

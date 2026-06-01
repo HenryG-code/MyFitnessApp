@@ -29,7 +29,11 @@ export function MealSlotCard({
   const hasInvalidSelection = Boolean(selectedSlug && !selectedRecipe);
 
   return (
-    <div className="rounded-[1.25rem] border border-line bg-white/65 p-4">
+    <div
+      className={`liftlog-card-motion rounded-[1.25rem] border border-line bg-white/65 p-4 ${
+        selectedRecipe ? "border-accent/35 bg-accent/10" : ""
+      }`}
+    >
       <div className="flex items-start justify-between gap-3">
         <div>
           <p className="text-xs font-black uppercase tracking-[0.18em] text-accent">
@@ -87,7 +91,7 @@ export function MealSlotCard({
       </select>
 
       {selectedRecipe ? (
-        <div className="mt-4 space-y-3">
+        <div className="liftlog-pop-in mt-4 space-y-3">
           <div className="grid grid-cols-3 gap-2 text-center">
             <div className="rounded-xl bg-stone-100 px-2 py-2">
               <p className="text-[0.65rem] font-black uppercase tracking-[0.12em] text-muted">

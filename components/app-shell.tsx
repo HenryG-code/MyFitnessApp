@@ -142,7 +142,7 @@ export function AppShell({
       <aside className="fixed inset-y-4 left-4 z-30 hidden w-72 flex-col rounded-[2rem] border border-line/90 bg-card/95 p-4 shadow-[0_28px_90px_rgba(0,0,0,0.48)] backdrop-blur-xl lg:flex">
         <Link
           href="/dashboard"
-          className="flex items-center gap-3 rounded-[1.4rem] border border-line bg-surface p-4 text-white shadow-inner shadow-white/[0.03]"
+          className="liftlog-card-motion flex items-center gap-3 rounded-[1.4rem] border border-line bg-surface p-4 text-white shadow-inner shadow-white/[0.03]"
         >
           <span className="grid size-11 place-items-center rounded-2xl bg-sun text-stone-950">
             <BarChart3 className="size-5" />
@@ -164,9 +164,9 @@ export function AppShell({
               <Link
                 key={item.href}
                 href={item.href}
-                className={`flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-bold transition ${
+                className={`liftlog-nav-item flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-bold transition ${
                   active
-                    ? "bg-accent text-stone-950 shadow-lg shadow-accent/20"
+                    ? "liftlog-active-item bg-accent text-stone-950 shadow-lg shadow-accent/20"
                     : "text-muted hover:bg-white/10 hover:text-foreground"
                 }`}
               >
@@ -178,7 +178,7 @@ export function AppShell({
         </nav>
 
         <div className="mt-auto space-y-3">
-          <div className="rounded-[1.6rem] border border-line bg-surface/90 p-4">
+          <div className="liftlog-card-motion rounded-[1.6rem] border border-line bg-surface/90 p-4">
             <div className="flex items-center gap-3">
               <UserAvatar
                 avatarUrl={avatarUrl}
@@ -202,7 +202,7 @@ export function AppShell({
             <LogoutButton className="mt-4 w-full bg-accent text-stone-950 hover:bg-accent-strong" />
           </div>
 
-          <div className="rounded-[1.6rem] border border-accent/25 bg-accent/10 p-4">
+          <div className="liftlog-card-motion rounded-[1.6rem] border border-accent/25 bg-accent/10 p-4">
             <p className="text-xs font-black uppercase tracking-[0.18em] text-accent">
               Keep building
             </p>
@@ -217,7 +217,7 @@ export function AppShell({
         </div>
       </aside>
 
-      <main className="mx-auto w-full max-w-7xl px-4 pb-28 pt-5 sm:px-6 lg:ml-80 lg:mr-6 lg:px-0 lg:pb-10">
+      <main className="liftlog-page mx-auto w-full max-w-7xl px-4 pb-28 pt-5 sm:px-6 lg:ml-80 lg:mr-6 lg:px-0 lg:pb-10">
         <header className="mb-5 rounded-[1.75rem] border border-line/80 bg-card/90 p-4 shadow-[0_18px_60px_rgba(0,0,0,0.32)] backdrop-blur lg:hidden">
           <div className="flex items-center justify-between gap-3">
             <Link href="/dashboard" className="flex items-center gap-3">
@@ -239,7 +239,7 @@ export function AppShell({
             <div className="flex items-center gap-2">
               <Link
                 href="/recipes"
-                className={`grid size-11 place-items-center rounded-2xl border border-line bg-surface text-muted transition hover:bg-white/10 ${
+                className={`liftlog-mobile-nav-item grid size-11 place-items-center rounded-2xl border border-line bg-surface text-muted transition hover:bg-white/10 ${
                   isActive(pathname, "/recipes") ? "bg-accent text-stone-950" : ""
                 }`}
                 aria-label="Open recipes"
@@ -248,7 +248,7 @@ export function AppShell({
               </Link>
               <Link
                 href="/meal-planner"
-                className={`grid size-11 place-items-center rounded-2xl border border-line bg-surface text-muted transition hover:bg-white/10 ${
+                className={`liftlog-mobile-nav-item grid size-11 place-items-center rounded-2xl border border-line bg-surface text-muted transition hover:bg-white/10 ${
                   isActive(pathname, "/meal-planner")
                     ? "bg-accent text-stone-950"
                     : ""
@@ -259,7 +259,7 @@ export function AppShell({
               </Link>
               <Link
                 href="/workouts/new"
-                className="grid size-11 place-items-center rounded-2xl bg-accent text-stone-950 shadow-lg shadow-accent/20"
+                className="liftlog-mobile-nav-item grid size-11 place-items-center rounded-2xl bg-accent text-stone-950 shadow-lg shadow-accent/20"
                 aria-label="Add workout"
               >
                 <Plus className="size-5" />
@@ -283,9 +283,9 @@ export function AppShell({
               <Link
                 key={item.href}
                 href={item.href}
-                className={`flex flex-col items-center justify-center gap-1 rounded-2xl px-2 py-2 text-[0.68rem] font-black transition ${
+                className={`liftlog-mobile-nav-item flex flex-col items-center justify-center gap-1 rounded-2xl px-2 py-2 text-[0.68rem] font-black transition ${
                   active
-                    ? "bg-accent text-stone-950"
+                    ? "liftlog-active-item bg-accent text-stone-950"
                     : "text-muted hover:bg-white/10 hover:text-foreground"
                 }`}
               >

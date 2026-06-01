@@ -87,7 +87,11 @@ export function RestTimer() {
   }
 
   return (
-    <section className="rounded-[1.5rem] border border-accent/25 bg-gradient-to-br from-accent/10 via-white/[0.04] to-sun/10 p-4 shadow-[0_18px_60px_rgba(0,0,0,0.25)]">
+    <section
+      className={`rounded-[1.5rem] border border-accent/25 bg-gradient-to-br from-accent/10 via-white/[0.04] to-sun/10 p-4 shadow-[0_18px_60px_rgba(0,0,0,0.25)] transition ${
+        message ? "liftlog-complete-pulse" : ""
+      }`}
+    >
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <div className="flex items-center gap-3">
@@ -117,7 +121,7 @@ export function RestTimer() {
 
       <div className="mt-4 h-2 overflow-hidden rounded-full bg-white/10">
         <div
-          className="h-full rounded-full bg-gradient-to-r from-accent via-sun to-energy transition-all duration-500"
+          className="liftlog-progress-bar h-full rounded-full bg-gradient-to-r from-accent via-sun to-energy transition-all duration-500"
           style={{ width: `${progress}%` }}
         />
       </div>
@@ -189,7 +193,7 @@ export function RestTimer() {
       </div>
 
       {message ? (
-        <p className="mt-4 rounded-2xl border border-accent/30 bg-accent/10 p-3 text-sm font-black text-soft-yellow liftlog-enter">
+        <p className="liftlog-pop-in mt-4 rounded-2xl border border-accent/30 bg-accent/10 p-3 text-sm font-black text-soft-yellow">
           {message}
         </p>
       ) : null}

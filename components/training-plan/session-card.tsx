@@ -66,7 +66,7 @@ export function SessionCard({ plan, session }: SessionCardProps) {
         {session.exercises.map((exercise) => (
           <div
             key={`${session.dayLabel}-${exercise.name}`}
-            className="rounded-2xl border border-line/80 bg-white/[0.04] p-4"
+            className="liftlog-slide-in rounded-2xl border border-line/80 bg-white/[0.04] p-4 transition hover:border-accent/35 hover:bg-white/[0.065]"
           >
             <div className="flex items-start gap-3">
               <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-accent text-stone-950">
@@ -113,7 +113,7 @@ export function SessionCard({ plan, session }: SessionCardProps) {
       </div>
 
       {createdWorkoutId ? (
-        <div className="mt-4 rounded-2xl border border-accent/30 bg-accent/15 p-4 text-sm font-bold text-soft-yellow">
+        <div className="liftlog-pop-in mt-4 rounded-2xl border border-accent/30 bg-accent/15 p-4 text-sm font-bold text-soft-yellow">
           Workout logged.{" "}
           <Link
             href={`/workouts/${createdWorkoutId}`}
@@ -125,7 +125,7 @@ export function SessionCard({ plan, session }: SessionCardProps) {
       ) : null}
 
       {error ? (
-        <p className="mt-4 rounded-2xl border border-red-400/30 bg-red-950/40 p-4 text-sm font-bold text-red-100">
+        <p className="liftlog-pop-in mt-4 rounded-2xl border border-red-400/30 bg-red-950/40 p-4 text-sm font-bold text-red-100">
           {error}
         </p>
       ) : null}

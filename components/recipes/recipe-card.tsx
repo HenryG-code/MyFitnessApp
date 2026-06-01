@@ -9,7 +9,7 @@ type RecipeCardProps = {
 
 export function RecipeCard({ recipe }: RecipeCardProps) {
   return (
-    <FitnessCard className="group flex h-full flex-col overflow-hidden hover:-translate-y-1 hover:shadow-[0_30px_90px_rgba(23,33,28,0.14)]">
+    <FitnessCard className="group flex h-full flex-col overflow-hidden hover:shadow-[0_30px_90px_rgba(23,33,28,0.14)]">
       <div className="-mx-5 -mt-5 mb-5 h-2 bg-gradient-to-r from-accent via-sun to-accent-strong opacity-90 transition group-hover:h-3" />
       <div className="flex items-start justify-between gap-4">
         <span className="rounded-full border border-accent/25 bg-accent/10 px-3 py-1 text-xs font-black uppercase tracking-[0.16em] text-soft-yellow">
