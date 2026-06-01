@@ -1,5 +1,21 @@
 import { createBrowserSupabaseClient } from "@/src/lib/supabase/client";
 import {
+  calculateDayTotals,
+  calculateWeekTotals,
+  createRecipeMap,
+} from "@/src/lib/meal-planner/calculations";
+import {
+  createEmptyMealPlan,
+  normalizeMealPlanState,
+} from "@/src/lib/meal-planner/storage";
+import {
+  weekdays,
+  type MealPlanState,
+  type MealPlanTotals,
+  type Weekday,
+} from "@/src/lib/meal-planner/types";
+import { getAllRecipes } from "@/src/lib/recipes/data";
+import {
   buildHabitDaySummary,
   ensureDefaultHabits,
   getDateDaysAgo,
@@ -25,6 +41,7 @@ export type DashboardData = {
   recentHabitCompletions: HabitCompletion[];
   todayHabits: HabitDaySummary;
   recentHabits: HabitDaySummary[];
+  mealPlan: MealPlanState;
   latestWorkout: Workout | null;
   workoutsThisWeek: Workout[];
   workoutsLastSevenDays: Workout[];
@@ -54,6 +71,30 @@ export type WeightProgress = {
   goalReached: boolean;
 };
 
+export type MacroTotals = {
+  calories: number;
+  protein: number;
+  carbs: number;
+  fat: number;
+  plannedMeals: number;
+};
+
+export type MacroBreakdownItem = {
+  label: "Protein" | "Carbs" | "Fat";
+  grams: number;
+  percentage: number;
+  barClassName: string;
+};
+
+export type FitnessJourneyItem = {
+  label: string;
+  value: string;
+  detail: string;
+  href: string;
+};
+
+const recipeMap = createRecipeMap(getAllRecipes());
+
 async function getAuthenticatedUserId() {
   const supabase = createBrowserSupabaseClient();
   const {
@@ -79,6 +120,10 @@ function getStartOfWeekDate() {
   start.setDate(now.getDate() - now.getDay());
 
   return getDateInputValue(start);
+}
+
+function getCurrentWeekday(date = new Date()): Weekday {
+  return weekdays[(date.getDay() + 6) % 7] as Weekday;
 }
 
 export function countCompletedHabits(row: HabitDaySummary | null) {
@@ -191,11 +236,171 @@ export function calculateWeightProgress(data: DashboardData): WeightProgress {
   };
 }
 
+export function calculateTodayMacros(data: DashboardData): MacroTotals {
+  const today = getCurrentWeekday();
+  const totals = calculateDayTotals(data.mealPlan, today, recipeMap);
+
+  return {
+    calories: totals.calories,
+    protein: totals.protein,
+    carbs: totals.carbs,
+    fat: totals.fat,
+    plannedMeals: totals.plannedMeals,
+  };
+}
+
+export function calculateWeeklyMacros(data: DashboardData): MealPlanTotals {
+  return calculateWeekTotals(data.mealPlan, recipeMap);
+}
+
+export function calculateMacroBreakdown(
+  macros: Pick<MacroTotals, "protein" | "carbs" | "fat">
+): MacroBreakdownItem[] {
+  const macroGrams = macros.protein + macros.carbs + macros.fat;
+  const getPercentage = (value: number) =>
+    macroGrams > 0 ? Math.round((value / macroGrams) * 100) : 0;
+
+  return [
+    {
+      label: "Protein",
+      grams: macros.protein,
+      percentage: getPercentage(macros.protein),
+      barClassName: "bg-accent",
+    },
+    {
+      label: "Carbs",
+      grams: macros.carbs,
+      percentage: getPercentage(macros.carbs),
+      barClassName: "bg-orange-500",
+    },
+    {
+      label: "Fat",
+      grams: macros.fat,
+      percentage: getPercentage(macros.fat),
+      barClassName: "bg-red-500",
+    },
+  ];
+}
+
+export function calculatePlannedMealsCount(data: DashboardData) {
+  return calculateWeeklyMacros(data).plannedMealsCount;
+}
+
+export function generateDashboardMotivation(data: DashboardData) {
+  const completedHabits = countCompletedHabits(data.todayHabits);
+  const totalHabits = countTotalHabits(data.todayHabits);
+  const habitPercent = getHabitCompletionPercent(data.todayHabits);
+  const weeklyWorkoutStats = calculateWeeklyWorkoutStats(
+    data.workoutsLastSevenDays
+  );
+  const todayMacros = calculateTodayMacros(data);
+  const weeklyMacros = calculateWeeklyMacros(data);
+  const weightProgress = calculateWeightProgress(data);
+
+  if (totalHabits > 0 && completedHabits === totalHabits) {
+    return "Clean sweep today. Every habit is checked off.";
+  }
+
+  if (todayMacros.plannedMeals >= 3 && weeklyWorkoutStats.workoutsCompleted > 0) {
+    return "Training and meals are both lined up. That is strong momentum.";
+  }
+
+  if (weeklyWorkoutStats.workoutsCompleted >= 4) {
+    return "Strong training week. You are building real momentum.";
+  }
+
+  if (weeklyMacros.plannedMealsCount >= 14) {
+    return "Your meals are mapped out. Keep stacking the easy wins.";
+  }
+
+  if (habitPercent >= 70) {
+    return "Good consistency today. Keep the streak alive.";
+  }
+
+  if (weeklyWorkoutStats.workoutsCompleted === 0) {
+    return "Start small today. One logged session beats zero.";
+  }
+
+  if (weightProgress.currentWeight === null) {
+    return "Add a weight check-in to start tracking your trend.";
+  }
+
+  if (todayMacros.plannedMeals === 0) {
+    return "Plan one meal for today and make the next choice easier.";
+  }
+
+  return "Keep moving. Small logged wins compound.";
+}
+
+export function buildFitnessJourneySummary(
+  data: DashboardData
+): FitnessJourneyItem[] {
+  const weightProgress = calculateWeightProgress(data);
+  const weeklyWorkoutStats = calculateWeeklyWorkoutStats(
+    data.workoutsLastSevenDays
+  );
+  const averageHabitCompletion = calculateAverageHabitCompletion(data);
+  const weeklyMacros = calculateWeeklyMacros(data);
+  const plannedMealsCount = calculatePlannedMealsCount(data);
+
+  return [
+    {
+      label: "Weight",
+      value:
+        weightProgress.currentWeight !== null
+          ? `${weightProgress.currentWeight.toFixed(1)} kg`
+          : "Not started",
+      detail:
+        weightProgress.totalChange !== null
+          ? `${Math.abs(weightProgress.totalChange).toFixed(
+              1
+            )} kg total change tracked.`
+          : "Add your first log to see your trend.",
+      href: "/weight",
+    },
+    {
+      label: "Training",
+      value: `${weeklyWorkoutStats.workoutsCompleted} this week`,
+      detail:
+        weeklyWorkoutStats.totalMinutes > 0
+          ? `${weeklyWorkoutStats.totalMinutes} minutes logged over 7 days.`
+          : "Log a session to build your training history.",
+      href: "/workouts",
+    },
+    {
+      label: "Habits",
+      value: `${averageHabitCompletion}% avg`,
+      detail: "Average completion across the last 7 days.",
+      href: "/habits",
+    },
+    {
+      label: "Nutrition",
+      value: `${weeklyMacros.weeklyProtein}g protein`,
+      detail:
+        plannedMealsCount > 0
+          ? `${plannedMealsCount} meals planned this week.`
+          : "Plan meals to see nutrition totals.",
+      href: "/meal-planner",
+    },
+    {
+      label: "Planning",
+      value: plannedMealsCount > 0 ? "Week mapped" : "Open slots",
+      detail:
+        plannedMealsCount > 0
+          ? "Your meal plan is feeding the grocery list."
+          : "Choose recipes to build your week.",
+      href: "/grocery-list",
+    },
+  ];
+}
+
 export function generateProgressInsights(data: DashboardData) {
   const weeklyData = buildWeeklyConsistencyData(data);
   const workoutStats = calculateWeeklyWorkoutStats(data.workoutsLastSevenDays);
   const averageHabitCompletion = calculateAverageHabitCompletion(data);
   const weightProgress = calculateWeightProgress(data);
+  const todayMacros = calculateTodayMacros(data);
+  const weeklyMacros = calculateWeeklyMacros(data);
   const trainingScore = Math.round((workoutStats.workoutDays / 7) * 100);
   const weightLoggingScore = Math.round((data.recentWeights.length / 7) * 100);
   const areas = [
@@ -254,6 +459,20 @@ export function generateProgressInsights(data: DashboardData) {
     );
   }
 
+  if (todayMacros.plannedMeals > 0) {
+    insights.push(
+      `Today you have ${todayMacros.plannedMeals} planned meals totaling ${todayMacros.protein}g protein.`
+    );
+  } else {
+    insights.push("Plan one meal today to make nutrition easier to follow.");
+  }
+
+  if (weeklyMacros.plannedMealsCount > 0) {
+    insights.push(
+      `Your week includes ${weeklyMacros.plannedMealsCount} planned meals and ${weeklyMacros.weeklyCalories} calories.`
+    );
+  }
+
   insights.push(
     `Your strongest consistency area this week was ${strongestArea.label}.`
   );
@@ -297,6 +516,7 @@ export async function fetchDashboardData(): Promise<DashboardData> {
     workoutsThisWeekResult,
     workoutsLastSevenDaysResult,
     profileResult,
+    preferencesResult,
   ] = await Promise.all([
     supabase
       .from("weight_logs")
@@ -361,6 +581,11 @@ export async function fetchDashboardData(): Promise<DashboardData> {
       .select("*")
       .eq("id", userId)
       .maybeSingle(),
+    supabase
+      .from("user_preferences")
+      .select("meal_plan")
+      .eq("user_id", userId)
+      .maybeSingle(),
   ]);
 
   const results = [
@@ -373,6 +598,7 @@ export async function fetchDashboardData(): Promise<DashboardData> {
     workoutsThisWeekResult,
     workoutsLastSevenDaysResult,
     profileResult,
+    preferencesResult,
   ];
   const failed = results.find((result) => result.error);
 
@@ -403,6 +629,9 @@ export async function fetchDashboardData(): Promise<DashboardData> {
     recentHabitCompletions,
     todayHabits: buildHabitDaySummary(today, habitDefinitions, todayHabitCompletions),
     recentHabits,
+    mealPlan: preferencesResult.data?.meal_plan
+      ? normalizeMealPlanState(preferencesResult.data.meal_plan)
+      : createEmptyMealPlan(),
     latestWorkout: latestWorkoutResult.data,
     workoutsThisWeek: workoutsThisWeekResult.data ?? [],
     workoutsLastSevenDays: workoutsLastSevenDaysResult.data ?? [],

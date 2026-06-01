@@ -63,7 +63,11 @@ Screenshot capture checklist:
 - Protected dashboard and app routes.
 - Real dashboard data from user-scoped Supabase records.
 - Weekly consistency score based on habits, workouts, and weight check-ins.
-- Weekly report and deterministic progress insights powered by user activity.
+- Dashboard nutrition macros from planned meals.
+- Weekly report, deterministic motivation, and progress insights powered by
+  user activity.
+- Fitness journey overview across weight, training, habits, nutrition, and
+  planning.
 - Profile-backed goal weight shown in dashboard progress.
 - Weight Tracker CRUD with stats and charting.
 - Flexible Daily Habits tracking with default habits, custom user habits,
@@ -111,13 +115,15 @@ Supabase-backed features fetch only the signed-in user's rows and rely on Row
 Level Security as the final protection layer.
 
 Dashboard insights are deterministic calculations from workouts, flexible daily
-habits, and weight logs. They do not use AI or paid services.
+habits, weight logs, goal weight, and planned-meal nutrition macros. They do
+not use AI or paid services.
 
 Recipes and training plan templates are static local TypeScript data in v1.
 Meal Planner, Grocery List checked state, selected training goal, and
 notification preferences sync through Supabase user preferences with
-`localStorage` retained as a fallback. No AI APIs, paid recipe APIs, grocery
-APIs, payment SDKs, or scraping workflows are used.
+`localStorage` retained as a fallback. Dashboard nutrition cards reuse the same
+meal plan and static recipe nutrition data. No AI APIs, paid recipe APIs,
+grocery APIs, payment SDKs, or scraping workflows are used.
 
 ## Database Overview
 
@@ -450,7 +456,8 @@ Use this checklist before demos or deployments:
 
 1. Register and log in with a Supabase email/password user.
 2. Confirm `/dashboard` loads real user-scoped data, weekly consistency,
-   weekly report, deterministic insights, and empty states.
+   nutrition macros, weekly report, deterministic motivation, journey overview,
+   and empty states.
 3. Test `/weight` add, edit, delete, chart, and stats.
 4. Test `/habits` habit toggles and 7-day summary persistence.
 5. Test `/workouts` create, edit, delete, exercise rows, and detail page.

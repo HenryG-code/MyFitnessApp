@@ -9,16 +9,25 @@ import {
 import { HeroPanel } from "@/components/ui/hero-panel";
 import {
   buildWeeklyConsistencyData,
+  buildFitnessJourneySummary,
+  calculateMacroBreakdown,
+  calculateTodayMacros,
   calculateAverageHabitCompletion,
+  calculateWeeklyMacros,
   calculateWeeklyWorkoutStats,
   calculateWeightProgress,
   countCompletedHabits,
   countTotalHabits,
   fetchDashboardData,
+  generateDashboardMotivation,
   generateProgressInsights,
   getHabitCompletionPercent,
   type DashboardData,
 } from "@/src/lib/dashboard/queries";
+import {
+  hasPlannedMeals,
+  loadMealPlanFromStorage,
+} from "@/src/lib/meal-planner/storage";
 import { fitnessImages } from "@/src/lib/visuals/fitness-images";
 import {
   Activity,
@@ -26,6 +35,7 @@ import {
   CalendarDays,
   Download,
   Dumbbell,
+  Flame,
   Plus,
   Scale,
   Settings,
@@ -35,6 +45,7 @@ import {
   Target,
   Trophy,
   TrendingUp,
+  Utensils,
 } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -80,6 +91,10 @@ function formatSignedWeight(value: number) {
   return `${value > 0 ? "+" : ""}${value.toFixed(1)} kg`;
 }
 
+function formatNumber(value: number) {
+  return new Intl.NumberFormat("en").format(value);
+}
+
 function getGoalSummary(latestWeight: number | null, goalWeight: number | null) {
   if (goalWeight === null) {
     return {
@@ -110,42 +125,6 @@ function getGoalSummary(latestWeight: number | null, goalWeight: number | null) 
   };
 }
 
-function getMotivationMessage({
-  completedHabits,
-  habitPercent,
-  latestWeightValue,
-  weeklyWorkouts,
-  totalHabits,
-}: {
-  completedHabits: number;
-  habitPercent: number;
-  latestWeightValue: number | null;
-  weeklyWorkouts: number;
-  totalHabits: number;
-}) {
-  if (totalHabits > 0 && completedHabits === totalHabits) {
-    return "Congratulations. You hit every habit today.";
-  }
-
-  if (weeklyWorkouts >= 4) {
-    return "Strong week. You are building real momentum.";
-  }
-
-  if (habitPercent >= 70) {
-    return "Good consistency today. Keep the streak alive.";
-  }
-
-  if (weeklyWorkouts === 0) {
-    return "Start small today. One logged session beats zero.";
-  }
-
-  if (latestWeightValue === null) {
-    return "Add a weight check-in to start tracking your trend.";
-  }
-
-  return "Keep moving. Small logged wins compound.";
-}
-
 export function DashboardOverview() {
   const [data, setData] = useState<DashboardData | null>(null);
   const [error, setError] = useState("");
@@ -157,7 +136,16 @@ export function DashboardOverview() {
     fetchDashboardData()
       .then((dashboardData) => {
         if (isMounted) {
-          setData(dashboardData);
+          const localMealPlan = loadMealPlanFromStorage();
+          const shouldUseLocalPlan =
+            !hasPlannedMeals(dashboardData.mealPlan) &&
+            hasPlannedMeals(localMealPlan);
+
+          setData(
+            shouldUseLocalPlan
+              ? { ...dashboardData, mealPlan: localMealPlan }
+              : dashboardData
+          );
         }
       })
       .catch((loadError: unknown) => {
@@ -198,13 +186,27 @@ export function DashboardOverview() {
   const goalSummary = getGoalSummary(latestWeightValue, data?.goalWeightKg ?? null);
   const weightProgress = data ? calculateWeightProgress(data) : null;
   const weightLogsThisWeek = data?.recentWeights.length ?? 0;
-  const motivationMessage = getMotivationMessage({
-    completedHabits,
-    habitPercent,
-    latestWeightValue,
-    weeklyWorkouts: weeklyWorkoutStats.workoutsCompleted,
-    totalHabits,
-  });
+  const todayMacros = data
+    ? calculateTodayMacros(data)
+    : { calories: 0, protein: 0, carbs: 0, fat: 0, plannedMeals: 0 };
+  const weeklyMacros = data
+    ? calculateWeeklyMacros(data)
+    : {
+        weeklyCalories: 0,
+        weeklyProtein: 0,
+        weeklyCarbs: 0,
+        weeklyFat: 0,
+        averageDailyCalories: 0,
+        averageDailyProtein: 0,
+        averageDailyCarbs: 0,
+        averageDailyFat: 0,
+        plannedMealsCount: 0,
+      };
+  const macroBreakdown = calculateMacroBreakdown(todayMacros);
+  const fitnessJourney = data ? buildFitnessJourneySummary(data) : [];
+  const motivationMessage = data
+    ? generateDashboardMotivation(data)
+    : "Keep moving. Small logged wins compound.";
 
   return (
     <div className="space-y-5">
@@ -312,7 +314,7 @@ export function DashboardOverview() {
       <section className="grid gap-4 lg:grid-cols-[1.25fr_0.75fr]">
         <FitnessCard>
           <SectionHeader eyebrow="Today" title="Your home base" />
-          <div className="grid gap-3 sm:grid-cols-3">
+          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
             <div className="rounded-[1.25rem] bg-white/[0.055] p-4 shadow-inner shadow-white/[0.02]">
               <p className="text-xs font-black uppercase tracking-[0.18em] text-muted">
                 Habits
@@ -348,6 +350,19 @@ export function DashboardOverview() {
                   : "Add your first log"}
               </p>
             </div>
+            <div className="rounded-[1.25rem] bg-white/[0.055] p-4 shadow-inner shadow-white/[0.02]">
+              <p className="text-xs font-black uppercase tracking-[0.18em] text-muted">
+                Meals today
+              </p>
+              <p className="mt-2 font-display text-3xl font-black">
+                {todayMacros.plannedMeals}
+              </p>
+              <p className="mt-1 text-sm text-muted">
+                {todayMacros.plannedMeals
+                  ? `${todayMacros.protein}g protein planned`
+                  : "Plan your first meal"}
+              </p>
+            </div>
           </div>
         </FitnessCard>
 
@@ -372,6 +387,122 @@ export function DashboardOverview() {
                 </Link>
               );
             })}
+          </div>
+        </FitnessCard>
+      </section>
+
+      <section className="grid gap-5 xl:grid-cols-[1.1fr_0.9fr]">
+        <FitnessCard>
+          <SectionHeader eyebrow="Nutrition" title="Today's macros" />
+          {todayMacros.plannedMeals > 0 ? (
+            <>
+              <div className="grid gap-3 sm:grid-cols-4">
+                <div className="rounded-[1.25rem] bg-accent p-4 text-stone-950">
+                  <p className="text-xs font-black uppercase tracking-[0.16em]">
+                    Calories
+                  </p>
+                  <p className="mt-2 font-display text-3xl font-black">
+                    {formatNumber(todayMacros.calories)}
+                  </p>
+                </div>
+                {[
+                  { label: "Protein", value: `${todayMacros.protein}g` },
+                  { label: "Carbs", value: `${todayMacros.carbs}g` },
+                  { label: "Fat", value: `${todayMacros.fat}g` },
+                ].map((item) => (
+                  <div
+                    key={item.label}
+                    className="rounded-[1.25rem] bg-white/[0.055] p-4 shadow-inner shadow-white/[0.02]"
+                  >
+                    <p className="text-xs font-black uppercase tracking-[0.16em] text-muted">
+                      {item.label}
+                    </p>
+                    <p className="mt-2 font-display text-3xl font-black">
+                      {item.value}
+                    </p>
+                  </div>
+                ))}
+              </div>
+              <div className="mt-5 space-y-3">
+                {macroBreakdown.map((macro) => (
+                  <div key={macro.label}>
+                    <div className="mb-2 flex items-center justify-between text-sm font-black">
+                      <span>{macro.label}</span>
+                      <span className="text-muted">
+                        {macro.grams}g - {macro.percentage}%
+                      </span>
+                    </div>
+                    <div className="h-3 overflow-hidden rounded-full bg-white/[0.08]">
+                      <div
+                        className={`h-full rounded-full ${macro.barClassName}`}
+                        style={{ width: `${macro.percentage}%` }}
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </>
+          ) : (
+            <div className="rounded-[1.5rem] border border-dashed border-line bg-white/[0.045] p-5">
+              <p className="font-display text-xl font-black">
+                No meals planned for today.
+              </p>
+              <p className="mt-2 text-sm leading-6 text-muted">
+                Choose recipes in your meal planner to see calories and macros
+                here.
+              </p>
+              <Link
+                href="/meal-planner"
+                className="mt-4 inline-flex rounded-2xl bg-accent px-4 py-2 text-sm font-black text-stone-950"
+              >
+                Plan meals
+              </Link>
+            </div>
+          )}
+        </FitnessCard>
+
+        <FitnessCard>
+          <SectionHeader eyebrow="This week" title="Nutrition overview" />
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div className="rounded-[1.25rem] bg-white/[0.055] p-4 shadow-inner shadow-white/[0.02]">
+              <Flame className="size-5 text-accent" />
+              <p className="mt-3 text-xs font-black uppercase tracking-[0.16em] text-muted">
+                Weekly calories
+              </p>
+              <p className="mt-2 font-display text-2xl font-black">
+                {formatNumber(weeklyMacros.weeklyCalories)}
+              </p>
+            </div>
+            <div className="rounded-[1.25rem] bg-white/[0.055] p-4 shadow-inner shadow-white/[0.02]">
+              <Utensils className="size-5 text-accent" />
+              <p className="mt-3 text-xs font-black uppercase tracking-[0.16em] text-muted">
+                Planned meals
+              </p>
+              <p className="mt-2 font-display text-2xl font-black">
+                {weeklyMacros.plannedMealsCount}
+              </p>
+            </div>
+            <div className="rounded-[1.25rem] bg-white/[0.055] p-4 shadow-inner shadow-white/[0.02]">
+              <p className="text-xs font-black uppercase tracking-[0.16em] text-muted">
+                Avg daily calories
+              </p>
+              <p className="mt-2 font-display text-2xl font-black">
+                {formatNumber(weeklyMacros.averageDailyCalories)}
+              </p>
+            </div>
+            <div className="rounded-[1.25rem] bg-white/[0.055] p-4 shadow-inner shadow-white/[0.02]">
+              <p className="text-xs font-black uppercase tracking-[0.16em] text-muted">
+                Avg daily protein
+              </p>
+              <p className="mt-2 font-display text-2xl font-black">
+                {weeklyMacros.averageDailyProtein}g
+              </p>
+            </div>
+          </div>
+          <div className="mt-4 rounded-[1.25rem] bg-white/[0.055] p-4 text-sm font-bold leading-6 text-muted shadow-inner shadow-white/[0.02]">
+            {weeklyMacros.plannedMealsCount > 0
+              ? `${weeklyMacros.weeklyProtein}g protein, ${weeklyMacros.weeklyCarbs}g carbs, and ${weeklyMacros.weeklyFat}g fat planned this week.`
+              : "Plan a few meals to turn this into a weekly nutrition snapshot."}
           </div>
         </FitnessCard>
       </section>
@@ -592,6 +723,29 @@ export function DashboardOverview() {
                     : "Add your first weight log to track progress."}
             </p>
           </div>
+        </div>
+      </FitnessCard>
+
+      <FitnessCard>
+        <SectionHeader eyebrow="Fitness journey" title="Your bigger picture" />
+        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
+          {fitnessJourney.map((item) => (
+            <Link
+              key={item.label}
+              href={item.href}
+              className="rounded-[1.25rem] border border-line bg-white/65 p-4 transition hover:-translate-y-0.5 hover:border-accent"
+            >
+              <p className="text-xs font-black uppercase tracking-[0.16em] text-muted">
+                {item.label}
+              </p>
+              <p className="mt-2 font-display text-2xl font-black">
+                {item.value}
+              </p>
+              <p className="mt-2 text-sm font-bold leading-6 text-muted">
+                {item.detail}
+              </p>
+            </Link>
+          ))}
         </div>
       </FitnessCard>
 

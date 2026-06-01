@@ -23,13 +23,19 @@ export type MealPlanState = Record<Weekday, MealPlanDay>;
 export type DayTotals = {
   calories: number;
   protein: number;
+  carbs: number;
+  fat: number;
   plannedMeals: number;
 };
 
 export type MealPlanTotals = {
   weeklyCalories: number;
   weeklyProtein: number;
+  weeklyCarbs: number;
+  weeklyFat: number;
   averageDailyCalories: number;
   averageDailyProtein: number;
+  averageDailyCarbs: number;
+  averageDailyFat: number;
   plannedMealsCount: number;
 };

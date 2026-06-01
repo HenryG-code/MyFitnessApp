@@ -44,10 +44,12 @@ export function calculateDayTotals(
       return {
         calories: totals.calories + recipe.calories,
         protein: totals.protein + recipe.protein,
+        carbs: totals.carbs + recipe.carbs,
+        fat: totals.fat + recipe.fat,
         plannedMeals: totals.plannedMeals + 1,
       };
     },
-    { calories: 0, protein: 0, plannedMeals: 0 }
+    { calories: 0, protein: 0, carbs: 0, fat: 0, plannedMeals: 0 }
   );
 }
 
@@ -62,6 +64,8 @@ export function calculateWeekTotals(
       return {
         weeklyCalories: weekTotals.weeklyCalories + dayTotals.calories,
         weeklyProtein: weekTotals.weeklyProtein + dayTotals.protein,
+        weeklyCarbs: weekTotals.weeklyCarbs + dayTotals.carbs,
+        weeklyFat: weekTotals.weeklyFat + dayTotals.fat,
         plannedMealsCount:
           weekTotals.plannedMealsCount + dayTotals.plannedMeals,
       };
@@ -69,6 +73,8 @@ export function calculateWeekTotals(
     {
       weeklyCalories: 0,
       weeklyProtein: 0,
+      weeklyCarbs: 0,
+      weeklyFat: 0,
       plannedMealsCount: 0,
     }
   );
@@ -77,5 +83,7 @@ export function calculateWeekTotals(
     ...totals,
     averageDailyCalories: Math.round(totals.weeklyCalories / weekdays.length),
     averageDailyProtein: Math.round(totals.weeklyProtein / weekdays.length),
+    averageDailyCarbs: Math.round(totals.weeklyCarbs / weekdays.length),
+    averageDailyFat: Math.round(totals.weeklyFat / weekdays.length),
   };
 }
