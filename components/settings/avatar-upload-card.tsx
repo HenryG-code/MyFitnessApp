@@ -6,7 +6,7 @@ import {
   validateAvatarFile,
 } from "@/src/lib/profile/avatar";
 import type { Profile } from "@/src/lib/supabase/database.types";
-import { Camera, Trash2, Upload, UserRound } from "lucide-react";
+import { Camera, Trash2, Upload } from "lucide-react";
 import { useRef, useState } from "react";
 
 type AvatarUploadCardProps = {

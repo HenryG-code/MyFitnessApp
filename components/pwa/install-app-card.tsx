@@ -38,14 +38,11 @@ function isLikelyIosSafari() {
 export function InstallAppCard() {
   const [deferredPrompt, setDeferredPrompt] =
     useState<BeforeInstallPromptEvent | null>(null);
-  const [isInstalled, setIsInstalled] = useState(false);
-  const [isIosSafari, setIsIosSafari] = useState(false);
+  const [isInstalled, setIsInstalled] = useState(isStandaloneDisplay);
+  const [isIosSafari] = useState(isLikelyIosSafari);
   const [status, setStatus] = useState("");
 
   useEffect(() => {
-    setIsInstalled(isStandaloneDisplay());
-    setIsIosSafari(isLikelyIosSafari());
-
     function handleBeforeInstallPrompt(event: Event) {
       event.preventDefault();
       setDeferredPrompt(event as BeforeInstallPromptEvent);

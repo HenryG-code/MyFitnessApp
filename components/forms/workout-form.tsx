@@ -10,7 +10,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Plus, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { useFieldArray, useForm } from "react-hook-form";
+import { useFieldArray, useForm, useWatch } from "react-hook-form";
 import { z } from "zod";
 
 const exerciseSchema = z.object({
@@ -238,10 +238,10 @@ export function WorkoutForm({ mode = "create", workout }: WorkoutFormProps) {
   const {
     control,
     formState: { errors, isSubmitting },
+    getValues,
     handleSubmit,
     register,
     setValue,
-    watch,
   } = useForm<WorkoutFormValues>({
     resolver: zodResolver(workoutSchema),
     defaultValues: getDefaultValues(workout),
@@ -250,14 +250,14 @@ export function WorkoutForm({ mode = "create", workout }: WorkoutFormProps) {
     control,
     name: "exercises",
   });
-  const watchedExercises = watch("exercises");
+  const watchedExercises = useWatch({ control, name: "exercises" });
 
   function addExercise() {
     append(getEmptyExercise());
   }
 
   function applyTitleSuggestion(title: string) {
-    const currentTitle = watch("title").trim();
+    const currentTitle = getValues("title").trim();
 
     if (!currentTitle || window.confirm(`Replace "${currentTitle}" with "${title}"?`)) {
       setValue("title", title, { shouldDirty: true, shouldValidate: true });

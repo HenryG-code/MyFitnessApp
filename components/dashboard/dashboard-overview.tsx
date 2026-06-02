@@ -320,7 +320,7 @@ export function DashboardOverview() {
           <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
             <div className="rounded-[1.25rem] bg-white/[0.055] p-4 shadow-inner shadow-white/[0.02]">
               <p className="text-xs font-black uppercase tracking-[0.18em] text-muted">
-                Today's habits
+                Today&rsquo;s habits
               </p>
               <p className="mt-2 font-display text-3xl font-black">
                 {habitPercent}%
@@ -396,7 +396,7 @@ export function DashboardOverview() {
 
       <section className="grid gap-5 xl:grid-cols-[1.1fr_0.9fr]">
         <FitnessCard>
-          <SectionHeader eyebrow="Planned nutrition" title="Today's macros" />
+          <SectionHeader eyebrow="Planned nutrition" title="Today’s macros" />
           {todayMacros.plannedMeals > 0 ? (
             <>
               <div className="grid gap-3 sm:grid-cols-4">
@@ -648,7 +648,7 @@ export function DashboardOverview() {
             <div className="rounded-[1.25rem] bg-white/[0.055] p-4 shadow-inner shadow-white/[0.02]">
               <div className="flex items-center gap-3">
                 <TrendingUp className="size-5 text-accent" />
-                <p className="font-black">Today's habit completion</p>
+                <p className="font-black">Today’s habit completion</p>
               </div>
               <div className="mt-3 h-2 rounded-full bg-stone-200">
                 <div

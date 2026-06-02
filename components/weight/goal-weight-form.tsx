@@ -3,7 +3,7 @@
 import { updateAuthenticatedGoalWeight } from "@/src/lib/profile/queries";
 import type { Profile } from "@/src/lib/supabase/database.types";
 import { Target, X } from "lucide-react";
-import { useEffect, useState } from "react";
+import { startTransition, useEffect, useState } from "react";
 
 type GoalWeightFormProps = {
   initialGoalWeight: number | null;
@@ -42,7 +42,9 @@ export function GoalWeightForm({
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
-    setGoalWeight(getInitialValue(initialGoalWeight));
+    startTransition(() => {
+      setGoalWeight(getInitialValue(initialGoalWeight));
+    });
   }, [initialGoalWeight]);
 
   async function saveGoalWeight(nextValue: string) {

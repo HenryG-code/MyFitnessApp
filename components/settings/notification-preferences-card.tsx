@@ -11,7 +11,6 @@ import {
   saveNotificationPreferences,
 } from "@/src/lib/notifications/storage";
 import {
-  defaultNotificationPreferences,
   type NotificationPreferenceKey,
   type NotificationPermissionStatus,
   type NotificationPreferences,
@@ -76,19 +75,16 @@ function getStatusMessage(
 
 export function NotificationPreferencesCard() {
   const [preferences, setPreferences] = useState<NotificationPreferences>(
-    defaultNotificationPreferences
+    loadNotificationPreferences
   );
   const [permissionStatus, setPermissionStatus] =
-    useState<NotificationPermissionStatus>("not-requested");
+    useState<NotificationPermissionStatus>(getNotificationPermissionStatus);
   const [message, setMessage] = useState("");
   const [isRequesting, setIsRequesting] = useState(false);
 
   useEffect(() => {
     let isMounted = true;
     const storedPreferences = loadNotificationPreferences();
-
-    setPreferences(storedPreferences);
-    setPermissionStatus(getNotificationPermissionStatus());
 
     async function loadSyncedPreferences() {
       try {

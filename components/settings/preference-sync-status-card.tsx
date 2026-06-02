@@ -20,14 +20,14 @@ const statusCopy: Record<PreferenceSyncStatus, string> = {
 
 function getStatusIcon(status: PreferenceSyncStatus) {
   if (status === "synced") {
-    return CheckCircle2;
+    return <CheckCircle2 className="size-5" />;
   }
 
   if (status === "fallback" || status === "error") {
-    return CloudOff;
+    return <CloudOff className="size-5" />;
   }
 
-  return RefreshCw;
+  return <RefreshCw className="size-5" />;
 }
 
 export function PreferenceSyncStatusCard() {
@@ -71,13 +71,13 @@ export function PreferenceSyncStatusCard() {
     };
   }, []);
 
-  const Icon = getStatusIcon(status);
+  const statusIcon = getStatusIcon(status);
 
   return (
     <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
       <div className="max-w-2xl">
         <span className="grid size-12 place-items-center rounded-2xl bg-accent text-stone-950">
-          <Icon className="size-5" />
+          {statusIcon}
         </span>
         <div className="mt-5">
           <SectionHeader eyebrow="Preferences" title="Synced preferences" />

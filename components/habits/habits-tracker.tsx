@@ -128,7 +128,7 @@ export function HabitsTracker() {
   }
 
   useEffect(() => {
-    void refreshHabits();
+    void Promise.resolve().then(refreshHabits);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [today]);
 
