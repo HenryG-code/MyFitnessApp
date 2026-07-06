@@ -1,10 +1,25 @@
 import type { Metadata, Viewport } from "next";
 import { Analytics } from "@vercel/analytics/next";
+import { Archivo, Inter } from "next/font/google";
 import "./globals.css";
 
+const inter = Inter({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-inter",
+});
+
+const archivo = Archivo({
+  subsets: ["latin"],
+  display: "swap",
+  weight: ["500", "600", "700", "800", "900"],
+  variable: "--font-archivo",
+});
+
 export const metadata: Metadata = {
-  title: "LiftLog",
-  description: "Full-stack fitness tracker built with Next.js and Supabase.",
+  title: "LogFit — Personal Performance OS",
+  description:
+    "LogFit is a personal performance OS for training, body progress, recovery, habits, and long-term consistency.",
   manifest: "/manifest.webmanifest",
   icons: {
     icon: [
@@ -17,17 +32,18 @@ export const metadata: Metadata = {
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
-    title: "LiftLog",
+    title: "LogFit",
   },
   openGraph: {
-    title: "LiftLog",
-    description: "Full-stack fitness tracker built with Next.js and Supabase.",
+    title: "LogFit — Personal Performance OS",
+    description:
+      "Training, body progress, recovery, habits, and long-term consistency in one performance system.",
     type: "website",
   },
 };
 
 export const viewport: Viewport = {
-  themeColor: "#050505",
+  themeColor: "#0a0a0b",
 };
 
 export default function RootLayout({
@@ -36,7 +52,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" className={`${inter.variable} ${archivo.variable}`}>
       <body>
         {children}
         <Analytics />

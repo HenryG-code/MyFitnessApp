@@ -9,7 +9,7 @@ export default function RegisterPage() {
   return (
     <PublicAuthRedirect>
       <AuthPageShell
-        title="Start your LiftLog journey"
+        title="Start your LogFit journey"
         subtitle="Create your free account and begin tracking your fitness progress."
         imageSrc={authImages.register}
         imageAlt="Fitness community celebrating progress"

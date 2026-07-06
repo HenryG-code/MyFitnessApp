@@ -93,7 +93,7 @@ export function PreferenceSyncStatusCard() {
       >
         <p className="font-display text-xl font-black">{statusCopy[status]}</p>
         <p className="mt-2 leading-6 text-muted">
-          {message || "Preferences stay available while you use LiftLog."}
+          {message || "Preferences stay available while you use LogFit."}
         </p>
       </div>
     </div>

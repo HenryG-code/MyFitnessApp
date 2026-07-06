@@ -6,25 +6,34 @@ import { getUserDisplayName } from "@/src/lib/auth/user";
 import { createBrowserSupabaseClient } from "@/src/lib/supabase/client";
 import type { User } from "@supabase/supabase-js";
 import {
-  BarChart3,
+  Activity,
   BookOpen,
   CalendarDays,
   Dumbbell,
+  FileBarChart,
   Home,
+  PersonStanding,
   Plus,
   Scale,
   Settings,
   ShoppingBasket,
   Sprout,
   Target,
+  TrendingUp,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState, type ReactNode } from "react";
 
-const navItems = [
-  { label: "Dashboard", href: "/dashboard", icon: Home },
-  { label: "Workouts", href: "/workouts", icon: Dumbbell },
+const performNavItems = [
+  { label: "Today", href: "/dashboard", icon: Home },
+  { label: "Train", href: "/workouts", icon: Dumbbell },
+  { label: "Body", href: "/body", icon: PersonStanding },
+  { label: "Progress", href: "/progress", icon: TrendingUp },
+  { label: "Report", href: "/report", icon: FileBarChart },
+];
+
+const lifestyleNavItems = [
   { label: "Weight", href: "/weight", icon: Scale },
   { label: "Habits", href: "/habits", icon: Sprout },
   { label: "Recipes", href: "/recipes", icon: BookOpen },
@@ -34,24 +43,28 @@ const navItems = [
   { label: "Settings", href: "/settings", icon: Settings },
 ];
 
-const mobileNavItems = navItems.filter(
-  (item) =>
-    item.href !== "/recipes" &&
-    item.href !== "/meal-planner" &&
-    item.href !== "/grocery-list" &&
-    item.href !== "/training-plan"
-);
+const mobileNavItems = [
+  { label: "Today", href: "/dashboard", icon: Home },
+  { label: "Train", href: "/workouts", icon: Dumbbell },
+  { label: "Body", href: "/body", icon: PersonStanding },
+  { label: "Progress", href: "/progress", icon: TrendingUp },
+  { label: "Habits", href: "/habits", icon: Sprout },
+];
 
 function isActive(pathname: string, href: string) {
   if (href === "/dashboard") {
     return pathname === href;
   }
 
+  if (href === "/workouts" && pathname.startsWith("/workouts/live")) {
+    return true;
+  }
+
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
 function getInitials(name: string, email?: string) {
-  const source = name.trim() || email?.trim() || "LiftLog User";
+  const source = name.trim() || email?.trim() || "LogFit User";
   const words = source.split(/\s+/).filter(Boolean);
 
   if (words.length >= 2) {
@@ -139,132 +152,121 @@ export function AppShell({
 
   return (
     <div className="min-h-screen text-foreground">
-      <aside className="fixed inset-y-4 left-4 z-30 hidden w-72 flex-col rounded-[2rem] border border-line/90 bg-card/95 p-4 shadow-[0_28px_90px_rgba(0,0,0,0.48)] backdrop-blur-xl lg:flex">
-        <Link
-          href="/dashboard"
-          className="liftlog-card-motion flex items-center gap-3 rounded-[1.4rem] border border-line bg-surface p-4 text-white shadow-inner shadow-white/[0.03]"
-        >
-          <span className="grid size-11 place-items-center rounded-2xl bg-sun text-stone-950">
-            <BarChart3 className="size-5" />
+      <aside className="fixed inset-y-0 left-0 z-30 hidden w-64 flex-col border-r border-line bg-surface/80 px-4 py-5 backdrop-blur-xl lg:flex">
+        <Link href="/dashboard" className="flex items-center gap-3 px-2">
+          <span className="grid size-10 place-items-center rounded-xl bg-accent text-white shadow-[0_6px_20px_rgba(240,71,46,0.35)]">
+            <Activity className="size-5" />
           </span>
           <span>
-            <span className="block font-display text-lg font-black">
-              LiftLog
+            <span className="block font-display text-lg font-black tracking-tight">
+              LogFit
             </span>
-            <span className="text-xs text-stone-300">Free fitness tracker</span>
+            <span className="text-[0.65rem] font-bold uppercase tracking-[0.14em] text-ink-dim">
+              Performance OS
+            </span>
           </span>
         </Link>
 
-        <nav className="mt-6 space-y-2">
-          {navItems.map((item) => {
-            const Icon = item.icon;
-            const active = isActive(pathname, item.href);
+        <nav className="mt-7 min-h-0 flex-1 space-y-6 overflow-y-auto">
+          <div>
+            <p className="lf-eyebrow px-3 !text-[0.6rem]">Perform</p>
+            <div className="mt-2 space-y-0.5">
+              {performNavItems.map((item) => {
+                const Icon = item.icon;
+                const active = isActive(pathname, item.href);
 
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={`liftlog-nav-item flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-bold transition ${
-                  active
-                    ? "liftlog-active-item bg-accent text-stone-950 shadow-lg shadow-accent/20"
-                    : "text-muted hover:bg-white/10 hover:text-foreground"
-                }`}
-              >
-                <Icon className="size-5" />
-                {item.label}
-              </Link>
-            );
-          })}
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className={`lf-press flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-bold transition ${
+                      active
+                        ? "bg-accent/[0.14] text-accent-strong"
+                        : "text-muted hover:bg-white/[0.05] hover:text-foreground"
+                    }`}
+                  >
+                    <Icon className="size-[1.1rem]" />
+                    {item.label}
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+          <div>
+            <p className="lf-eyebrow px-3 !text-[0.6rem]">Lifestyle</p>
+            <div className="mt-2 space-y-0.5">
+              {lifestyleNavItems.map((item) => {
+                const Icon = item.icon;
+                const active = isActive(pathname, item.href);
+
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className={`lf-press flex items-center gap-3 rounded-xl px-3 py-2 text-[0.82rem] font-bold transition ${
+                      active
+                        ? "bg-accent/[0.14] text-accent-strong"
+                        : "text-muted hover:bg-white/[0.05] hover:text-foreground"
+                    }`}
+                  >
+                    <Icon className="size-[1.05rem]" />
+                    {item.label}
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
         </nav>
 
-        <div className="mt-auto space-y-3">
-          <div className="liftlog-card-motion rounded-[1.6rem] border border-line bg-surface/90 p-4">
+        <div className="mt-auto">
+          <div className="rounded-xl border border-line bg-white/[0.02] p-3">
             <div className="flex items-center gap-3">
-              <UserAvatar
-                avatarUrl={avatarUrl}
-                userName={userName}
-                email={user.email}
-              />
-              <div className="min-w-0">
-                <p className="text-xs font-black uppercase tracking-[0.18em] text-muted">
-                  Signed in
-                </p>
-                <p className="mt-1 truncate font-display text-lg font-black">
-                  {userName}
-                </p>
-                {user.email ? (
-                  <p className="mt-1 truncate text-xs font-medium text-muted">
-                    {user.email}
-                  </p>
-                ) : null}
-              </div>
-            </div>
-            <LogoutButton className="mt-4 w-full bg-accent text-stone-950 hover:bg-accent-strong" />
-          </div>
-
-          <div className="liftlog-card-motion rounded-[1.6rem] border border-accent/25 bg-accent/10 p-4">
-            <p className="text-xs font-black uppercase tracking-[0.18em] text-accent">
-              Keep building
-            </p>
-            <p className="mt-2 text-2xl font-black tracking-tight">
-              Your private hub
-            </p>
-            <p className="mt-1 text-sm leading-6 text-muted">
-              Track workouts, habits, meals, groceries, and training plans from
-              one private dashboard.
-            </p>
-          </div>
-        </div>
-      </aside>
-
-      <main className="mx-auto w-full max-w-7xl px-4 pb-28 pt-5 sm:px-6 lg:ml-80 lg:mr-6 lg:px-0 lg:pb-10">
-        <header className="mb-5 rounded-[1.75rem] border border-line/80 bg-card/90 p-4 shadow-[0_18px_60px_rgba(0,0,0,0.32)] backdrop-blur lg:hidden">
-          <div className="flex items-center justify-between gap-3">
-            <Link href="/dashboard" className="flex items-center gap-3">
               <UserAvatar
                 avatarUrl={avatarUrl}
                 userName={userName}
                 email={user.email}
                 size="sm"
               />
-              <span>
-                <span className="block font-display text-lg font-black">
-                  LiftLog
-                </span>
-                <span className="text-xs font-medium text-muted">
-                  {userName}
-                </span>
-              </span>
-            </Link>
-            <div className="flex items-center gap-2">
-              <Link
-                href="/recipes"
-                className={`liftlog-mobile-nav-item grid size-11 place-items-center rounded-2xl border border-line bg-surface text-muted transition hover:bg-white/10 ${
-                  isActive(pathname, "/recipes") ? "bg-accent text-stone-950" : ""
-                }`}
-                aria-label="Open recipes"
-              >
-                <BookOpen className="size-5" />
-              </Link>
-              <Link
-                href="/meal-planner"
-                className={`liftlog-mobile-nav-item grid size-11 place-items-center rounded-2xl border border-line bg-surface text-muted transition hover:bg-white/10 ${
-                  isActive(pathname, "/meal-planner")
-                    ? "bg-accent text-stone-950"
-                    : ""
-                }`}
-                aria-label="Open meal planner"
-              >
-                <CalendarDays className="size-5" />
-              </Link>
-              <Link
-                href="/workouts/new"
-                className="liftlog-mobile-nav-item grid size-11 place-items-center rounded-2xl bg-accent text-stone-950 shadow-lg shadow-accent/20"
-                aria-label="Add workout"
-              >
-                <Plus className="size-5" />
-              </Link>
+              <div className="min-w-0">
+                <p className="truncate text-sm font-black">{userName}</p>
+                {user.email ? (
+                  <p className="truncate text-[0.7rem] font-medium text-ink-dim">
+                    {user.email}
+                  </p>
+                ) : null}
+              </div>
             </div>
+            <LogoutButton className="mt-3 w-full rounded-xl border border-line bg-transparent text-xs text-muted hover:bg-white/[0.06] hover:text-foreground" />
+          </div>
+        </div>
+      </aside>
+
+      <main className="mx-auto w-full max-w-7xl px-4 pb-24 pt-4 sm:px-6 lg:ml-64 lg:px-8 lg:pb-10 lg:pt-6">
+        <header className="mb-4 flex items-center justify-between gap-3 lg:hidden">
+          <Link href="/dashboard" className="flex items-center gap-2.5">
+            <span className="grid size-9 place-items-center rounded-xl bg-accent text-white shadow-[0_6px_20px_rgba(240,71,46,0.3)]">
+              <Activity className="size-[1.05rem]" />
+            </span>
+            <span className="font-display text-base font-black tracking-tight">
+              LogFit
+            </span>
+          </Link>
+          <div className="flex items-center gap-2">
+            <Link
+              href="/workouts/new"
+              className="lf-press grid size-10 place-items-center rounded-xl border border-line bg-white/[0.04] text-muted transition hover:text-foreground"
+              aria-label="Log a workout manually"
+            >
+              <Plus className="size-[1.1rem]" />
+            </Link>
+            <Link href="/settings" aria-label="Open settings">
+              <UserAvatar
+                avatarUrl={avatarUrl}
+                userName={userName}
+                email={user.email}
+                size="sm"
+              />
+            </Link>
           </div>
         </header>
 
@@ -273,8 +275,11 @@ export function AppShell({
 
       <BackToTopButton />
 
-      <nav className="fixed inset-x-3 bottom-3 z-40 rounded-[1.5rem] border border-line/90 bg-card/95 p-2 shadow-[0_18px_60px_rgba(0,0,0,0.48)] backdrop-blur-xl lg:hidden">
-        <div className="grid grid-cols-5 gap-1">
+      <nav
+        aria-label="Primary"
+        className="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-surface/90 pb-[env(safe-area-inset-bottom)] backdrop-blur-xl lg:hidden"
+      >
+        <div className="mx-auto grid max-w-md grid-cols-5">
           {mobileNavItems.map((item) => {
             const Icon = item.icon;
             const active = isActive(pathname, item.href);
@@ -283,13 +288,20 @@ export function AppShell({
               <Link
                 key={item.href}
                 href={item.href}
-                className={`liftlog-mobile-nav-item flex flex-col items-center justify-center gap-1 rounded-2xl px-2 py-2 text-[0.68rem] font-black transition ${
+                aria-current={active ? "page" : undefined}
+                className={`lf-press flex flex-col items-center justify-center gap-0.5 py-2 text-[0.62rem] font-bold transition ${
                   active
-                    ? "liftlog-active-item bg-accent text-stone-950"
-                    : "text-muted hover:bg-white/10 hover:text-foreground"
+                    ? "text-accent-strong"
+                    : "text-ink-dim hover:text-foreground"
                 }`}
               >
-                <Icon className="size-5" />
+                <span
+                  className={`grid h-6 w-10 place-items-center rounded-full transition ${
+                    active ? "bg-accent/[0.15]" : ""
+                  }`}
+                >
+                  <Icon className="size-[1.15rem]" />
+                </span>
                 {item.label}
               </Link>
             );

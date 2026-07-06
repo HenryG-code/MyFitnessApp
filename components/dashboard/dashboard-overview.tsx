@@ -778,7 +778,7 @@ export function DashboardOverview() {
       </section>
 
       <FitnessCard>
-        <SectionHeader eyebrow="Tools" title="Explore LiftLog" />
+        <SectionHeader eyebrow="Tools" title="Explore LogFit" />
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-6">
           {toolLinks.map((item) => {
             const Icon = item.icon;

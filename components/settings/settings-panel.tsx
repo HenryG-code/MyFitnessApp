@@ -127,7 +127,7 @@ export function SettingsPanel() {
           Settings
         </p>
         <h1 className="mt-3 font-display text-4xl font-black tracking-tight">
-          Your LiftLog account.
+          Your LogFit account.
         </h1>
         <p className="mt-3 max-w-2xl text-sm leading-6 text-muted">
           Manage your profile, privacy, reminders, support options, and quick
@@ -281,10 +281,10 @@ export function SettingsPanel() {
               <Download className="size-5" />
             </span>
             <div className="mt-5">
-              <SectionHeader eyebrow="App install" title="Install LiftLog" />
+              <SectionHeader eyebrow="App install" title="Install LogFit" />
             </div>
             <p className="text-sm leading-6 text-muted">
-              Add LiftLog to your device for quicker access from your home
+              Add LogFit to your device for quicker access from your home
               screen or desktop.
             </p>
             <p className="mt-3 text-sm font-black text-accent">
@@ -310,7 +310,7 @@ export function SettingsPanel() {
               />
             </div>
             <p className="max-w-2xl text-sm leading-6 text-muted">
-              Enjoying LiftLog? You can support future improvements.
+              Enjoying LogFit? You can support future improvements.
             </p>
           </div>
           <div className="grid gap-3 sm:min-w-64">

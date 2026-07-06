@@ -46,13 +46,13 @@ export function InstallAppCard() {
     function handleBeforeInstallPrompt(event: Event) {
       event.preventDefault();
       setDeferredPrompt(event as BeforeInstallPromptEvent);
-      setStatus("LiftLog is ready to install on this device.");
+      setStatus("LogFit is ready to install on this device.");
     }
 
     function handleAppInstalled() {
       setIsInstalled(true);
       setDeferredPrompt(null);
-      setStatus("LiftLog is installed.");
+      setStatus("LogFit is installed.");
     }
 
     window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
@@ -90,7 +90,7 @@ export function InstallAppCard() {
       <div className="rounded-2xl border border-accent/30 bg-accent/15 p-4 text-sm font-black text-soft-yellow">
         <span className="inline-flex items-center gap-2">
           <CheckCircle2 className="size-5" />
-          LiftLog is installed.
+          LogFit is installed.
         </span>
       </div>
     );

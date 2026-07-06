@@ -17,7 +17,7 @@ type AvatarUploadCardProps = {
 };
 
 function getInitials(name: string, email: string | null) {
-  const source = name.trim() || email?.trim() || "LiftLog User";
+  const source = name.trim() || email?.trim() || "LogFit User";
   const words = source.split(/\s+/).filter(Boolean);
 
   if (words.length >= 2) {

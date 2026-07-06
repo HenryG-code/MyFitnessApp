@@ -20,7 +20,7 @@ export default function RecipeNotFound() {
           <SectionHeader eyebrow="Not found" title="Recipe not found" />
         </div>
         <p className="text-sm leading-6 text-muted">
-          This recipe is not in the local LiftLog library yet. Head back to the
+          This recipe is not in the local LogFit library yet. Head back to the
           recipe list and pick one of the available meals.
         </p>
       </FitnessCard>

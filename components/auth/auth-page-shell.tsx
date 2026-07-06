@@ -34,7 +34,7 @@ export function AuthPageShell({
               </span>
               <span>
                 <span className="block font-display text-xl font-black">
-                  LiftLog
+                  LogFit
                 </span>
                 <span className="text-sm font-medium text-muted">
                   Private fitness dashboard

@@ -66,7 +66,7 @@ export function AuthGuard({ children }: { children: ReactNode }) {
             Checking session
           </p>
           <p className="mt-3 text-sm font-medium text-muted">
-            Hang tight while LiftLog opens the gym door.
+            Hang tight while LogFit opens the gym door.
           </p>
         </div>
       </main>

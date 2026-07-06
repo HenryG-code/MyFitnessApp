@@ -2,15 +2,16 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "LiftLog",
-    short_name: "LiftLog",
-    description: "Full-stack fitness tracker built with Next.js and Supabase.",
+    name: "LogFit — Personal Performance OS",
+    short_name: "LogFit",
+    description:
+      "Personal performance OS for training, body progress, recovery, and consistency.",
     start_url: "/dashboard",
     scope: "/",
     display: "standalone",
     orientation: "portrait-primary",
-    background_color: "#050505",
-    theme_color: "#050505",
+    background_color: "#0a0a0b",
+    theme_color: "#0a0a0b",
     categories: ["health", "fitness", "productivity"],
     icons: [
       {

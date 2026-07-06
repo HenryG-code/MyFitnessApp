@@ -29,6 +29,8 @@ import type {
   WeightLog,
   Workout,
 } from "@/src/lib/supabase/database.types";
+import { isTrainingGoal } from "@/src/lib/training-plans/storage";
+import type { TrainingGoal } from "@/src/lib/training-plans/types";
 
 export type DashboardData = {
   profile: Profile | null;
@@ -45,6 +47,7 @@ export type DashboardData = {
   latestWorkout: Workout | null;
   workoutsThisWeek: Workout[];
   workoutsLastSevenDays: Workout[];
+  selectedTrainingGoal: TrainingGoal | null;
 };
 
 export type WeeklyConsistencyPoint = {
@@ -583,7 +586,7 @@ export async function fetchDashboardData(): Promise<DashboardData> {
       .maybeSingle(),
     supabase
       .from("user_preferences")
-      .select("meal_plan")
+      .select("meal_plan, selected_training_goal")
       .eq("user_id", userId)
       .maybeSingle(),
   ]);
@@ -635,5 +638,10 @@ export async function fetchDashboardData(): Promise<DashboardData> {
     latestWorkout: latestWorkoutResult.data,
     workoutsThisWeek: workoutsThisWeekResult.data ?? [],
     workoutsLastSevenDays: workoutsLastSevenDaysResult.data ?? [],
+    selectedTrainingGoal: isTrainingGoal(
+      preferencesResult.data?.selected_training_goal
+    )
+      ? preferencesResult.data.selected_training_goal
+      : null,
   };
 }
