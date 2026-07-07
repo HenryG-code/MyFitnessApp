@@ -11,11 +11,13 @@ import {
   buildHabitChartData,
   buildHabitDaySummary,
   createHabitDefinition,
+  deleteHabitDefinition,
   ensureDefaultHabits,
   fetchHabitCompletionsForDate,
   fetchRecentHabitCompletions,
   getDateInputValue,
   hideHabitDefinition,
+  moveHabitDefinition,
   toggleHabitCompletion,
   updateHabitDefinition,
   type HabitDaySummary,
@@ -28,12 +30,15 @@ import { fitnessImages } from "@/src/lib/visuals/fitness-images";
 import {
   CalendarDays,
   CheckCircle2,
+  ChevronDown,
+  ChevronUp,
   ClipboardCheck,
   EyeOff,
   Pencil,
   Plus,
   Sparkles,
   Sprout,
+  Trash2,
   X,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
@@ -200,6 +205,69 @@ export function HabitsTracker() {
         toggleError instanceof Error
           ? toggleError.message
           : "Could not update this habit."
+      );
+    } finally {
+      setSavingHabitId(null);
+    }
+  }
+
+  async function handleMoveHabit(habit: HabitDefinition, direction: "up" | "down") {
+    setError("");
+    setNotice("");
+    setSavingHabitId(habit.id);
+
+    // Optimistic local swap for instant feedback.
+    const index = activeDefinitions.findIndex((item) => item.id === habit.id);
+    const neighborIndex = direction === "up" ? index - 1 : index + 1;
+    const neighbor = activeDefinitions[neighborIndex];
+
+    if (neighbor) {
+      setDefinitions((current) => {
+        const next = [...current];
+        const a = next.findIndex((item) => item.id === habit.id);
+        const b = next.findIndex((item) => item.id === neighbor.id);
+        [next[a], next[b]] = [next[b], next[a]];
+        return next;
+      });
+    }
+
+    try {
+      await moveHabitDefinition(activeDefinitions, habit.id, direction);
+      await refreshHabits();
+    } catch (moveError) {
+      setError(
+        moveError instanceof Error
+          ? moveError.message
+          : "Could not reorder habits."
+      );
+      await refreshHabits();
+    } finally {
+      setSavingHabitId(null);
+    }
+  }
+
+  async function handleDeleteHabit(habit: HabitDefinition) {
+    const confirmed = window.confirm(
+      `Permanently delete "${habit.name}" and its completion history? This cannot be undone. (Use Hide to keep the history.)`
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    setError("");
+    setNotice("");
+    setSavingHabitId(habit.id);
+
+    try {
+      await deleteHabitDefinition(habit.id);
+      setNotice(`"${habit.name}" deleted.`);
+      await refreshHabits();
+    } catch (deleteError) {
+      setError(
+        deleteError instanceof Error
+          ? deleteError.message
+          : "Could not delete habit."
       );
     } finally {
       setSavingHabitId(null);
@@ -377,85 +445,107 @@ export function HabitsTracker() {
               Loading today&apos;s habits...
             </div>
           ) : activeDefinitions.length ? (
-            <div className="space-y-3">
-              {activeDefinitions.map((habit) => {
+            <div className="space-y-2">
+              {activeDefinitions.map((habit, habitIndex) => {
                 const isComplete = completedHabitIds.has(habit.id);
                 const isSaving = savingHabitId === habit.id;
 
                 return (
                   <div
                     key={habit.id}
-                    className={`rounded-[1.5rem] p-4 shadow-inner shadow-white/[0.02] transition hover:-translate-y-0.5 hover:border-accent/30 ${
+                    className={`rounded-xl p-2.5 shadow-inner shadow-white/[0.02] transition sm:p-3 ${
                       isComplete
                         ? "liftlog-complete-pulse border border-accent/35 bg-accent/15"
                         : "bg-white/[0.055]"
                     }`}
                   >
-                    <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="flex items-center gap-2">
                       <button
                         type="button"
                         onClick={() => void handleToggleHabit(habit)}
                         disabled={isSaving}
-                        className="flex min-h-16 flex-1 items-center gap-4 text-left disabled:cursor-not-allowed disabled:opacity-70"
+                        aria-pressed={isComplete}
+                        className="flex min-h-12 min-w-0 flex-1 items-center gap-3 text-left disabled:cursor-not-allowed disabled:opacity-70"
                       >
                         <span
-                          className={`grid size-12 shrink-0 place-items-center rounded-2xl ${
+                          className={`grid size-10 shrink-0 place-items-center rounded-xl transition ${
                             isComplete
                               ? "liftlog-pop-in bg-accent text-white"
                               : "bg-stone-950 text-sun"
                           }`}
                         >
                           {isComplete ? (
-                            <CheckCircle2 className="size-6" />
+                            <CheckCircle2 className="size-5" />
                           ) : (
-                            <Sparkles className="size-5" />
+                            <Sparkles className="size-4" />
                           )}
                         </span>
-                        <span>
-                          <span className="block font-display text-xl font-black leading-tight">
+                        <span className="min-w-0">
+                          <span
+                            className={`block truncate font-display text-base font-black leading-tight ${
+                              isComplete ? "" : ""
+                            }`}
+                          >
                             {habit.name}
                           </span>
-                          <span className="mt-1 block text-sm leading-6 text-muted">
-                            {habit.description ||
-                              (isComplete ? "Completed" : "Tap when done.")}
-                          </span>
+                          {habit.description ? (
+                            <span className="block truncate text-xs leading-5 text-muted">
+                              {habit.description}
+                            </span>
+                          ) : null}
                         </span>
                       </button>
-                      <div className="flex flex-wrap gap-2 sm:justify-end">
-                        <button
-                          type="button"
-                          onClick={() => void handleToggleHabit(habit)}
-                          disabled={isSaving}
-                          className={`rounded-2xl px-4 py-2 text-sm font-black transition disabled:cursor-not-allowed disabled:opacity-70 ${
-                            isComplete
-                              ? "bg-white/10 text-soft-yellow hover:bg-white/15"
-                              : "bg-accent text-white hover:bg-accent-strong"
-                          }`}
-                        >
-                          {isSaving
-                            ? "Saving..."
-                            : isComplete
-                              ? "Undo"
-                              : "Mark done"}
-                        </button>
+                      <div className="flex shrink-0 items-center gap-0.5">
+                        <div className="flex flex-col">
+                          <button
+                            type="button"
+                            onClick={() => void handleMoveHabit(habit, "up")}
+                            disabled={isSaving || habitIndex === 0}
+                            aria-label={`Move ${habit.name} up`}
+                            className="lf-press grid size-6 place-items-center rounded-md text-ink-dim transition hover:text-foreground disabled:opacity-25"
+                          >
+                            <ChevronUp className="size-3.5" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => void handleMoveHabit(habit, "down")}
+                            disabled={
+                              isSaving ||
+                              habitIndex === activeDefinitions.length - 1
+                            }
+                            aria-label={`Move ${habit.name} down`}
+                            className="lf-press grid size-6 place-items-center rounded-md text-ink-dim transition hover:text-foreground disabled:opacity-25"
+                          >
+                            <ChevronDown className="size-3.5" />
+                          </button>
+                        </div>
                         {!habit.is_default ? (
                           <button
                             type="button"
                             onClick={() => openEditForm(habit)}
-                            className="inline-flex items-center gap-2 rounded-2xl border border-line bg-white/65 px-3 py-2 text-sm font-black text-muted transition hover:border-accent hover:text-foreground"
+                            aria-label={`Edit ${habit.name}`}
+                            className="lf-press grid size-9 place-items-center rounded-lg border border-line text-muted transition hover:text-foreground"
                           >
-                            <Pencil className="size-4" />
-                            Edit
+                            <Pencil className="size-3.5" />
                           </button>
                         ) : null}
                         <button
                           type="button"
                           onClick={() => void handleHideHabit(habit)}
                           disabled={isSaving}
-                          className="inline-flex items-center gap-2 rounded-2xl border border-line bg-white/65 px-3 py-2 text-sm font-black text-muted transition hover:border-accent hover:text-foreground disabled:cursor-not-allowed disabled:opacity-70"
+                          aria-label={`Hide ${habit.name}`}
+                          className="lf-press grid size-9 place-items-center rounded-lg border border-line text-muted transition hover:text-foreground disabled:opacity-50"
                         >
-                          <EyeOff className="size-4" />
-                          Hide
+                          <EyeOff className="size-3.5" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => void handleDeleteHabit(habit)}
+                          disabled={isSaving}
+                          aria-label={`Delete ${habit.name}`}
+                          className="lf-press grid size-9 place-items-center rounded-lg border border-strain/25 text-strain transition disabled:opacity-50"
+                        >
+                          <Trash2 className="size-3.5" />
                         </button>
                       </div>
                     </div>

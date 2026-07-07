@@ -7,10 +7,17 @@ import {
   type WorkoutWithExercises,
 } from "@/src/lib/workouts/queries";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Plus, Trash2 } from "lucide-react";
+import { ChevronDown, Minus, Plus, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { useFieldArray, useForm, useWatch } from "react-hook-form";
+import {
+  useFieldArray,
+  useForm,
+  useWatch,
+  type Control,
+  type UseFormRegister,
+  type UseFormSetValue,
+} from "react-hook-form";
 import { z } from "zod";
 
 const exerciseSchema = z.object({
@@ -231,6 +238,77 @@ function toWorkoutInput(values: WorkoutFormValues): WorkoutInput {
   };
 }
 
+type StepperName =
+  | `exercises.${number}.sets`
+  | `exercises.${number}.reps`
+  | `exercises.${number}.weight`;
+
+/** Registered numeric input flanked by −/+ tap targets. */
+function StepperField({
+  label,
+  name,
+  step,
+  control,
+  register,
+  setValue,
+  error,
+}: {
+  label: string;
+  name: StepperName;
+  step: number;
+  control: Control<WorkoutFormValues>;
+  register: UseFormRegister<WorkoutFormValues>;
+  setValue: UseFormSetValue<WorkoutFormValues>;
+  error?: string;
+}) {
+  const raw = useWatch({ control, name }) ?? "";
+
+  function adjust(direction: 1 | -1) {
+    const current = Number(String(raw).trim()) || 0;
+    const next = Math.max(0, Math.round((current + direction * step) * 10) / 10);
+    setValue(name, next ? String(next) : "", {
+      shouldDirty: true,
+      shouldValidate: true,
+    });
+  }
+
+  return (
+    <div>
+      <p className="text-[0.65rem] font-black uppercase tracking-[0.14em] text-muted">
+        {label}
+      </p>
+      <div className="mt-1.5 flex items-center gap-1">
+        <button
+          type="button"
+          aria-label={`Decrease ${label}`}
+          onClick={() => adjust(-1)}
+          className="lf-press grid size-10 shrink-0 place-items-center rounded-lg border border-line bg-white/[0.04] text-muted transition hover:text-foreground"
+        >
+          <Minus className="size-3.5" />
+        </button>
+        <input
+          inputMode="decimal"
+          aria-label={label}
+          placeholder="—"
+          className="lf-num min-h-10 w-full min-w-0 rounded-lg border border-line bg-surface/80 px-1 text-center text-sm font-black outline-none transition focus:border-accent"
+          {...register(name)}
+        />
+        <button
+          type="button"
+          aria-label={`Increase ${label}`}
+          onClick={() => adjust(1)}
+          className="lf-press grid size-10 shrink-0 place-items-center rounded-lg border border-line bg-white/[0.04] text-muted transition hover:text-foreground"
+        >
+          <Plus className="size-3.5" />
+        </button>
+      </div>
+      {error ? (
+        <p className="mt-1 text-xs font-medium text-strain">{error}</p>
+      ) : null}
+    </div>
+  );
+}
+
 export function WorkoutForm({ mode = "create", workout }: WorkoutFormProps) {
   const router = useRouter();
   const [formError, setFormError] = useState("");
@@ -251,6 +329,28 @@ export function WorkoutForm({ mode = "create", workout }: WorkoutFormProps) {
     name: "exercises",
   });
   const watchedExercises = useWatch({ control, name: "exercises" });
+  // Rows with pre-existing distance/duration/notes start expanded.
+  const [expandedRows, setExpandedRows] = useState<Set<number>>(() => {
+    const expanded = new Set<number>();
+    workout?.exercises.forEach((exercise, index) => {
+      if (exercise.distance_km || exercise.duration_minutes || exercise.notes) {
+        expanded.add(index);
+      }
+    });
+    return expanded;
+  });
+
+  function toggleRowDetails(index: number) {
+    setExpandedRows((current) => {
+      const next = new Set(current);
+      if (next.has(index)) {
+        next.delete(index);
+      } else {
+        next.add(index);
+      }
+      return next;
+    });
+  }
 
   function addExercise() {
     append(getEmptyExercise());
@@ -449,117 +549,113 @@ export function WorkoutForm({ mode = "create", workout }: WorkoutFormProps) {
                 ) : null}
               </div>
 
-              <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-6">
-                <div className="sm:col-span-6">
-                  <label className="text-sm font-black">Exercise name</label>
+              <div className="mt-3 space-y-3">
+                <div>
                   <input
-                    className="mt-2 min-h-12 w-full rounded-2xl border border-line bg-surface/80 px-4 py-3 text-base outline-none transition focus:border-accent focus:ring-4 focus:ring-accent/20"
-                    placeholder="Bench press"
+                    aria-label={`Exercise ${index + 1} name`}
+                    className="min-h-11 w-full rounded-xl border border-line bg-surface/80 px-3 py-2.5 text-sm font-semibold outline-none transition focus:border-accent"
+                    placeholder="Exercise name, e.g. Bench press"
                     {...register(`exercises.${index}.exercise_name`)}
                   />
                   {errors.exercises?.[index]?.exercise_name ? (
-                    <p className="mt-2 text-sm font-medium text-red-700">
+                    <p className="mt-1.5 text-xs font-medium text-strain">
                       {errors.exercises[index]?.exercise_name?.message}
                     </p>
                   ) : null}
                 </div>
 
-                <div className="col-span-1 sm:col-span-1">
-                  <label className="text-sm font-black">Sets</label>
-                  <input
-                    type="number"
-                    min="0"
-                    step="1"
-                    className="mt-2 min-h-11 w-full rounded-2xl border border-line bg-surface/80 px-3 py-2.5 outline-none transition focus:border-accent focus:ring-4 focus:ring-accent/20"
-                    {...register(`exercises.${index}.sets`)}
+                <div className="grid grid-cols-3 gap-2">
+                  <StepperField
+                    label="Sets"
+                    name={`exercises.${index}.sets`}
+                    step={1}
+                    control={control}
+                    register={register}
+                    setValue={setValue}
+                    error={errors.exercises?.[index]?.sets?.message}
                   />
-                  {errors.exercises?.[index]?.sets ? (
-                    <p className="mt-2 text-sm font-medium text-red-700">
-                      {errors.exercises[index]?.sets?.message}
-                    </p>
-                  ) : null}
+                  <StepperField
+                    label="Reps"
+                    name={`exercises.${index}.reps`}
+                    step={1}
+                    control={control}
+                    register={register}
+                    setValue={setValue}
+                    error={errors.exercises?.[index]?.reps?.message}
+                  />
+                  <StepperField
+                    label="Kg"
+                    name={`exercises.${index}.weight`}
+                    step={2.5}
+                    control={control}
+                    register={register}
+                    setValue={setValue}
+                    error={errors.exercises?.[index]?.weight?.message}
+                  />
                 </div>
 
-                <div className="col-span-1 sm:col-span-1">
-                  <label className="text-sm font-black">Reps</label>
-                  <input
-                    type="number"
-                    min="0"
-                    step="1"
-                    className="mt-2 min-h-11 w-full rounded-2xl border border-line bg-surface/80 px-3 py-2.5 outline-none transition focus:border-accent focus:ring-4 focus:ring-accent/20"
-                    {...register(`exercises.${index}.reps`)}
+                <button
+                  type="button"
+                  onClick={() => toggleRowDetails(index)}
+                  aria-expanded={expandedRows.has(index)}
+                  className="lf-press flex items-center gap-1 py-1 text-xs font-bold text-ink-dim transition hover:text-foreground"
+                >
+                  Distance, duration & notes
+                  <ChevronDown
+                    className={`size-3.5 transition-transform ${expandedRows.has(index) ? "rotate-180" : ""}`}
                   />
-                  {errors.exercises?.[index]?.reps ? (
-                    <p className="mt-2 text-sm font-medium text-red-700">
-                      {errors.exercises[index]?.reps?.message}
-                    </p>
-                  ) : null}
-                </div>
+                </button>
 
-                <div className="col-span-2 sm:col-span-2">
-                  <label className="text-sm font-black">Weight, kg</label>
-                  <input
-                    type="number"
-                    min="0"
-                    step="0.5"
-                    className="mt-2 min-h-11 w-full rounded-2xl border border-line bg-surface/80 px-3 py-2.5 outline-none transition focus:border-accent focus:ring-4 focus:ring-accent/20"
-                    {...register(`exercises.${index}.weight`)}
-                  />
-                  {errors.exercises?.[index]?.weight ? (
-                    <p className="mt-2 text-sm font-medium text-red-700">
-                      {errors.exercises[index]?.weight?.message}
-                    </p>
-                  ) : null}
-                </div>
-
-                <div className="col-span-1 sm:col-span-3">
-                  <label className="text-sm font-black">Distance, km</label>
-                  <input
-                    type="number"
-                    min="0"
-                    step="0.1"
-                    className="mt-2 min-h-11 w-full rounded-2xl border border-line bg-surface/80 px-3 py-2.5 outline-none transition focus:border-accent focus:ring-4 focus:ring-accent/20"
-                    {...register(`exercises.${index}.distance_km`)}
-                  />
-                  {errors.exercises?.[index]?.distance_km ? (
-                    <p className="mt-2 text-sm font-medium text-red-700">
-                      {errors.exercises[index]?.distance_km?.message}
-                    </p>
-                  ) : null}
-                </div>
-
-                <div className="col-span-1 sm:col-span-3">
-                  <label className="text-sm font-black">
-                    Exercise duration, min
-                  </label>
-                  <input
-                    type="number"
-                    min="0"
-                    step="1"
-                    className="mt-2 min-h-11 w-full rounded-2xl border border-line bg-surface/80 px-3 py-2.5 outline-none transition focus:border-accent focus:ring-4 focus:ring-accent/20"
-                    {...register(`exercises.${index}.duration_minutes`)}
-                  />
-                  {errors.exercises?.[index]?.duration_minutes ? (
-                    <p className="mt-2 text-sm font-medium text-red-700">
-                      {errors.exercises[index]?.duration_minutes?.message}
-                    </p>
-                  ) : null}
-                </div>
-
-                <div className="sm:col-span-6">
-                  <label className="text-sm font-black">Exercise notes</label>
-                  <textarea
-                    rows={2}
-                    className="mt-2 w-full rounded-2xl border border-line bg-surface/80 px-4 py-2.5 outline-none transition focus:border-accent focus:ring-4 focus:ring-accent/20"
-                    placeholder="Optional cues or set details."
-                    {...register(`exercises.${index}.notes`)}
-                  />
-                  {errors.exercises?.[index]?.notes ? (
-                    <p className="mt-2 text-sm font-medium text-red-700">
-                      {errors.exercises[index]?.notes?.message}
-                    </p>
-                  ) : null}
-                </div>
+                {expandedRows.has(index) ? (
+                  <div className="lf-fade grid grid-cols-2 gap-2">
+                    <div>
+                      <label className="text-[0.65rem] font-black uppercase tracking-[0.14em] text-muted">
+                        Distance, km
+                      </label>
+                      <input
+                        inputMode="decimal"
+                        className="lf-num mt-1.5 min-h-10 w-full rounded-lg border border-line bg-surface/80 px-3 text-sm outline-none transition focus:border-accent"
+                        {...register(`exercises.${index}.distance_km`)}
+                      />
+                      {errors.exercises?.[index]?.distance_km ? (
+                        <p className="mt-1 text-xs font-medium text-strain">
+                          {errors.exercises[index]?.distance_km?.message}
+                        </p>
+                      ) : null}
+                    </div>
+                    <div>
+                      <label className="text-[0.65rem] font-black uppercase tracking-[0.14em] text-muted">
+                        Duration, min
+                      </label>
+                      <input
+                        inputMode="numeric"
+                        className="lf-num mt-1.5 min-h-10 w-full rounded-lg border border-line bg-surface/80 px-3 text-sm outline-none transition focus:border-accent"
+                        {...register(`exercises.${index}.duration_minutes`)}
+                      />
+                      {errors.exercises?.[index]?.duration_minutes ? (
+                        <p className="mt-1 text-xs font-medium text-strain">
+                          {errors.exercises[index]?.duration_minutes?.message}
+                        </p>
+                      ) : null}
+                    </div>
+                    <div className="col-span-2">
+                      <label className="text-[0.65rem] font-black uppercase tracking-[0.14em] text-muted">
+                        Notes
+                      </label>
+                      <textarea
+                        rows={2}
+                        className="mt-1.5 w-full rounded-lg border border-line bg-surface/80 px-3 py-2 text-sm outline-none transition focus:border-accent"
+                        placeholder="Optional cues or set details."
+                        {...register(`exercises.${index}.notes`)}
+                      />
+                      {errors.exercises?.[index]?.notes ? (
+                        <p className="mt-1 text-xs font-medium text-strain">
+                          {errors.exercises[index]?.notes?.message}
+                        </p>
+                      ) : null}
+                    </div>
+                  </div>
+                ) : null}
               </div>
             </div>
           ))}

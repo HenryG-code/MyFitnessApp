@@ -271,6 +271,49 @@ export async function deleteHabitDefinition(habitId: string) {
   }
 }
 
+/**
+ * Moves a habit one position up or down among the given ordered active
+ * definitions by swapping sort_order values with its neighbour.
+ */
+export async function moveHabitDefinition(
+  orderedHabits: HabitDefinition[],
+  habitId: string,
+  direction: "up" | "down"
+) {
+  const index = orderedHabits.findIndex((habit) => habit.id === habitId);
+  const neighborIndex = direction === "up" ? index - 1 : index + 1;
+
+  if (index === -1 || neighborIndex < 0 || neighborIndex >= orderedHabits.length) {
+    return;
+  }
+
+  const habit = orderedHabits[index];
+  const neighbor = orderedHabits[neighborIndex];
+  // Guard against duplicate sort_order values from legacy rows.
+  const habitOrder =
+    habit.sort_order === neighbor.sort_order
+      ? habit.sort_order + (direction === "up" ? -1 : 1)
+      : habit.sort_order;
+
+  const { supabase, userId } = await getAuthenticatedUserId();
+  const swaps = [
+    { id: habit.id, sort_order: neighbor.sort_order },
+    { id: neighbor.id, sort_order: habitOrder },
+  ];
+
+  for (const swap of swaps) {
+    const { error } = await supabase
+      .from("habit_definitions")
+      .update({ sort_order: swap.sort_order })
+      .eq("id", swap.id)
+      .eq("user_id", userId);
+
+    if (error) {
+      throw new Error(error.message);
+    }
+  }
+}
+
 export async function fetchHabitCompletionsForDate(date: string) {
   const { supabase, userId } = await getAuthenticatedUserId();
   const { data, error } = await supabase

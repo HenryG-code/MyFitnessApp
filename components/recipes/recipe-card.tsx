@@ -44,6 +44,17 @@ export function RecipeCard({
         href={`/recipes/${recipe.slug}`}
         className="flex h-full flex-col outline-none"
       >
+        {recipe.image ? (
+          <span className="relative -mx-3.5 -mt-3.5 mb-3 block aspect-[2/1] overflow-hidden rounded-t-[1.2rem] sm:-mx-4 sm:-mt-4">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={recipe.image}
+              alt=""
+              loading="lazy"
+              className="size-full object-cover"
+            />
+          </span>
+        ) : null}
         <p
           className={`text-[0.6rem] font-black uppercase tracking-[0.16em] ${mealTypeTints[recipe.mealType]}`}
         >

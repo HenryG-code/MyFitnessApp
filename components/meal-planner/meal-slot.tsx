@@ -1,7 +1,10 @@
+"use client";
+
 import type { MealSlot } from "@/src/lib/meal-planner/types";
-import type { Recipe } from "@/src/lib/recipes/data";
-import { ExternalLink, Trash2 } from "lucide-react";
+import { mealTypeOptions, type Recipe } from "@/src/lib/recipes/data";
+import { ChevronRight, ExternalLink, X } from "lucide-react";
 import Link from "next/link";
+import { useMemo, useState } from "react";
 
 type MealSlotCardProps = {
   slot: MealSlot;
@@ -11,11 +14,115 @@ type MealSlotCardProps = {
   onChange: (slug: string | null) => void;
 };
 
-function getRecipeOptions(slot: MealSlot, recipes: Recipe[]) {
-  const slotRecipes = recipes.filter((recipe) => recipe.mealType === slot);
-  const otherRecipes = recipes.filter((recipe) => recipe.mealType !== slot);
+const mealTypeTints: Record<Recipe["mealType"], string> = {
+  Breakfast: "text-sun",
+  Lunch: "text-ready",
+  Dinner: "text-accent-strong",
+  Snack: "text-caution",
+};
 
-  return { slotRecipes, otherRecipes };
+/** Bottom-sheet recipe picker with meal-type chips and compact rows. */
+function RecipePickerSheet({
+  slot,
+  recipes,
+  onSelect,
+  onClose,
+}: {
+  slot: MealSlot;
+  recipes: Recipe[];
+  onSelect: (slug: string) => void;
+  onClose: () => void;
+}) {
+  const [mealType, setMealType] = useState<Recipe["mealType"] | "">(slot);
+
+  const visibleRecipes = useMemo(() => {
+    const filtered = mealType
+      ? recipes.filter((recipe) => recipe.mealType === mealType)
+      : recipes;
+    return [...filtered].sort((a, b) => b.protein - a.protein);
+  }, [recipes, mealType]);
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-end justify-center bg-black/60"
+      role="dialog"
+      aria-modal="true"
+      aria-label={`Choose a ${slot.toLowerCase()} recipe`}
+      onClick={onClose}
+    >
+      <div
+        className="lf-sheet flex max-h-[80vh] w-full max-w-lg flex-col rounded-t-2xl border-t border-line bg-card"
+        onClick={(event) => event.stopPropagation()}
+      >
+        <div className="flex items-center justify-between p-4 pb-2">
+          <p className="lf-eyebrow">Choose {slot.toLowerCase()}</p>
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Close picker"
+            className="lf-press grid size-9 place-items-center rounded-xl border border-line text-muted"
+          >
+            <X className="size-4" />
+          </button>
+        </div>
+
+        <div className="lf-scroll-x flex gap-2 overflow-x-auto px-4 pb-3">
+          {(["", ...mealTypeOptions] as Array<Recipe["mealType"] | "">).map(
+            (option) => (
+              <button
+                key={option || "all"}
+                type="button"
+                onClick={() => setMealType(option)}
+                aria-pressed={mealType === option}
+                className={`lf-press shrink-0 rounded-full border px-3.5 py-1.5 text-xs font-bold transition ${
+                  mealType === option
+                    ? "border-accent/50 bg-accent/15 text-accent-strong"
+                    : "border-line bg-white/[0.03] text-muted"
+                }`}
+              >
+                {option || "All"}
+              </button>
+            )
+          )}
+        </div>
+
+        <div className="min-h-0 flex-1 overflow-y-auto px-3 pb-[max(1rem,env(safe-area-inset-bottom))]">
+          {visibleRecipes.length ? (
+            <ul className="space-y-1">
+              {visibleRecipes.map((recipe) => (
+                <li key={recipe.slug}>
+                  <button
+                    type="button"
+                    onClick={() => onSelect(recipe.slug)}
+                    className="lf-press flex w-full items-center gap-3 rounded-xl px-2.5 py-2.5 text-left transition hover:bg-white/[0.04]"
+                  >
+                    <span className="min-w-0 flex-1">
+                      <span className="block truncate text-sm font-bold">
+                        {recipe.title}
+                      </span>
+                      <span
+                        className={`text-[0.62rem] font-black uppercase tracking-wider ${mealTypeTints[recipe.mealType]}`}
+                      >
+                        {recipe.mealType}
+                      </span>
+                    </span>
+                    <span className="lf-num shrink-0 text-right text-xs font-bold text-muted">
+                      {recipe.protein}g · {recipe.calories} kcal
+                    </span>
+                    <ChevronRight className="size-4 shrink-0 text-ink-dim" />
+                  </button>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="p-4 text-center text-sm font-semibold text-muted">
+              No recipes for this filter.
+            </p>
+          )}
+        </div>
+      </div>
+    </div>
+  );
 }
 
 export function MealSlotCard({
@@ -25,108 +132,85 @@ export function MealSlotCard({
   recipes,
   onChange,
 }: MealSlotCardProps) {
-  const { slotRecipes, otherRecipes } = getRecipeOptions(slot, recipes);
+  const [pickerOpen, setPickerOpen] = useState(false);
   const hasInvalidSelection = Boolean(selectedSlug && !selectedRecipe);
 
   return (
     <div
-      className={`liftlog-card-motion rounded-[1.25rem] border border-line bg-white/65 p-4 ${
-        selectedRecipe ? "border-accent/35 bg-accent/10" : ""
+      className={`rounded-xl border p-3 transition ${
+        selectedRecipe
+          ? "border-accent/30 bg-accent/[0.08]"
+          : "border-line bg-white/[0.03]"
       }`}
     >
-      <div className="flex items-start justify-between gap-3">
-        <div>
-          <p className="text-xs font-black uppercase tracking-[0.18em] text-accent">
-            {slot}
-          </p>
-          {selectedRecipe ? (
-            <h3 className="mt-2 font-display text-lg font-black">
-              {selectedRecipe.title}
-            </h3>
-          ) : (
-            <h3 className="mt-2 font-display text-lg font-black">
-              Choose a recipe
-            </h3>
-          )}
-        </div>
-
+      <div className="flex items-center justify-between gap-2">
+        <p className="lf-eyebrow !text-[0.6rem]">{slot}</p>
         {selectedSlug ? (
           <button
             type="button"
             onClick={() => onChange(null)}
-            className="grid size-9 place-items-center rounded-xl bg-red-50 text-red-700 transition hover:-translate-y-0.5"
             aria-label={`Clear ${slot}`}
+            className="lf-press grid size-7 place-items-center rounded-md text-ink-dim transition hover:text-strain"
           >
-            <Trash2 className="size-4" />
+            <X className="size-3.5" />
           </button>
         ) : null}
       </div>
 
-      <select
-        value={selectedSlug ?? ""}
-        onChange={(event) => onChange(event.target.value || null)}
-        className="mt-4 w-full rounded-2xl border border-line bg-surface px-4 py-3 text-sm font-bold outline-none transition focus:border-accent focus:ring-4 focus:ring-accent/20"
-      >
-        <option value="">Select {slot.toLowerCase()}</option>
-        {slotRecipes.length ? (
-          <optgroup label={`${slot} recipes`}>
-            {slotRecipes.map((recipe) => (
-              <option key={recipe.slug} value={recipe.slug}>
-                {recipe.title}
-              </option>
-            ))}
-          </optgroup>
-        ) : (
-          <option disabled>No matching recipes found.</option>
-        )}
-        {otherRecipes.length ? (
-          <optgroup label="Any recipe">
-            {otherRecipes.map((recipe) => (
-              <option key={recipe.slug} value={recipe.slug}>
-                {recipe.title} ({recipe.mealType})
-              </option>
-            ))}
-          </optgroup>
-        ) : null}
-      </select>
-
       {selectedRecipe ? (
-        <div className="liftlog-pop-in mt-4 space-y-3">
-          <div className="grid grid-cols-3 gap-2 text-center">
-            <div className="rounded-xl bg-stone-100 px-2 py-2">
-              <p className="text-[0.65rem] font-black uppercase tracking-[0.12em] text-muted">
-                Calories
+        <div className="mt-1.5">
+          <div className="flex items-center justify-between gap-2">
+            <button
+              type="button"
+              onClick={() => setPickerOpen(true)}
+              className="lf-press min-w-0 flex-1 text-left"
+              aria-label={`Change ${slot.toLowerCase()} recipe`}
+            >
+              <p className="truncate font-display text-sm font-black leading-tight">
+                {selectedRecipe.title}
               </p>
-              <p className="text-sm font-black">{selectedRecipe.calories}</p>
-            </div>
-            <div className="rounded-xl bg-stone-100 px-2 py-2">
-              <p className="text-[0.65rem] font-black uppercase tracking-[0.12em] text-muted">
-                Protein
+              <p className="lf-num mt-0.5 text-[0.68rem] font-bold text-muted">
+                {selectedRecipe.protein}g protein · {selectedRecipe.calories}{" "}
+                kcal
               </p>
-              <p className="text-sm font-black">{selectedRecipe.protein}g</p>
-            </div>
-            <div className="rounded-xl bg-stone-100 px-2 py-2">
-              <p className="text-[0.65rem] font-black uppercase tracking-[0.12em] text-muted">
-                Type
-              </p>
-              <p className="text-sm font-black">{selectedRecipe.mealType}</p>
-            </div>
+            </button>
+            <Link
+              href={`/recipes/${selectedRecipe.slug}`}
+              aria-label={`View ${selectedRecipe.title}`}
+              className="lf-press grid size-8 shrink-0 place-items-center rounded-lg border border-line text-muted transition hover:text-foreground"
+            >
+              <ExternalLink className="size-3.5" />
+            </Link>
           </div>
-          <Link
-            href={`/recipes/${selectedRecipe.slug}`}
-            className="inline-flex items-center gap-2 rounded-2xl bg-stone-950 px-4 py-2 text-sm font-black text-white transition hover:bg-accent"
-          >
-            View recipe
-            <ExternalLink className="size-4" />
-          </Link>
         </div>
-      ) : null}
+      ) : (
+        <button
+          type="button"
+          onClick={() => setPickerOpen(true)}
+          className="lf-press mt-1.5 flex w-full items-center justify-between rounded-lg border border-dashed border-line px-3 py-2.5 text-sm font-bold text-muted transition hover:border-accent/40 hover:text-foreground"
+        >
+          Choose a recipe
+          <ChevronRight className="size-4" />
+        </button>
+      )}
 
       {hasInvalidSelection ? (
-        <p className="mt-3 rounded-2xl bg-red-50 p-3 text-sm font-bold text-red-700">
-          This saved recipe is no longer available. Clear the slot to choose a
-          new recipe.
+        <p className="mt-2 rounded-lg border border-strain/25 bg-strain/10 p-2 text-xs font-bold text-strain">
+          This saved recipe is no longer available. Clear the slot to pick a
+          new one.
         </p>
+      ) : null}
+
+      {pickerOpen ? (
+        <RecipePickerSheet
+          slot={slot}
+          recipes={recipes}
+          onSelect={(slug) => {
+            onChange(slug);
+            setPickerOpen(false);
+          }}
+          onClose={() => setPickerOpen(false)}
+        />
       ) : null}
     </div>
   );

@@ -66,6 +66,17 @@ export function RecipeDetail({ recipe }: RecipeDetailProps) {
         </p>
       </header>
 
+      {recipe.image ? (
+        <div className="lf-rise lf-rise-1 relative aspect-[2/1] overflow-hidden rounded-xl border border-line">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={recipe.image}
+            alt={recipe.title}
+            className="size-full object-cover"
+          />
+        </div>
+      ) : null}
+
       {/* Nutrition strip */}
       <section className="lf-rise lf-rise-1 grid grid-cols-4 gap-2">
         {[

@@ -1,5 +1,4 @@
 import { GroceryItemRow } from "@/components/grocery-list/grocery-item-row";
-import { FitnessCard } from "@/components/ui/fitness-card";
 import type {
   CheckedGroceryItems,
   GroceryCategory,
@@ -29,21 +28,19 @@ export function GroceryCategorySection({
     return null;
   }
 
-  return (
-    <FitnessCard className="bg-gradient-to-br from-card/95 via-surface/90 to-white/[0.035] hover:-translate-y-0.5 hover:shadow-[0_28px_80px_rgba(0,0,0,0.42)]">
-      <div className="mb-4 flex items-center justify-between gap-4">
-        <div>
-          <p className="text-xs font-black uppercase tracking-[0.22em] text-accent">
-            Category
-          </p>
-          <h2 className="mt-1 font-display text-2xl font-black">{category}</h2>
-        </div>
-        <span className="rounded-full bg-stone-100 px-3 py-1 text-sm font-black text-muted">
-          {visibleItems.length}
-        </span>
-      </div>
+  const remaining = visibleItems.filter((item) => !checkedItems[item.id]).length;
 
-      <div className="grid gap-3">
+  return (
+    <section className="lf-panel p-3 sm:p-3.5">
+      <div className="mb-1.5 flex items-center justify-between px-2">
+        <p className="lf-eyebrow !text-[0.62rem] text-accent-strong">
+          {category}
+        </p>
+        <p className="lf-num text-[0.65rem] font-bold text-ink-dim">
+          {remaining} left
+        </p>
+      </div>
+      <div className="space-y-0.5">
         {visibleItems.map((item) => (
           <GroceryItemRow
             key={item.id}
@@ -53,6 +50,6 @@ export function GroceryCategorySection({
           />
         ))}
       </div>
-    </FitnessCard>
+    </section>
   );
 }

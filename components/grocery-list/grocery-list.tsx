@@ -11,6 +11,7 @@ import {
 } from "@/src/lib/grocery-list/build-list";
 import {
   clearCheckedGroceryItems,
+  evaluateWeeklyGroceryReset,
   hasCheckedGroceryItems,
   loadCheckedGroceryItems,
   normalizeCheckedGroceryItems,
@@ -53,7 +54,15 @@ export function GroceryList({ recipes }: GroceryListProps) {
 
     async function loadGroceryState() {
       const storedPlan = loadMealPlanFromStorage();
-      const storedCheckedItems = loadCheckedGroceryItems();
+      // Weekly reset: checked-off items start fresh each Monday. The helper
+      // is memoised per page load so concurrent mounts agree on the answer.
+      const isNewWeek = evaluateWeeklyGroceryReset();
+      const storedCheckedItems = isNewWeek ? {} : loadCheckedGroceryItems();
+
+      if (isNewWeek) {
+        setStatusMessage("New week — checked items were reset.");
+      }
+
       setPlan(storedPlan);
       setCheckedItems(storedCheckedItems);
 
@@ -70,7 +79,10 @@ export function GroceryList({ recipes }: GroceryListProps) {
           await updateMealPlan(storedPlan);
         }
 
-        if (syncedCheckedItems && isMounted) {
+        if (isNewWeek) {
+          // Propagate the weekly reset to synced preferences too.
+          await updateGroceryCheckedItems({});
+        } else if (syncedCheckedItems && isMounted) {
           const normalizedCheckedItems =
             normalizeCheckedGroceryItems(syncedCheckedItems);
           setCheckedItems(normalizedCheckedItems);
@@ -154,20 +166,20 @@ export function GroceryList({ recipes }: GroceryListProps) {
   if (hasLoadedStorage && plannedMealsCount === 0) {
     return (
       <FitnessCard>
-        <div className="rounded-[1.5rem] border border-accent/25 bg-accent/10 p-6">
-          <span className="grid size-14 place-items-center rounded-2xl bg-white/75 text-accent-strong">
-            <ShoppingBasket className="size-6" />
+        <div className="p-2 text-center">
+          <span className="mx-auto grid size-12 place-items-center rounded-xl border border-accent/25 bg-accent/10 text-accent-strong">
+            <ShoppingBasket className="size-5" />
           </span>
-          <h2 className="mt-5 font-display text-2xl font-black">
-            No planned meals yet.
+          <h2 className="mt-3 font-display text-lg font-black">
+            No planned meals yet
           </h2>
-          <p className="mt-2 max-w-2xl text-sm leading-6 text-muted">
-            Add recipes to your Meal Planner first, then your grocery list will
-            appear here.
+          <p className="mx-auto mt-1 max-w-sm text-sm leading-6 text-muted">
+            Add recipes to your Meal Planner and your grocery list builds
+            itself.
           </p>
           <Link
             href="/meal-planner"
-            className="mt-5 inline-flex items-center gap-2 rounded-2xl bg-accent px-5 py-3 text-sm font-black text-stone-950 transition hover:-translate-y-0.5"
+            className="lf-press mt-4 inline-flex items-center gap-2 rounded-xl bg-accent px-4 py-2.5 text-sm font-black text-white transition hover:bg-accent-strong"
           >
             <CalendarDays className="size-4" />
             Open Meal Planner
@@ -178,35 +190,29 @@ export function GroceryList({ recipes }: GroceryListProps) {
   }
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-3">
       <GrocerySummary summary={summary} />
 
       {statusMessage ? (
-        <p className="liftlog-pop-in rounded-[1.5rem] border border-accent/25 bg-accent/10 p-4 text-sm font-black text-soft-yellow">
+        <p
+          role="status"
+          className="liftlog-pop-in rounded-xl border border-line bg-white/[0.03] p-2.5 text-xs font-bold text-muted"
+        >
           {statusMessage}
         </p>
       ) : null}
 
-      <section className="flex flex-col gap-3 rounded-[1.75rem] border border-line/80 bg-card/85 p-5 shadow-[0_20px_60px_rgba(23,33,28,0.08)] sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <p className="text-xs font-black uppercase tracking-[0.22em] text-accent">
-            Shopping mode
-          </p>
-          <h2 className="mt-1 font-display text-2xl font-black">
-            {allGroceryItems.length} ingredients from your plan
-          </h2>
-          <p className="mt-2 text-sm leading-6 text-muted">
-            Duplicate ingredients are combined and show how many planned meals
-            use them.
-          </p>
-        </div>
-
-        <div className="flex flex-wrap gap-2">
+      {/* Toolbar */}
+      <div className="flex items-center justify-between px-1">
+        <p className="lf-num text-[0.7rem] font-bold text-ink-dim">
+          {allGroceryItems.length} ingredients · resets each Monday
+        </p>
+        <div className="flex gap-1.5">
           {hideCheckedItems ? (
             <button
               type="button"
               onClick={() => setHideCheckedItems(false)}
-              className="inline-flex items-center gap-2 rounded-2xl bg-stone-950 px-4 py-3 text-sm font-black text-white transition hover:bg-accent"
+              className="lf-press rounded-lg border border-line px-3 py-1.5 text-[0.7rem] font-bold text-muted transition hover:text-foreground"
             >
               Show checked
             </button>
@@ -215,32 +221,25 @@ export function GroceryList({ recipes }: GroceryListProps) {
               type="button"
               onClick={clearCheckedFromView}
               disabled={!summary.checkedItemsCount}
-              className="inline-flex items-center gap-2 rounded-2xl bg-stone-950 px-4 py-3 text-sm font-black text-white transition hover:bg-accent disabled:cursor-not-allowed disabled:opacity-50"
+              className="lf-press flex items-center gap-1.5 rounded-lg border border-line px-3 py-1.5 text-[0.7rem] font-bold text-muted transition hover:text-foreground disabled:opacity-40"
             >
-              <EyeOff className="size-4" />
-              Clear checked items
+              <EyeOff className="size-3" />
+              Hide checked
             </button>
           )}
           <button
             type="button"
             onClick={resetCheckedItems}
             disabled={!summary.checkedItemsCount}
-            className="inline-flex items-center gap-2 rounded-2xl bg-red-50 px-4 py-3 text-sm font-black text-red-700 transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-50"
+            className="lf-press flex items-center gap-1.5 rounded-lg border border-line px-3 py-1.5 text-[0.7rem] font-bold text-muted transition hover:text-foreground disabled:opacity-40"
           >
-            <RotateCcw className="size-4" />
-            Reset all checked states
+            <RotateCcw className="size-3" />
+            Reset
           </button>
-          <Link
-            href="/meal-planner"
-            className="inline-flex items-center gap-2 rounded-2xl border border-accent/25 bg-accent/10 px-4 py-3 text-sm font-black text-soft-yellow transition hover:-translate-y-0.5"
-          >
-            <CalendarDays className="size-4" />
-            Go to Meal Planner
-          </Link>
         </div>
-      </section>
+      </div>
 
-      <div className="grid gap-5 xl:grid-cols-2">
+      <div className="grid gap-2.5 sm:grid-cols-2">
         {groceryCategories.map((category) => (
           <GroceryCategorySection
             key={category}

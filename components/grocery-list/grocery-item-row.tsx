@@ -14,10 +14,11 @@ export function GroceryItemRow({
 }: GroceryItemRowProps) {
   return (
     <label
-      className={`flex cursor-pointer items-start gap-3 rounded-2xl border p-4 transition ${
-        checked
-          ? "liftlog-complete-pulse border-accent/25 bg-accent/10 text-muted"
-          : "border-line bg-white/70 hover:-translate-y-0.5 hover:border-accent"
+      title={
+        item.recipeTitles.length ? `Used in: ${item.recipeTitles.join(", ")}` : undefined
+      }
+      className={`lf-press flex cursor-pointer items-center gap-2.5 rounded-lg px-2 py-2 transition ${
+        checked ? "opacity-55" : "hover:bg-white/[0.04]"
       }`}
     >
       <input
@@ -27,27 +28,26 @@ export function GroceryItemRow({
         className="sr-only"
       />
       <span
-        className={`mt-1 grid size-6 shrink-0 place-items-center rounded-lg border ${
+        className={`grid size-5 shrink-0 place-items-center rounded-md border transition ${
           checked
-            ? "liftlog-pop-in border-accent bg-accent text-stone-950"
+            ? "liftlog-pop-in border-ready/50 bg-ready/15 text-ready"
             : "border-line bg-card text-transparent"
         }`}
       >
-        <Check className="size-4" />
+        <Check className="size-3" />
       </span>
-      <span className="min-w-0 flex-1">
-        <span
-          className={`block font-display text-lg font-black ${
-            checked ? "line-through" : ""
-          }`}
-        >
-          {item.name}
-        </span>
-        <span className="mt-1 block text-sm leading-6 text-muted">
-          Used in {item.count} {item.count === 1 ? "recipe" : "recipes"}
-          {item.recipeTitles.length ? `: ${item.recipeTitles.join(", ")}` : ""}
-        </span>
+      <span
+        className={`min-w-0 flex-1 truncate text-sm font-semibold ${
+          checked ? "text-ink-dim line-through" : ""
+        }`}
+      >
+        {item.name}
       </span>
+      {item.count > 1 ? (
+        <span className="lf-num shrink-0 rounded-full bg-white/[0.06] px-2 py-0.5 text-[0.62rem] font-bold text-muted">
+          ×{item.count}
+        </span>
+      ) : null}
     </label>
   );
 }

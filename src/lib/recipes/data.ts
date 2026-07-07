@@ -18,6 +18,8 @@ export type Recipe = {
   instructions: string[];
   description: string;
   tags: string[];
+  /** Optional thumbnail path (e.g. /recipes/slug.jpg in public/). */
+  image?: string;
 };
 
 export type RecipeFilters = {
