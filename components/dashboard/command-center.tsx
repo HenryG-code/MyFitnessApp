@@ -17,6 +17,13 @@ import {
   loadMealPlanFromStorage,
 } from "@/src/lib/meal-planner/storage";
 import { getDateInputValue } from "@/src/lib/habits/queries";
+import {
+  emptyHealthSummary,
+  fetchHealthSummary,
+  formatSleep,
+  platformLabel,
+  type HealthSummary,
+} from "@/src/lib/health/queries";
 import { buildTodayMission } from "@/src/lib/performance/mission";
 import {
   calculateReadiness,
@@ -128,6 +135,7 @@ type CommandTab = "overview" | "nutrition" | "insights";
 
 export function CommandCenter() {
   const [data, setData] = useState<DashboardData | null>(null);
+  const [health, setHealth] = useState<HealthSummary>(emptyHealthSummary);
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [tab, setTab] = useState<CommandTab>("overview");
@@ -135,6 +143,13 @@ export function CommandCenter() {
 
   useEffect(() => {
     let isMounted = true;
+
+    // Health data is optional context — it fails soft to an empty summary.
+    fetchHealthSummary().then((summary) => {
+      if (isMounted) {
+        setHealth(summary);
+      }
+    });
 
     fetchDashboardData()
       .then((dashboardData) => {
@@ -176,7 +191,11 @@ export function CommandCenter() {
       return null;
     }
 
-    const readiness = calculateReadiness(data);
+    const readiness = calculateReadiness({
+      ...data,
+      healthToday: health.today,
+      healthRecent: health.recent,
+    });
     const load = classifyWeeklyLoad(data.workoutsLastSevenDays);
     const streak = calculateTrainingStreak({
       workoutDates: data.workoutsLastSevenDays.map(
@@ -197,7 +216,7 @@ export function CommandCenter() {
     );
 
     return { readiness, load, streak, mission, weight, weekly, workoutStats };
-  }, [data]);
+  }, [data, health]);
 
   if (isLoading) {
     return <CommandSkeleton />;
@@ -309,15 +328,74 @@ export function CommandCenter() {
               </div>
             ))}
             <p className="col-span-2 text-[0.65rem] leading-snug text-ink-dim sm:col-span-4">
-              Guidance from your logged training, sleep habits, and consistency —
-              not a medical measurement.
+              {health.connection
+                ? `Guidance from your logged training and data synced from ${platformLabel(health.connection.platform)} — not a medical measurement.`
+                : "Guidance from your logged training, sleep habits, and consistency — not a medical measurement."}
             </p>
           </div>
         ) : null}
       </section>
 
-      {/* Metric strip */}
+      {/* Metric strip — swaps in synced health metrics when connected */}
       <section className="lf-rise lf-rise-2 grid grid-cols-4 gap-2">
+        {health.today?.steps != null ? (
+          <div className="lf-inset p-2.5 sm:p-3">
+            <p className="lf-eyebrow !text-[0.56rem] sm:!text-[0.62rem]">Steps</p>
+            <p className="lf-num mt-1 font-display text-base font-black sm:text-xl">
+              {new Intl.NumberFormat("en").format(health.today.steps)}
+            </p>
+            <p
+              className={`lf-num mt-0.5 text-[0.65rem] font-bold ${
+                health.today.steps >= health.goals.dailySteps
+                  ? "text-ready"
+                  : "text-muted"
+              }`}
+            >
+              {Math.min(
+                999,
+                Math.round((health.today.steps / health.goals.dailySteps) * 100)
+              )}
+              % of goal
+            </p>
+          </div>
+        ) : (
+          <div className="lf-inset p-2.5 sm:p-3">
+            <p className="lf-eyebrow !text-[0.56rem] sm:!text-[0.62rem]">Streak</p>
+            <p className="lf-num mt-1 font-display text-base font-black sm:text-xl">
+              {streak}
+            </p>
+            <p className="mt-0.5 text-[0.65rem] font-bold text-muted">
+              {streak === 1 ? "day" : "days"}
+            </p>
+          </div>
+        )}
+        {health.today?.sleep_minutes != null ? (
+          <div className="lf-inset p-2.5 sm:p-3">
+            <p className="lf-eyebrow !text-[0.56rem] sm:!text-[0.62rem]">Sleep</p>
+            <p className="lf-num mt-1 font-display text-base font-black sm:text-xl">
+              {formatSleep(health.today.sleep_minutes)}
+            </p>
+            <p
+              className={`mt-0.5 text-[0.65rem] font-bold ${
+                health.today.sleep_minutes >= health.goals.sleepMinutes - 30
+                  ? "text-ready"
+                  : "text-muted"
+              }`}
+            >
+              of {formatSleep(health.goals.sleepMinutes)}
+            </p>
+          </div>
+        ) : (
+          <div className="lf-inset p-2.5 sm:p-3">
+            <p className="lf-eyebrow !text-[0.56rem] sm:!text-[0.62rem]">Load</p>
+            <p className="mt-1 truncate font-display text-base font-black sm:text-xl">
+              {load.label}
+            </p>
+            <p className="lf-num mt-0.5 text-[0.65rem] font-bold text-muted">
+              {load.minutes} min
+            </p>
+          </div>
+        )}
         <Link href="/weight" className="lf-press lf-inset block p-2.5 sm:p-3">
           <p className="lf-eyebrow !text-[0.56rem] sm:!text-[0.62rem]">Weight</p>
           <p className="lf-num mt-1 font-display text-base font-black sm:text-xl">
@@ -340,24 +418,6 @@ export function CommandCenter() {
               : "kg"}
           </p>
         </Link>
-        <div className="lf-inset p-2.5 sm:p-3">
-          <p className="lf-eyebrow !text-[0.56rem] sm:!text-[0.62rem]">Streak</p>
-          <p className="lf-num mt-1 font-display text-base font-black sm:text-xl">
-            {streak}
-          </p>
-          <p className="mt-0.5 text-[0.65rem] font-bold text-muted">
-            {streak === 1 ? "day" : "days"}
-          </p>
-        </div>
-        <div className="lf-inset p-2.5 sm:p-3">
-          <p className="lf-eyebrow !text-[0.56rem] sm:!text-[0.62rem]">Load</p>
-          <p className="mt-1 truncate font-display text-base font-black sm:text-xl">
-            {load.label}
-          </p>
-          <p className="lf-num mt-0.5 text-[0.65rem] font-bold text-muted">
-            {load.minutes} min
-          </p>
-        </div>
         <Link href="/habits" className="lf-press lf-inset block p-2.5 sm:p-3">
           <p className="lf-eyebrow !text-[0.56rem] sm:!text-[0.62rem]">Habits</p>
           <p className="lf-num mt-1 font-display text-base font-black sm:text-xl">
@@ -368,6 +428,11 @@ export function CommandCenter() {
           </p>
         </Link>
       </section>
+      {health.connection ? (
+        <p className="lf-rise lf-rise-2 -mt-1 px-1 text-right text-[0.6rem] font-semibold text-ink-dim">
+          Synced from {platformLabel(health.connection.platform)}
+        </p>
+      ) : null}
       </div>
 
       {/* Mission */}

@@ -1,8 +1,13 @@
 import type { HabitDaySummary } from "@/src/lib/habits/queries";
 import { getDateDaysAgo, getDateInputValue } from "@/src/lib/habits/queries";
+import {
+  formatSleep,
+  restingHeartRateBaseline,
+} from "@/src/lib/health/queries";
 import type {
   HabitCompletion,
   HabitDefinition,
+  HealthDailyMetric,
   Workout,
 } from "@/src/lib/supabase/database.types";
 
@@ -69,15 +74,29 @@ function daysSinceLastWorkout(workouts: Workout[]) {
   );
 }
 
+/** Deterministic sleep score from synced sleep minutes. */
+function scoreSyncedSleep(minutes: number) {
+  if (minutes >= 450) return 96;
+  if (minutes >= 420) return 90;
+  if (minutes >= 360) return 74;
+  if (minutes >= 300) return 58;
+  return 45;
+}
+
 /**
  * Deterministic fitness-guidance readiness score from logged data.
  * Not a medical measurement — a training heuristic.
+ *
+ * Fallback hierarchy: synced health data (when connected) → manual habits →
+ * neutral baseline. Never depends on a single fragile metric.
  */
 export function calculateReadiness(input: {
   workoutsLastSevenDays: Workout[];
   recentHabits: HabitDaySummary[];
   habitDefinitions: HabitDefinition[];
   recentHabitCompletions: HabitCompletion[];
+  healthToday?: HealthDailyMetric | null;
+  healthRecent?: HealthDailyMetric[];
 }): Readiness {
   const yesterday = getDateDaysAgo(1);
   const sleepHabitId = findHabitId(input.habitDefinitions, "sleep");
@@ -102,19 +121,55 @@ export function calculateReadiness(input: {
     recoveryDetail = `${restDays} days since your last session.`;
   }
 
-  // Sleep: yesterday's sleep habit.
-  const sleptWell = wasHabitCompletedOn(
-    input.recentHabitCompletions,
-    sleepHabitId,
-    yesterday
-  );
-  const sleepScore = sleptWell === null ? 70 : sleptWell ? 96 : 52;
-  const sleepDetail =
-    sleptWell === null
-      ? "No sleep habit logged yesterday."
-      : sleptWell
-        ? "Sleep habit hit yesterday."
-        : "Short sleep logged yesterday.";
+  // Sleep: prefer real synced sleep (last night is stored under today's
+  // date), fall back to the manual sleep habit, then a neutral baseline.
+  const syncedSleepMinutes =
+    input.healthToday?.sleep_minutes ??
+    input.healthRecent?.find(
+      (metric) => metric.metric_date === yesterday && metric.sleep_minutes
+    )?.sleep_minutes ??
+    null;
+  let sleepScore: number;
+  let sleepDetail: string;
+
+  if (syncedSleepMinutes !== null) {
+    sleepScore = scoreSyncedSleep(syncedSleepMinutes);
+    sleepDetail = `${formatSleep(syncedSleepMinutes)} synced sleep.`;
+  } else {
+    const sleptWell = wasHabitCompletedOn(
+      input.recentHabitCompletions,
+      sleepHabitId,
+      yesterday
+    );
+    sleepScore = sleptWell === null ? 70 : sleptWell ? 96 : 52;
+    sleepDetail =
+      sleptWell === null
+        ? "No sleep habit logged yesterday."
+        : sleptWell
+          ? "Sleep habit hit yesterday."
+          : "Short sleep logged yesterday.";
+  }
+
+  // Resting-HR trend vs personal baseline (conservative, needs 3+ days).
+  const rhrToday = input.healthToday?.resting_heart_rate_bpm ?? null;
+  const rhrBaseline = input.healthRecent
+    ? restingHeartRateBaseline(
+        input.healthRecent,
+        input.healthToday?.metric_date
+      )
+    : null;
+  let rhrAdjustment = 0;
+  let rhrNote: string | null = null;
+
+  if (rhrToday !== null && rhrBaseline !== null) {
+    if (rhrToday >= rhrBaseline + 5) {
+      rhrAdjustment = -8;
+      rhrNote = "Resting HR is above your recent baseline.";
+    } else if (rhrToday <= rhrBaseline + 1) {
+      rhrAdjustment = 3;
+      rhrNote = "Resting HR is at or below your baseline.";
+    }
+  }
 
   // Lifestyle: alcohol habit yesterday.
   const stayedClean = wasHabitCompletedOn(
@@ -152,7 +207,13 @@ export function calculateReadiness(input: {
   }
 
   const components: ReadinessComponent[] = [
-    { label: "Recovery", score: Math.round(recoveryScore), detail: recoveryDetail },
+    {
+      label: "Recovery",
+      score: Math.round(
+        Math.max(0, Math.min(100, recoveryScore + rhrAdjustment))
+      ),
+      detail: rhrNote ? `${recoveryDetail} ${rhrNote}` : recoveryDetail,
+    },
     { label: "Sleep", score: sleepScore, detail: sleepDetail },
     {
       label: "Consistency",
@@ -163,7 +224,7 @@ export function calculateReadiness(input: {
   ];
 
   let score = Math.round(
-    recoveryScore * 0.34 +
+    (recoveryScore + rhrAdjustment) * 0.34 +
       sleepScore * 0.26 +
       consistencyScore * 0.2 +
       loadScore * 0.2

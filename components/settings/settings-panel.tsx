@@ -3,6 +3,7 @@
 import { LogoutButton } from "@/components/auth/logout-button";
 import { InstallAppCard } from "@/components/pwa/install-app-card";
 import { AvatarUploadCard } from "@/components/settings/avatar-upload-card";
+import { ConnectedHealthCard } from "@/components/settings/connected-health-card";
 import { NotificationPreferencesCard } from "@/components/settings/notification-preferences-card";
 import { PreferenceSyncStatusCard } from "@/components/settings/preference-sync-status-card";
 import { FitnessCard, SectionHeader } from "@/components/ui/fitness-card";
@@ -238,6 +239,8 @@ export function SettingsPanel() {
           to your signed-in account.
         </p>
       </FitnessCard>
+
+      <ConnectedHealthCard />
 
       <FitnessCard>
         <NotificationPreferencesCard />

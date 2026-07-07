@@ -11,7 +11,9 @@ import {
   CalendarDays,
   Dumbbell,
   FileBarChart,
+  HeartPulse,
   Home,
+  LayoutGrid,
   PersonStanding,
   Plus,
   Scale,
@@ -20,6 +22,7 @@ import {
   Sprout,
   Target,
   TrendingUp,
+  X,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -49,6 +52,18 @@ const mobileNavItems = [
   { label: "Body", href: "/body", icon: PersonStanding },
   { label: "Progress", href: "/progress", icon: TrendingUp },
   { label: "Habits", href: "/habits", icon: Sprout },
+];
+
+/** Secondary lifestyle destinations exposed through the mobile menu sheet. */
+const mobileMenuItems = [
+  { label: "Recipes", href: "/recipes", icon: BookOpen },
+  { label: "Grocery List", href: "/grocery-list", icon: ShoppingBasket },
+  { label: "Meal Planner", href: "/meal-planner", icon: CalendarDays },
+  { label: "Weight", href: "/weight", icon: Scale },
+  { label: "Training Plan", href: "/training-plan", icon: Target },
+  { label: "Weekly Report", href: "/report", icon: FileBarChart },
+  { label: "Connected Health", href: "/settings#connected-health", icon: HeartPulse },
+  { label: "Settings", href: "/settings", icon: Settings },
 ];
 
 function isActive(pathname: string, href: string) {
@@ -116,6 +131,8 @@ export function AppShell({
   const pathname = usePathname();
   const userName = getUserDisplayName(user);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  // Sheet links close the menu via their own onClick handlers.
+  const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
     let isMounted = true;
@@ -259,6 +276,15 @@ export function AppShell({
             >
               <Plus className="size-[1.1rem]" />
             </Link>
+            <button
+              type="button"
+              onClick={() => setMenuOpen(true)}
+              className="lf-press grid size-10 place-items-center rounded-xl border border-line bg-white/[0.04] text-muted transition hover:text-foreground"
+              aria-label="Open lifestyle menu"
+              aria-expanded={menuOpen}
+            >
+              <LayoutGrid className="size-[1.1rem]" />
+            </button>
             <Link href="/settings" aria-label="Open settings">
               <UserAvatar
                 avatarUrl={avatarUrl}
@@ -269,6 +295,52 @@ export function AppShell({
             </Link>
           </div>
         </header>
+
+        {menuOpen ? (
+          <div
+            className="fixed inset-0 z-50 flex items-end bg-black/60 lg:hidden"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Lifestyle menu"
+            onClick={() => setMenuOpen(false)}
+          >
+            <div
+              className="lf-sheet w-full rounded-t-2xl border-t border-line bg-card p-4 pb-[max(1rem,env(safe-area-inset-bottom))]"
+              onClick={(event) => event.stopPropagation()}
+            >
+              <div className="mb-3 flex items-center justify-between">
+                <p className="lf-eyebrow">Lifestyle</p>
+                <button
+                  type="button"
+                  onClick={() => setMenuOpen(false)}
+                  aria-label="Close menu"
+                  className="lf-press grid size-9 place-items-center rounded-xl border border-line text-muted"
+                >
+                  <X className="size-4" />
+                </button>
+              </div>
+              <div className="grid grid-cols-4 gap-2">
+                {mobileMenuItems.map((item) => {
+                  const Icon = item.icon;
+
+                  return (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      onClick={() => setMenuOpen(false)}
+                      className="lf-press flex flex-col items-center gap-1.5 rounded-xl border border-line bg-white/[0.03] px-1 py-3 text-center"
+                    >
+                      <Icon className="size-[1.15rem] text-accent-strong" />
+                      <span className="text-[0.62rem] font-bold leading-tight text-muted">
+                        {item.label}
+                      </span>
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        ) : null}
 
         {children}
       </main>

@@ -94,6 +94,39 @@ export type UserPreferences = {
   preferred_reminder_time: string | null;
   meal_plan: Json;
   grocery_checked_items: Json;
+  health_goals: Json;
+  created_at: string;
+  updated_at: string;
+};
+
+export type HealthPlatform = "apple_health" | "health_connect";
+
+export type HealthConnection = {
+  id: string;
+  user_id: string;
+  platform: HealthPlatform;
+  status: "connected" | "disconnected" | "error";
+  device_label: string | null;
+  permissions: Json;
+  connected_at: string;
+  last_synced_at: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+export type HealthDailyMetric = {
+  id: string;
+  user_id: string;
+  metric_date: string;
+  platform: HealthPlatform;
+  source_name: string | null;
+  steps: number | null;
+  sleep_minutes: number | null;
+  resting_heart_rate_bpm: number | null;
+  active_energy_kcal: number | null;
+  distance_meters: number | null;
+  weight_kg: number | null;
+  exercise_minutes: number | null;
   created_at: string;
   updated_at: string;
 };
@@ -221,9 +254,48 @@ export type UserPreferencesInsert = {
   preferred_reminder_time?: string | null;
   meal_plan?: Json;
   grocery_checked_items?: Json;
+  health_goals?: Json;
   created_at?: string;
   updated_at?: string;
 };
+
+export type HealthConnectionInsert = {
+  id?: string;
+  user_id: string;
+  platform: HealthPlatform;
+  status?: HealthConnection["status"];
+  device_label?: string | null;
+  permissions?: Json;
+  connected_at?: string;
+  last_synced_at?: string | null;
+  created_at?: string;
+  updated_at?: string;
+};
+
+export type HealthConnectionUpdate = Partial<
+  Omit<HealthConnection, "id" | "user_id" | "created_at">
+>;
+
+export type HealthDailyMetricInsert = {
+  id?: string;
+  user_id: string;
+  metric_date: string;
+  platform: HealthPlatform;
+  source_name?: string | null;
+  steps?: number | null;
+  sleep_minutes?: number | null;
+  resting_heart_rate_bpm?: number | null;
+  active_energy_kcal?: number | null;
+  distance_meters?: number | null;
+  weight_kg?: number | null;
+  exercise_minutes?: number | null;
+  created_at?: string;
+  updated_at?: string;
+};
+
+export type HealthDailyMetricUpdate = Partial<
+  Omit<HealthDailyMetric, "id" | "user_id" | "created_at">
+>;
 
 export type UserPreferencesUpdate = Partial<
   Omit<UserPreferences, "user_id" | "created_at">
@@ -336,6 +408,32 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "user_preferences_user_id_fkey";
+            columns: ["user_id"];
+            referencedRelation: "users";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      health_connections: {
+        Row: HealthConnection;
+        Insert: HealthConnectionInsert;
+        Update: HealthConnectionUpdate;
+        Relationships: [
+          {
+            foreignKeyName: "health_connections_user_id_fkey";
+            columns: ["user_id"];
+            referencedRelation: "users";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      health_daily_metrics: {
+        Row: HealthDailyMetric;
+        Insert: HealthDailyMetricInsert;
+        Update: HealthDailyMetricUpdate;
+        Relationships: [
+          {
+            foreignKeyName: "health_daily_metrics_user_id_fkey";
             columns: ["user_id"];
             referencedRelation: "users";
             referencedColumns: ["id"];

@@ -1,8 +1,13 @@
 import type { HabitDaySummary } from "@/src/lib/habits/queries";
 import { getDateDaysAgo } from "@/src/lib/habits/queries";
+import { formatSleep } from "@/src/lib/health/queries";
 import { buildStrengthTrends } from "@/src/lib/performance/journey";
 import type { DatedExercise } from "@/src/lib/performance/muscles";
-import type { WeightLog, Workout } from "@/src/lib/supabase/database.types";
+import type {
+  HealthDailyMetric,
+  WeightLog,
+  Workout,
+} from "@/src/lib/supabase/database.types";
 
 export type ReportDelta = {
   label: string;
@@ -37,6 +42,7 @@ export function buildWeeklyReport(input: {
   weights: WeightLog[]; // last 14 days (or more)
   habitDays: HabitDaySummary[]; // last 14 days
   exercises: DatedExercise[]; // last 14 days
+  healthDays?: HealthDailyMetric[]; // last 14 days, optional synced data
 }): WeeklyReport {
   const thisWeekStart = getDateDaysAgo(6);
   const lastWeekStart = getDateDaysAgo(13);
@@ -168,6 +174,60 @@ export function buildWeeklyReport(input: {
     },
   ];
 
+  // Synced health context (optional).
+  const healthDays = input.healthDays ?? [];
+  const healthThisWeek = healthDays.filter((day) =>
+    inRange(day.metric_date, thisWeekStart, today)
+  );
+  const healthLastWeek = healthDays.filter((day) =>
+    inRange(day.metric_date, lastWeekStart, lastWeekEnd)
+  );
+  const sumSteps = (days: HealthDailyMetric[]) =>
+    days.reduce((sum, day) => sum + (day.steps ?? 0), 0);
+  const avgSleep = (days: HealthDailyMetric[]) => {
+    const values = days
+      .map((day) => day.sleep_minutes)
+      .filter((value): value is number => value !== null);
+    return values.length ? Math.round(avg(values)) : null;
+  };
+  const thisSteps = sumSteps(healthThisWeek);
+  const lastSteps = sumSteps(healthLastWeek);
+  const thisSleep = avgSleep(healthThisWeek);
+  const lastSleep = avgSleep(healthLastWeek);
+
+  if (healthThisWeek.some((day) => day.steps !== null)) {
+    deltas.push({
+      label: "Steps",
+      current: new Intl.NumberFormat("en").format(thisSteps),
+      change: lastSteps
+        ? `${thisSteps - lastSteps >= 0 ? "+" : ""}${new Intl.NumberFormat(
+            "en"
+          ).format(thisSteps - lastSteps)}`
+        : null,
+      direction:
+        thisSteps > lastSteps ? "up" : thisSteps < lastSteps ? "down" : "flat",
+      positive: thisSteps >= lastSteps,
+    });
+  }
+
+  if (thisSleep !== null) {
+    deltas.push({
+      label: "Avg sleep",
+      current: formatSleep(thisSleep),
+      change:
+        lastSleep !== null
+          ? `${thisSleep - lastSleep >= 0 ? "+" : ""}${thisSleep - lastSleep} min`
+          : null,
+      direction:
+        lastSleep === null || thisSleep === lastSleep
+          ? "flat"
+          : thisSleep > lastSleep
+            ? "up"
+            : "down",
+      positive: lastSleep === null || thisSleep >= lastSleep,
+    });
+  }
+
   // Narrative
   const narrative: string[] = [];
   narrative.push(
@@ -178,6 +238,16 @@ export function buildWeeklyReport(input: {
 
   if (thisMinutes > 0) {
     narrative.push(`You accumulated ${thisMinutes} training minutes.`);
+  }
+
+  if (thisSteps > 0) {
+    narrative.push(
+      `You walked ${new Intl.NumberFormat("en").format(thisSteps)} steps.`
+    );
+  }
+
+  if (thisSleep !== null) {
+    narrative.push(`You averaged ${formatSleep(thisSleep)} of sleep.`);
   }
 
   if (weightDelta !== null) {
@@ -231,7 +301,12 @@ export function buildWeeklyReport(input: {
   let watchItem: WeeklyReport["watchItem"] = null;
 
   const sleepDays = thisHabits.filter((day) => day.total > 0);
-  if (thisWeek.length < lastWeek.length && lastWeek.length > 0) {
+  if (thisSleep !== null && lastSleep !== null && thisSleep < lastSleep - 30) {
+    watchItem = {
+      title: "Sleep fell below your baseline",
+      detail: `${formatSleep(thisSleep)} avg vs ${formatSleep(lastSleep)} last week.`,
+    };
+  } else if (thisWeek.length < lastWeek.length && lastWeek.length > 0) {
     watchItem = {
       title: "Training volume dipped",
       detail: `${thisWeek.length} sessions vs ${lastWeek.length} last week.`,

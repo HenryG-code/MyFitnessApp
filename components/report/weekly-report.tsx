@@ -5,6 +5,7 @@ import {
   fetchHabitDefinitions,
   fetchRecentHabitCompletions,
 } from "@/src/lib/habits/queries";
+import { fetchHealthSummary } from "@/src/lib/health/queries";
 import { fetchDatedExercises } from "@/src/lib/performance/muscles";
 import {
   buildWeeklyReport,
@@ -40,8 +41,9 @@ export function WeeklyReportPage() {
       fetchWeightLogs(),
       fetchHabitDefinitions({ activeOnly: true }),
       fetchRecentHabitCompletions(14),
+      fetchHealthSummary(),
     ])
-      .then(([dated, weights, definitions, completions]) => {
+      .then(([dated, weights, definitions, completions, health]) => {
         if (isMounted) {
           setReport(
             buildWeeklyReport({
@@ -49,6 +51,7 @@ export function WeeklyReportPage() {
               weights,
               habitDays: buildHabitChartData(definitions, completions, 14),
               exercises: dated.exercises,
+              healthDays: health.recent,
             })
           );
         }

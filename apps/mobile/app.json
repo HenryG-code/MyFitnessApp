@@ -1,0 +1,60 @@
+{
+  "expo": {
+    "name": "LogFit",
+    "slug": "logfit-mobile",
+    "version": "0.1.0",
+    "scheme": "logfit",
+    "orientation": "portrait",
+    "userInterfaceStyle": "dark",
+    "backgroundColor": "#0a0a0b",
+    "ios": {
+      "bundleIdentifier": "co.weblytics.logfit",
+      "supportsTablet": false,
+      "infoPlist": {
+        "NSHealthShareUsageDescription": "LogFit reads steps, sleep, resting heart rate, active energy, distance, and weight that you approve, to power your performance dashboard.",
+        "NSHealthUpdateUsageDescription": "LogFit does not write health data in this version, but the platform requires this description."
+      },
+      "entitlements": {
+        "com.apple.developer.healthkit": true,
+        "com.apple.developer.healthkit.background-delivery": false
+      }
+    },
+    "android": {
+      "package": "co.weblytics.logfit",
+      "permissions": [
+        "android.permission.health.READ_STEPS",
+        "android.permission.health.READ_SLEEP",
+        "android.permission.health.READ_RESTING_HEART_RATE",
+        "android.permission.health.READ_ACTIVE_CALORIES_BURNED",
+        "android.permission.health.READ_DISTANCE",
+        "android.permission.health.READ_WEIGHT",
+        "android.permission.health.READ_EXERCISE"
+      ]
+    },
+    "plugins": [
+      "react-native-health-connect",
+      [
+        "@kingstinct/react-native-healthkit",
+        {
+          "NSHealthShareUsageDescription": "LogFit reads steps, sleep, resting heart rate, active energy, distance, and weight that you approve, to power your performance dashboard.",
+          "background": false
+        }
+      ],
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "compileSdkVersion": 35,
+            "targetSdkVersion": 35,
+            "minSdkVersion": 26
+          }
+        }
+      ]
+    ],
+    "extra": {
+      "supabaseUrl": "https://cbhydojkqxfohyjspucp.supabase.co",
+      "supabaseAnonKey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNiaHlkb2prcXhmb2h5anNwdWNwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk5ODM2MTksImV4cCI6MjA5NTU1OTYxOX0.FU1IMmsU7bM9m_sgvhIDw_PcWM3muDUgXEKma_STnYk",
+      "webAppUrl": "https://fitness.weblytics.co.za"
+    }
+  }
+}
