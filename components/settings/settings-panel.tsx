@@ -123,11 +123,11 @@ export function SettingsPanel() {
 
   return (
     <div className="space-y-5">
-      <section className="rounded-[2rem] border border-line/80 bg-card/80 p-6 backdrop-blur">
+      <section className="rounded-[1.25rem] border border-line/80 bg-card/80 p-4 backdrop-blur sm:p-5">
         <p className="text-xs font-black uppercase tracking-[0.28em] text-accent">
           Settings
         </p>
-        <h1 className="mt-3 font-display text-4xl font-black tracking-tight">
+        <h1 className="mt-1.5 font-display text-2xl font-black tracking-tight sm:text-3xl">
           Your LogFit account.
         </h1>
         <p className="mt-3 max-w-2xl text-sm leading-6 text-muted">

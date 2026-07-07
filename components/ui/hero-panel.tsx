@@ -31,7 +31,7 @@ export function HeroPanel({
 }: HeroPanelProps) {
   return (
     <section
-      className={`liftlog-hero-motion relative overflow-hidden rounded-[2rem] border border-line bg-gradient-to-br p-6 text-white shadow-[0_30px_100px_rgba(0,0,0,0.45)] after:absolute after:inset-0 after:pointer-events-none sm:p-8 ${variantStyles[variant]}`}
+      className={`liftlog-hero-motion relative overflow-hidden rounded-[1.25rem] border border-line bg-gradient-to-br p-4 text-white shadow-[0_20px_70px_rgba(0,0,0,0.4)] after:absolute after:inset-0 after:pointer-events-none sm:rounded-[1.75rem] sm:p-6 ${variantStyles[variant]}`}
     >
       <div className="absolute inset-0 opacity-70 [background-image:linear-gradient(120deg,rgba(255,255,255,0.08)_0_1px,transparent_1px_14px)]" />
       {imageSrc ? (
@@ -49,13 +49,13 @@ export function HeroPanel({
         </div>
       ) : null}
       <div className="relative z-10 max-w-3xl">
-        <p className="text-xs font-black uppercase tracking-[0.28em] text-sun">
+        <p className="text-[0.68rem] font-black uppercase tracking-[0.24em] text-sun">
           {eyebrow}
         </p>
-        <h1 className="mt-4 font-display text-4xl font-black tracking-tight sm:text-6xl">
+        <h1 className="mt-2 font-display text-2xl font-black leading-tight tracking-tight sm:text-4xl">
           {title}
         </h1>
-        <p className="mt-4 max-w-2xl text-base leading-7 text-stone-300 sm:text-lg">
+        <p className="mt-2 max-w-2xl text-sm leading-6 text-stone-300">
           {description}
         </p>
         {children}

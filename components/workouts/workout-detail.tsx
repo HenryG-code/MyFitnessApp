@@ -94,11 +94,11 @@ export function WorkoutDetail({ workoutId }: WorkoutDetailProps) {
         Back to workouts
       </Link>
 
-      <section className="rounded-[2rem] border border-line/80 bg-stone-950 p-6 text-white shadow-[0_24px_80px_rgba(23,33,28,0.18)]">
+      <section className="rounded-[1.25rem] border border-line/80 bg-stone-950 p-4 text-white shadow-[0_24px_80px_rgba(23,33,28,0.18)] sm:p-5">
         <p className="text-xs font-black uppercase tracking-[0.28em] text-sun">
           Workout details
         </p>
-        <h1 className="mt-3 font-display text-4xl font-black tracking-tight">
+        <h1 className="mt-1.5 font-display text-2xl font-black tracking-tight sm:text-3xl">
           {workout.title}
         </h1>
         <div className="mt-5 flex flex-wrap gap-3 text-sm font-bold text-stone-300">

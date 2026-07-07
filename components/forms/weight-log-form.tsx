@@ -100,8 +100,8 @@ export function WeightLogForm({
   }
 
   return (
-    <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
-      <div className="grid gap-4 sm:grid-cols-2">
+    <form className="space-y-3" onSubmit={handleSubmit(onSubmit)}>
+      <div className="grid grid-cols-2 gap-3">
         <div>
           <label className="text-sm font-black" htmlFor={`${mode}-weight`}>
             Weight, kg
@@ -111,7 +111,7 @@ export function WeightLogForm({
             type="number"
             step="0.1"
             min="0"
-            className="mt-2 w-full rounded-2xl border border-line bg-surface/80 px-4 py-3 outline-none transition focus:border-accent focus:ring-4 focus:ring-accent/20"
+            className="mt-1.5 w-full rounded-xl border border-line bg-surface/80 px-3 py-2.5 text-sm outline-none transition focus:border-accent focus:ring-4 focus:ring-accent/20"
             placeholder="78.4"
             {...register("weight_kg", { valueAsNumber: true })}
           />
@@ -129,7 +129,7 @@ export function WeightLogForm({
           <input
             id={`${mode}-logged-at`}
             type="date"
-            className="mt-2 w-full rounded-2xl border border-line bg-surface/80 px-4 py-3 outline-none transition focus:border-accent focus:ring-4 focus:ring-accent/20"
+            className="mt-1.5 w-full rounded-xl border border-line bg-surface/80 px-3 py-2.5 text-sm outline-none transition focus:border-accent focus:ring-4 focus:ring-accent/20"
             {...register("logged_at")}
           />
           {errors.logged_at ? (
@@ -146,8 +146,8 @@ export function WeightLogForm({
         </label>
         <textarea
           id={`${mode}-notes`}
-          rows={mode === "edit" ? 3 : 4}
-          className="mt-2 w-full rounded-2xl border border-line bg-surface/80 px-4 py-3 outline-none transition focus:border-accent focus:ring-4 focus:ring-accent/20"
+          rows={2}
+          className="mt-1.5 w-full rounded-xl border border-line bg-surface/80 px-3 py-2.5 text-sm outline-none transition focus:border-accent focus:ring-4 focus:ring-accent/20"
           placeholder="Optional context, like morning weigh-in or post-travel."
           {...register("notes")}
         />

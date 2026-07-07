@@ -1,163 +1,162 @@
-import { FitnessCard, MetricCard } from "@/components/ui/fitness-card";
+"use client";
+
 import type { Recipe } from "@/src/lib/recipes/data";
 import {
-  ArrowLeft,
-  ChefHat,
-  Clock,
-  Flame,
-  Gauge,
-  Salad,
-  Timer,
-  Utensils,
-} from "lucide-react";
+  toggleFavoriteSlug,
+  useFavoriteRecipes,
+} from "@/src/lib/recipes/favorites";
+import { ArrowLeft, CalendarDays, Check, Heart } from "lucide-react";
 import Link from "next/link";
+import { useState } from "react";
 
 type RecipeDetailProps = {
   recipe: Recipe;
 };
 
 export function RecipeDetail({ recipe }: RecipeDetailProps) {
+  const isFavorite = useFavoriteRecipes().has(recipe.slug);
+  const [checkedIngredients, setCheckedIngredients] = useState<Set<string>>(
+    new Set()
+  );
+
+  function toggleIngredient(ingredient: string) {
+    setCheckedIngredients((current) => {
+      const next = new Set(current);
+      if (next.has(ingredient)) {
+        next.delete(ingredient);
+      } else {
+        next.add(ingredient);
+      }
+      return next;
+    });
+  }
+
   return (
-    <div className="space-y-5">
-      <Link
-        href="/recipes"
-        className="inline-flex items-center gap-2 rounded-2xl bg-stone-950 px-4 py-2 text-sm font-black text-white transition hover:bg-accent"
-      >
-        <ArrowLeft className="size-4" />
-        Back to recipes
-      </Link>
-
-      <section className="overflow-hidden rounded-[2rem] border border-line/80 bg-stone-950 p-6 text-white shadow-[0_24px_80px_rgba(23,33,28,0.18)] sm:p-8">
-        <div className="max-w-3xl">
-          <p className="text-xs font-black uppercase tracking-[0.28em] text-sun">
-            {recipe.mealType} / {recipe.difficulty}
-          </p>
-          <h1 className="mt-4 font-display text-4xl font-black tracking-tight sm:text-6xl">
-            {recipe.title}
-          </h1>
-          <p className="mt-4 max-w-2xl text-base leading-7 text-stone-300 sm:text-lg">
-            {recipe.description}
-          </p>
-          <div className="mt-6 flex flex-wrap gap-2">
-            {recipe.goals.map((goal) => (
-              <span
-                key={goal}
-                className="rounded-full bg-white/10 px-3 py-1 text-xs font-black uppercase tracking-[0.14em] text-white"
-              >
-                {goal}
-              </span>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <MetricCard
-          label="Calories"
-          value={`${recipe.calories}`}
-          detail="Approximate energy per serving."
-          icon={<Flame className="size-5" />}
-          tone="yellow"
-        />
-        <MetricCard
-          label="Protein"
-          value={`${recipe.protein}g`}
-          detail={`${recipe.carbs}g carbs / ${recipe.fat}g fat.`}
-          icon={<Utensils className="size-5" />}
-          tone="amber"
-        />
-        <MetricCard
-          label="Prep and cook"
-          value={`${recipe.prepTimeMinutes + recipe.cookTimeMinutes} min`}
-          detail={`${recipe.prepTimeMinutes} min prep / ${recipe.cookTimeMinutes} min cook.`}
-          icon={<Timer className="size-5" />}
-          tone="ink"
-        />
-        <MetricCard
-          label="Difficulty"
-          value={recipe.difficulty}
-          detail="Simple enough for repeat meals."
-          icon={<Gauge className="size-5" />}
-          tone="yellow"
-        />
-      </section>
-
-      <section className="grid gap-5 lg:grid-cols-[0.9fr_1.1fr]">
-        <FitnessCard>
-          <div className="mb-5 flex items-center gap-3">
-            <span className="grid size-12 place-items-center rounded-2xl bg-accent text-stone-950">
-              <Salad className="size-5" />
-            </span>
-            <div>
-              <p className="text-xs font-black uppercase tracking-[0.22em] text-accent">
-                Ingredients
-              </p>
-              <h2 className="font-display text-xl font-black">
-                What you need
-              </h2>
-            </div>
-          </div>
-          <ul className="space-y-3">
-            {recipe.ingredients.map((ingredient) => (
-              <li
-                key={ingredient}
-                className="rounded-2xl border border-line bg-white/65 px-4 py-3 text-sm font-bold text-muted"
-              >
-                {ingredient}
-              </li>
-            ))}
-          </ul>
-        </FitnessCard>
-
-        <FitnessCard>
-          <div className="mb-5 flex items-center gap-3">
-            <span className="grid size-12 place-items-center rounded-2xl bg-sun text-stone-950">
-              <ChefHat className="size-5" />
-            </span>
-            <div>
-              <p className="text-xs font-black uppercase tracking-[0.22em] text-accent">
-                Instructions
-              </p>
-              <h2 className="font-display text-xl font-black">Make it</h2>
-            </div>
-          </div>
-          <ol className="space-y-3">
-            {recipe.instructions.map((instruction, index) => (
-              <li
-                key={instruction}
-                className="flex gap-3 rounded-2xl border border-line bg-white/65 p-4"
-              >
-                <span className="grid size-8 shrink-0 place-items-center rounded-full bg-stone-950 text-sm font-black text-white">
-                  {index + 1}
-                </span>
-                <span className="text-sm font-bold leading-6 text-muted">
-                  {instruction}
-                </span>
-              </li>
-            ))}
-          </ol>
-        </FitnessCard>
-      </section>
-
-      <FitnessCard className="border-accent/25 bg-accent/10">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <p className="text-xs font-black uppercase tracking-[0.22em] text-accent">
-              Planning
-            </p>
-            <h2 className="mt-1 font-display text-xl font-black">
-              Add this recipe to your weekly plan from Meal Planner.
-            </h2>
-          </div>
+    <div className="mx-auto max-w-3xl space-y-3">
+      {/* Header */}
+      <header className="lf-rise">
+        <div className="flex items-center justify-between">
           <Link
-            href="/meal-planner"
-            className="inline-flex items-center gap-2 rounded-full bg-white/65 px-3 py-2 text-sm font-black text-muted transition hover:-translate-y-0.5 hover:text-accent-strong"
+            href="/recipes"
+            className="lf-press flex items-center gap-1.5 py-1 text-xs font-bold text-muted transition hover:text-foreground"
           >
-            <Clock className="size-4" />
-            Open Meal Planner
+            <ArrowLeft className="size-3.5" />
+            Recipes
           </Link>
+          <button
+            type="button"
+            onClick={() => toggleFavoriteSlug(recipe.slug)}
+            aria-label={isFavorite ? "Remove from saved" : "Save recipe"}
+            aria-pressed={isFavorite}
+            className="lf-press grid size-10 place-items-center rounded-xl border border-line text-muted transition hover:text-foreground"
+          >
+            <Heart
+              className={`size-4 ${isFavorite ? "fill-accent text-accent" : ""}`}
+            />
+          </button>
         </div>
-      </FitnessCard>
+        <p className="lf-eyebrow mt-2 text-accent-strong">
+          {recipe.mealType} · {recipe.difficulty}
+        </p>
+        <h1 className="mt-1 font-display text-2xl font-black leading-tight tracking-tight sm:text-3xl">
+          {recipe.title}
+        </h1>
+        <p className="mt-1.5 text-sm leading-6 text-muted">
+          {recipe.description}
+        </p>
+      </header>
+
+      {/* Nutrition strip */}
+      <section className="lf-rise lf-rise-1 grid grid-cols-4 gap-2">
+        {[
+          { label: "Kcal", value: `${recipe.calories}` },
+          { label: "Protein", value: `${recipe.protein}g` },
+          { label: "Carbs", value: `${recipe.carbs}g` },
+          { label: "Fat", value: `${recipe.fat}g` },
+        ].map((stat) => (
+          <div key={stat.label} className="lf-inset p-2.5 text-center sm:p-3">
+            <p className="lf-num font-display text-base font-black sm:text-xl">
+              {stat.value}
+            </p>
+            <p className="lf-eyebrow mt-0.5 !text-[0.56rem]">{stat.label}</p>
+          </div>
+        ))}
+      </section>
+
+      <p className="lf-rise lf-rise-1 px-1 text-[0.7rem] font-bold text-ink-dim">
+        {recipe.prepTimeMinutes} min prep
+        {recipe.cookTimeMinutes ? ` · ${recipe.cookTimeMinutes} min cook` : ""} ·{" "}
+        {recipe.goals.join(" · ")}
+      </p>
+
+      {/* Ingredients — tappable checklist */}
+      <section className="lf-rise lf-rise-2 lf-panel p-4">
+        <div className="flex items-baseline justify-between">
+          <p className="lf-eyebrow">Ingredients</p>
+          <p className="lf-num text-[0.65rem] font-bold text-ink-dim">
+            {checkedIngredients.size}/{recipe.ingredients.length}
+          </p>
+        </div>
+        <ul className="mt-2.5 space-y-1">
+          {recipe.ingredients.map((ingredient) => {
+            const checked = checkedIngredients.has(ingredient);
+
+            return (
+              <li key={ingredient}>
+                <button
+                  type="button"
+                  onClick={() => toggleIngredient(ingredient)}
+                  aria-pressed={checked}
+                  className="lf-press flex w-full items-center gap-2.5 rounded-lg px-2 py-2 text-left transition hover:bg-white/[0.03]"
+                >
+                  <span
+                    className={`grid size-5 shrink-0 place-items-center rounded-md border transition ${
+                      checked
+                        ? "border-ready/50 bg-ready/15 text-ready"
+                        : "border-line text-transparent"
+                    }`}
+                  >
+                    <Check className="size-3" />
+                  </span>
+                  <span
+                    className={`text-sm font-semibold transition ${
+                      checked ? "text-ink-dim line-through" : "text-foreground"
+                    }`}
+                  >
+                    {ingredient}
+                  </span>
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+      </section>
+
+      {/* Steps */}
+      <section className="lf-rise lf-rise-3 lf-panel p-4">
+        <p className="lf-eyebrow">Method</p>
+        <ol className="mt-2.5 space-y-3">
+          {recipe.instructions.map((instruction, index) => (
+            <li key={instruction} className="flex gap-3">
+              <span className="lf-num grid size-6 shrink-0 place-items-center rounded-full bg-accent/15 text-[0.7rem] font-black text-accent-strong">
+                {index + 1}
+              </span>
+              <span className="pt-0.5 text-sm font-medium leading-relaxed text-muted">
+                {instruction}
+              </span>
+            </li>
+          ))}
+        </ol>
+      </section>
+
+      {/* Quick action */}
+      <Link
+        href="/meal-planner"
+        className="lf-rise lf-rise-4 lf-press flex h-12 items-center justify-center gap-2 rounded-xl border border-accent/30 bg-accent/10 text-sm font-black text-accent-strong transition hover:bg-accent/[0.18]"
+      >
+        <CalendarDays className="size-4" />
+        Add to weekly meal plan
+      </Link>
     </div>
   );
 }
