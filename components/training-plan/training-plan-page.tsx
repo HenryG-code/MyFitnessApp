@@ -76,7 +76,7 @@ export function TrainingPlanPage() {
   }, [hasLoadedGoal, selectedGoal]);
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-3 sm:space-y-5">
       <HeroPanel
         eyebrow="Suggested training plan"
         title="Suggested training plan"
@@ -86,31 +86,31 @@ export function TrainingPlanPage() {
         variant="amber"
       >
 
-        <div className="mt-8 grid gap-3 sm:grid-cols-3">
-          <div className="rounded-[1.5rem] bg-white/10 p-4">
-            <Dumbbell className="size-5 text-sun" />
-            <p className="mt-3 text-2xl font-black">Strength</p>
-            <p className="text-sm text-stone-300">Major muscles twice weekly</p>
+        <div className="mt-4 grid grid-cols-3 gap-2 sm:mt-8 sm:gap-3">
+          <div className="rounded-xl bg-white/10 p-2.5 sm:rounded-[1.5rem] sm:p-4">
+            <Dumbbell className="size-4 text-sun sm:size-5" />
+            <p className="mt-2 text-sm font-black sm:mt-3 sm:text-2xl">Strength</p>
+            <p className="mt-0.5 text-[0.65rem] leading-tight text-stone-300 sm:text-sm sm:leading-normal">Major muscles twice weekly</p>
           </div>
-          <div className="rounded-[1.5rem] bg-white/10 p-4">
-            <HeartPulse className="size-5 text-sun" />
-            <p className="mt-3 text-2xl font-black">Cardio</p>
-            <p className="text-sm text-stone-300">Moderate weekly activity</p>
+          <div className="rounded-xl bg-white/10 p-2.5 sm:rounded-[1.5rem] sm:p-4">
+            <HeartPulse className="size-4 text-sun sm:size-5" />
+            <p className="mt-2 text-sm font-black sm:mt-3 sm:text-2xl">Cardio</p>
+            <p className="mt-0.5 text-[0.65rem] leading-tight text-stone-300 sm:text-sm sm:leading-normal">Moderate weekly activity</p>
           </div>
-          <div className="rounded-[1.5rem] bg-white/10 p-4">
-            <ShieldCheck className="size-5 text-sun" />
-            <p className="mt-3 text-2xl font-black">Recovery</p>
-            <p className="text-sm text-stone-300">Gradual and sustainable</p>
+          <div className="rounded-xl bg-white/10 p-2.5 sm:rounded-[1.5rem] sm:p-4">
+            <ShieldCheck className="size-4 text-sun sm:size-5" />
+            <p className="mt-2 text-sm font-black sm:mt-3 sm:text-2xl">Recovery</p>
+            <p className="mt-0.5 text-[0.65rem] leading-tight text-stone-300 sm:text-sm sm:leading-normal">Gradual and sustainable</p>
           </div>
         </div>
       </HeroPanel>
 
-      <FitnessCard className="border-warning/30 bg-warning/10">
+      <FitnessCard className="border-warning/30 bg-warning/10 !p-3 sm:!p-5">
         <div className="flex items-start gap-3">
-          <span className="grid size-11 shrink-0 place-items-center rounded-2xl bg-sun text-stone-950">
+          <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-sun text-stone-950 sm:size-11 sm:rounded-2xl">
             <AlertTriangle className="size-5" />
           </span>
-          <p className="text-sm font-bold leading-6 text-muted">
+          <p className="text-xs font-bold leading-5 text-muted sm:text-sm sm:leading-6">
             These plans are general fitness suggestions, not medical advice.
             Start light, use proper form, and consult a professional if you have
             injuries or medical conditions.
@@ -121,7 +121,7 @@ export function TrainingPlanPage() {
       <GoalSelector selectedGoal={selectedGoal} onChange={setSelectedGoal} />
       <PlanOverview plan={selectedPlan} />
 
-      <section className="grid gap-5 xl:grid-cols-2">
+      <section className="grid gap-3 sm:gap-5 xl:grid-cols-2">
         {selectedPlan.days.map((session) => (
           <SessionCard
             key={`${selectedPlan.slug}-${session.dayLabel}`}

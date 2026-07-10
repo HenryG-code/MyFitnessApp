@@ -184,24 +184,24 @@ export function NotificationPreferencesCard() {
   const canSendTest = permissionStatus === "granted";
 
   return (
-    <div className="space-y-5">
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+    <div className="space-y-3 sm:space-y-5">
+      <div className="flex flex-col gap-3 sm:gap-4 lg:flex-row lg:items-start lg:justify-between">
         <div className="max-w-2xl">
-          <span className="grid size-12 place-items-center rounded-2xl bg-accent text-stone-950 shadow-sm shadow-accent/25">
+          <span className="grid size-9 place-items-center rounded-xl bg-accent text-stone-950 shadow-sm shadow-accent/25 sm:size-12 sm:rounded-2xl">
             <Bell className="size-5" />
           </span>
-          <p className="mt-5 text-xs font-black uppercase tracking-[0.22em] text-accent">
+          <p className="mt-3 text-xs font-black uppercase tracking-[0.22em] text-accent sm:mt-5">
             Notifications
           </p>
-          <h2 className="mt-2 font-display text-2xl font-black">
+          <h2 className="mt-1 font-display text-xl font-black sm:mt-2 sm:text-2xl">
             Notification preferences
           </h2>
-          <p className="mt-3 text-sm leading-6 text-muted">
+          <p className="mt-2 text-xs leading-5 text-muted sm:mt-3 sm:text-sm sm:leading-6">
             Notifications depend on your browser and device settings. You can
             turn reminders off anytime.
           </p>
         </div>
-        <div className="rounded-[1.25rem] border border-line bg-white/65 p-4 text-sm">
+        <div className="rounded-xl border border-line bg-white/65 p-3 text-xs sm:rounded-[1.25rem] sm:p-4 sm:text-sm">
           <p className="font-black text-foreground">
             Permission: {permissionLabels[permissionStatus]}
           </p>
@@ -211,12 +211,12 @@ export function NotificationPreferencesCard() {
         </div>
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-3">
+      <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-3">
         <button
           type="button"
           onClick={handleEnableNotifications}
           disabled={isRequesting || permissionStatus === "unsupported"}
-          className="inline-flex items-center justify-center gap-2 rounded-2xl bg-stone-950 px-4 py-3 text-sm font-black text-white transition hover:-translate-y-0.5 hover:bg-accent disabled:cursor-not-allowed disabled:opacity-55 disabled:hover:translate-y-0"
+          className="inline-flex items-center justify-center gap-2 rounded-xl bg-stone-950 px-3 py-2.5 text-xs font-black text-white transition hover:-translate-y-0.5 hover:bg-accent disabled:cursor-not-allowed disabled:opacity-55 disabled:hover:translate-y-0 sm:rounded-2xl sm:px-4 sm:py-3 sm:text-sm"
         >
           <Bell className="size-4" />
           {isRequesting ? "Requesting..." : "Enable notifications"}
@@ -224,7 +224,7 @@ export function NotificationPreferencesCard() {
         <button
           type="button"
           onClick={handleDisableReminders}
-          className="inline-flex items-center justify-center gap-2 rounded-2xl border border-line bg-white/75 px-4 py-3 text-sm font-black transition hover:-translate-y-0.5 hover:border-accent"
+          className="inline-flex items-center justify-center gap-2 rounded-xl border border-line bg-white/75 px-3 py-2.5 text-xs font-black transition hover:-translate-y-0.5 hover:border-accent sm:rounded-2xl sm:px-4 sm:py-3 sm:text-sm"
         >
           <BellOff className="size-4" />
           Disable reminders
@@ -233,14 +233,14 @@ export function NotificationPreferencesCard() {
           type="button"
           onClick={handleSendTestNotification}
           disabled={!canSendTest}
-          className="inline-flex items-center justify-center gap-2 rounded-2xl border border-line bg-white/75 px-4 py-3 text-sm font-black transition hover:-translate-y-0.5 hover:border-accent disabled:cursor-not-allowed disabled:opacity-55 disabled:hover:translate-y-0"
+          className="col-span-2 inline-flex items-center justify-center gap-2 rounded-xl border border-line bg-white/75 px-3 py-2.5 text-xs font-black transition hover:-translate-y-0.5 hover:border-accent disabled:cursor-not-allowed disabled:opacity-55 disabled:hover:translate-y-0 sm:col-span-1 sm:rounded-2xl sm:px-4 sm:py-3 sm:text-sm"
         >
           <Send className="size-4" />
           Send test notification
         </button>
       </div>
 
-      <div className="rounded-[1.25rem] border border-line bg-surface/80 p-4">
+      <div className="rounded-xl border border-line bg-surface/80 p-3 sm:rounded-[1.25rem] sm:p-4">
         <label
           htmlFor="preferredTime"
           className="flex items-center gap-2 text-sm font-black"
@@ -257,15 +257,15 @@ export function NotificationPreferencesCard() {
           value={preferences.preferredTime}
           disabled={!canUseReminders}
           onChange={(event) => handlePreferredTimeChange(event.target.value)}
-          className="mt-4 min-h-12 w-full rounded-2xl border border-line bg-[#080807] px-4 py-3 text-base font-black text-foreground outline-none transition focus:border-accent focus:ring-4 focus:ring-accent/20 disabled:cursor-not-allowed disabled:bg-white/10 disabled:text-muted disabled:opacity-70 sm:max-w-xs"
+          className="mt-3 min-h-10 w-full rounded-xl border border-line bg-[#080807] px-3 py-2 text-sm font-black text-foreground outline-none transition focus:border-accent focus:ring-4 focus:ring-accent/20 disabled:cursor-not-allowed disabled:bg-white/10 disabled:text-muted disabled:opacity-70 sm:mt-4 sm:min-h-12 sm:max-w-xs sm:rounded-2xl sm:px-4 sm:py-3 sm:text-base"
         />
       </div>
 
-      <div className="grid gap-3 md:grid-cols-2">
+      <div className="grid gap-2 sm:gap-3 md:grid-cols-2">
         {reminderOptions.map((option) => (
           <label
             key={option.key}
-            className={`flex cursor-pointer items-start gap-3 rounded-[1.25rem] border p-4 transition hover:-translate-y-0.5 hover:border-accent ${
+            className={`flex cursor-pointer items-start gap-2.5 rounded-xl border p-3 transition hover:-translate-y-0.5 hover:border-accent sm:gap-3 sm:rounded-[1.25rem] sm:p-4 ${
               preferences[option.key]
                 ? "liftlog-complete-pulse border-accent/30 bg-accent/10"
                 : "border-line bg-white/65"

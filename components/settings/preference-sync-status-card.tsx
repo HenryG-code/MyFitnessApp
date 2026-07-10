@@ -74,12 +74,12 @@ export function PreferenceSyncStatusCard() {
   const statusIcon = getStatusIcon(status);
 
   return (
-    <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+    <div className="flex flex-col gap-3 sm:gap-4 lg:flex-row lg:items-start lg:justify-between">
       <div className="max-w-2xl">
-        <span className="grid size-12 place-items-center rounded-2xl bg-accent text-stone-950">
+        <span className="grid size-9 place-items-center rounded-xl bg-accent text-stone-950 sm:size-12 sm:rounded-2xl">
           {statusIcon}
         </span>
-        <div className="mt-5">
+        <div className="mt-3 sm:mt-5">
           <SectionHeader eyebrow="Preferences" title="Synced preferences" />
         </div>
         <p className="text-sm leading-6 text-muted">
@@ -89,7 +89,7 @@ export function PreferenceSyncStatusCard() {
       </div>
       <div
         key={status}
-        className="liftlog-pop-in rounded-[1.25rem] bg-white/[0.055] p-4 text-sm shadow-inner shadow-white/[0.02] lg:min-w-64"
+        className="liftlog-pop-in rounded-xl bg-white/[0.055] p-3 text-xs shadow-inner shadow-white/[0.02] sm:rounded-[1.25rem] sm:p-4 sm:text-sm lg:min-w-64"
       >
         <p className="font-display text-xl font-black">{statusCopy[status]}</p>
         <p className="mt-2 leading-6 text-muted">
