@@ -122,15 +122,15 @@ export function SettingsPanel() {
   ];
 
   return (
-    <div className="space-y-5">
-      <section className="rounded-[1.25rem] border border-line/80 bg-card/80 p-4 backdrop-blur sm:p-5">
+    <div className="space-y-3 sm:space-y-5">
+      <section className="rounded-[1.25rem] border border-line/80 bg-card/80 p-3.5 backdrop-blur sm:p-5">
         <p className="text-xs font-black uppercase tracking-[0.28em] text-accent">
           Settings
         </p>
-        <h1 className="mt-1.5 font-display text-2xl font-black tracking-tight sm:text-3xl">
+        <h1 className="mt-1 font-display text-xl font-black tracking-tight sm:mt-1.5 sm:text-3xl">
           Your LogFit account.
         </h1>
-        <p className="mt-3 max-w-2xl text-sm leading-6 text-muted">
+        <p className="mt-2 max-w-2xl text-xs leading-5 text-muted sm:mt-3 sm:text-sm sm:leading-6">
           Manage your profile, privacy, reminders, support options, and quick
           links from one account space.
         </p>
@@ -150,25 +150,31 @@ export function SettingsPanel() {
         </FitnessCard>
       ) : null}
 
-      <section className="grid gap-4 lg:grid-cols-3">
+      <section className="grid gap-2 sm:gap-4 lg:grid-cols-3">
         {settings.map((item) => {
           const Icon = item.icon;
 
           return (
-            <FitnessCard key={item.title}>
-              <span className="grid size-12 place-items-center rounded-2xl bg-accent text-stone-950">
-                <Icon className="size-5" />
-              </span>
-              <h2 className="mt-5 font-display text-xl font-black">
-                {item.title}
-              </h2>
-              <p className="mt-2 text-sm leading-6 text-muted">{item.detail}</p>
+            <FitnessCard key={item.title} className="min-w-0 !p-3 sm:!p-5">
+              <div className="flex items-center gap-3 lg:block">
+                <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-accent text-stone-950 sm:size-12 sm:rounded-2xl">
+                  <Icon className="size-5" />
+                </span>
+                <div className="min-w-0">
+                  <h2 className="font-display text-base font-black sm:text-xl lg:mt-5">
+                    {item.title}
+                  </h2>
+                  <p className="mt-0.5 truncate text-xs text-muted sm:mt-2 sm:text-sm sm:leading-6 lg:whitespace-normal">
+                    {item.detail}
+                  </p>
+                </div>
+              </div>
             </FitnessCard>
           );
         })}
       </section>
 
-      <FitnessCard>
+      <FitnessCard className="!p-3 sm:!p-5">
         <AvatarUploadCard
           fullName={profile?.fullName ?? "Signed-in user"}
           email={profile?.email ?? null}
@@ -189,50 +195,50 @@ export function SettingsPanel() {
         />
       </FitnessCard>
 
-      <FitnessCard>
+      <FitnessCard className="!p-3 sm:!p-5">
         <SectionHeader eyebrow="Account details" title="Signed-in profile" />
-        <div className="grid gap-3 sm:grid-cols-2">
-          <div className="rounded-[1.25rem] bg-white/[0.055] p-4 shadow-inner shadow-white/[0.02]">
+        <div className="grid grid-cols-2 gap-2 sm:gap-3">
+          <div className="rounded-xl bg-white/[0.055] p-3 shadow-inner shadow-white/[0.02] sm:rounded-[1.25rem] sm:p-4">
             <p className="text-xs font-black uppercase tracking-[0.18em] text-muted">
               Name
             </p>
-            <p className="mt-2 font-display text-xl font-black">
+            <p className="mt-1 font-display text-base font-black sm:mt-2 sm:text-xl">
               {profile?.fullName ?? "Signed-in user"}
             </p>
           </div>
-          <div className="rounded-[1.25rem] bg-white/[0.055] p-4 shadow-inner shadow-white/[0.02]">
+          <div className="rounded-xl bg-white/[0.055] p-3 shadow-inner shadow-white/[0.02] sm:rounded-[1.25rem] sm:p-4">
             <p className="text-xs font-black uppercase tracking-[0.18em] text-muted">
               Email
             </p>
-            <p className="mt-2 break-all font-display text-xl font-black">
+            <p className="mt-1 break-all font-display text-sm font-black sm:mt-2 sm:text-xl">
               {profile?.email ?? "--"}
             </p>
           </div>
-          <div className="rounded-[1.25rem] bg-white/[0.055] p-4 shadow-inner shadow-white/[0.02]">
+          <div className="rounded-xl bg-white/[0.055] p-3 shadow-inner shadow-white/[0.02] sm:rounded-[1.25rem] sm:p-4">
             <div className="flex items-center gap-3">
               <ShieldCheck className="size-5 text-accent" />
               <div>
                 <p className="text-xs font-black uppercase tracking-[0.18em] text-muted">
                   Account status
                 </p>
-                <p className="mt-1 font-display text-xl font-black">
+                <p className="mt-1 font-display text-base font-black sm:text-xl">
                   Signed in
                 </p>
               </div>
             </div>
           </div>
-          <div className="rounded-[1.25rem] bg-white/[0.055] p-4 shadow-inner shadow-white/[0.02]">
+          <div className="rounded-xl bg-white/[0.055] p-3 shadow-inner shadow-white/[0.02] sm:rounded-[1.25rem] sm:p-4">
             <p className="text-xs font-black uppercase tracking-[0.18em] text-muted">
               Plan
             </p>
-            <p className="mt-2 font-display text-xl font-black">
+            <p className="mt-1 font-display text-base font-black sm:mt-2 sm:text-xl">
               Free version
             </p>
           </div>
         </div>
       </FitnessCard>
 
-      <FitnessCard>
+      <FitnessCard className="!p-3 sm:!p-5">
         <SectionHeader eyebrow="Privacy" title="Private to your account" />
         <p className="text-sm leading-6 text-muted">
           Your workouts, weight check-ins, habits, and preferences stay private
@@ -242,17 +248,17 @@ export function SettingsPanel() {
 
       <ConnectedHealthCard />
 
-      <FitnessCard>
+      <FitnessCard className="!p-3 sm:!p-5">
         <NotificationPreferencesCard />
       </FitnessCard>
 
-      <FitnessCard>
+      <FitnessCard className="!p-3 sm:!p-5">
         <PreferenceSyncStatusCard />
       </FitnessCard>
 
-      <FitnessCard>
+      <FitnessCard className="!p-3 sm:!p-5">
         <SectionHeader eyebrow="More tools" title="Quick links" />
-        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        <div className="grid grid-cols-2 gap-2 sm:gap-3 xl:grid-cols-4">
           {toolLinks.map((item) => {
             const Icon = item.icon;
 
@@ -260,15 +266,15 @@ export function SettingsPanel() {
               <Link
                 key={item.href}
                 href={item.href}
-                className="rounded-[1.25rem] bg-white/[0.055] p-4 shadow-inner shadow-white/[0.02] transition hover:-translate-y-0.5 hover:border-accent"
+                className="rounded-xl bg-white/[0.055] p-3 shadow-inner shadow-white/[0.02] transition hover:-translate-y-0.5 hover:border-accent sm:rounded-[1.25rem] sm:p-4"
               >
-                <span className="grid size-10 place-items-center rounded-2xl bg-accent text-stone-950">
+                <span className="grid size-8 place-items-center rounded-xl bg-accent text-stone-950 sm:size-10 sm:rounded-2xl">
                   <Icon className="size-4" />
                 </span>
-                <p className="mt-3 font-display text-lg font-black">
+                <p className="mt-2 font-display text-base font-black sm:mt-3 sm:text-lg">
                   {item.title}
                 </p>
-                <p className="mt-1 text-sm leading-6 text-muted">
+                <p className="mt-0.5 text-xs leading-5 text-muted sm:mt-1 sm:text-sm sm:leading-6">
                   {item.detail}
                 </p>
               </Link>
@@ -277,13 +283,13 @@ export function SettingsPanel() {
         </div>
       </FitnessCard>
 
-      <FitnessCard>
+      <FitnessCard className="!p-3 sm:!p-5">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
           <div className="max-w-xl">
-            <span className="grid size-12 place-items-center rounded-2xl bg-accent text-stone-950">
+            <span className="grid size-9 place-items-center rounded-xl bg-accent text-stone-950 sm:size-12 sm:rounded-2xl">
               <Download className="size-5" />
             </span>
-            <div className="mt-5">
+            <div className="mt-3 sm:mt-5">
               <SectionHeader eyebrow="App install" title="Install LogFit" />
             </div>
             <p className="text-sm leading-6 text-muted">
@@ -300,13 +306,13 @@ export function SettingsPanel() {
         </div>
       </FitnessCard>
 
-      <FitnessCard>
+      <FitnessCard className="!p-3 sm:!p-5">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div>
-            <span className="grid size-12 place-items-center rounded-2xl bg-accent text-stone-950">
+            <span className="grid size-9 place-items-center rounded-xl bg-accent text-stone-950 sm:size-12 sm:rounded-2xl">
               <HandHeart className="size-5" />
             </span>
-            <div className="mt-5">
+            <div className="mt-3 sm:mt-5">
               <SectionHeader
                 eyebrow="Support"
                 title="Support the project"
@@ -369,7 +375,7 @@ export function SettingsPanel() {
         </div>
       </FitnessCard>
 
-      <FitnessCard>
+      <FitnessCard className="!p-3 sm:!p-5">
         <SectionHeader eyebrow="Account" title="Sign out" />
         <p className="mb-4 text-sm leading-6 text-muted">
           Log out of this browser and return to the public login page.

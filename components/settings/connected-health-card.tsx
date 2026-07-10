@@ -70,7 +70,7 @@ export function ConnectedHealthCard() {
   const { connection, today } = summary;
 
   return (
-    <section id="connected-health" className="lf-panel scroll-mt-4 p-5">
+    <section id="connected-health" className="lf-panel scroll-mt-4 p-3 sm:p-5">
       <SectionHeader
         eyebrow="Connected health"
         title="Health data"

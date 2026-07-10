@@ -590,9 +590,16 @@ export function CommandCenter() {
                             {macro.grams}g · {macro.percentage}%
                           </span>
                         </div>
-                        <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-white/[0.07]">
+                        <div
+                          className="mt-1.5 h-2 overflow-hidden rounded-full bg-white/[0.07] ring-1 ring-white/[0.03]"
+                          role="progressbar"
+                          aria-label={`${macro.label}: ${macro.percentage}%`}
+                          aria-valuemin={0}
+                          aria-valuemax={100}
+                          aria-valuenow={macro.percentage}
+                        >
                           <div
-                            className={`h-full rounded-full ${macro.barClassName}`}
+                            className={`liftlog-progress-bar h-full min-w-1 rounded-full ${macro.barClassName}`}
                             style={{ width: `${macro.percentage}%` }}
                           />
                         </div>

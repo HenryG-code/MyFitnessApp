@@ -8,9 +8,9 @@ import {
   type MuscleGroupStatus,
   type MuscleState,
 } from "@/src/lib/performance/muscles";
-import { ArrowDownRight, ArrowUpRight, X } from "lucide-react";
+import { ArrowDownRight, ArrowUpRight, RotateCcw, X } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 type BodyView = "front" | "rear";
 
@@ -34,50 +34,105 @@ type MuscleShape = {
   attrs: Record<string, string | number>;
 };
 
-/** Schematic, symmetric muscle plates on a capsule silhouette. viewBox 0 0 220 440. */
+/** Symmetric muscle plates on the front of the sculpted model. */
 const frontShapes: MuscleShape[] = [
-  { id: "shoulders", el: "ellipse", attrs: { cx: 70, cy: 88, rx: 13, ry: 11 } },
-  { id: "shoulders", el: "ellipse", attrs: { cx: 150, cy: 88, rx: 13, ry: 11 } },
-  { id: "chest", el: "path", attrs: { d: "M80,102 Q108,96 108,120 Q108,138 86,134 Q72,128 74,110 Z" } },
-  { id: "chest", el: "path", attrs: { d: "M140,102 Q112,96 112,120 Q112,138 134,134 Q148,128 146,110 Z" } },
-  { id: "biceps", el: "ellipse", attrs: { cx: 63, cy: 126, rx: 9, ry: 15, transform: "rotate(8 63 126)" } },
-  { id: "biceps", el: "ellipse", attrs: { cx: 157, cy: 126, rx: 9, ry: 15, transform: "rotate(-8 157 126)" } },
-  { id: "forearms", el: "ellipse", attrs: { cx: 55, cy: 176, rx: 7, ry: 21, transform: "rotate(9 55 176)" } },
-  { id: "forearms", el: "ellipse", attrs: { cx: 165, cy: 176, rx: 7, ry: 21, transform: "rotate(-9 165 176)" } },
-  { id: "core", el: "path", attrs: { d: "M94,142 Q110,138 126,142 L124,198 Q110,206 96,198 Z" } },
-  { id: "quads", el: "ellipse", attrs: { cx: 93, cy: 264, rx: 15, ry: 42 } },
-  { id: "quads", el: "ellipse", attrs: { cx: 127, cy: 264, rx: 15, ry: 42 } },
-  { id: "calves", el: "ellipse", attrs: { cx: 90, cy: 362, rx: 9, ry: 27 } },
-  { id: "calves", el: "ellipse", attrs: { cx: 130, cy: 362, rx: 9, ry: 27 } },
+  { id: "shoulders", el: "path", attrs: { d: "M75 77 C61 75 51 84 52 98 C55 106 63 110 74 106 C82 100 84 88 75 77Z" } },
+  { id: "shoulders", el: "path", attrs: { d: "M145 77 C159 75 169 84 168 98 C165 106 157 110 146 106 C138 100 136 88 145 77Z" } },
+  { id: "chest", el: "path", attrs: { d: "M78 96 C88 86 102 87 108 96 L108 126 C96 137 78 133 72 119 C69 108 72 101 78 96Z" } },
+  { id: "chest", el: "path", attrs: { d: "M142 96 C132 86 118 87 112 96 L112 126 C124 137 142 133 148 119 C151 108 148 101 142 96Z" } },
+  { id: "biceps", el: "path", attrs: { d: "M54 109 C44 117 44 137 50 150 C55 156 64 152 68 141 C71 128 67 114 60 109Z" } },
+  { id: "biceps", el: "path", attrs: { d: "M166 109 C176 117 176 137 170 150 C165 156 156 152 152 141 C149 128 153 114 160 109Z" } },
+  { id: "forearms", el: "path", attrs: { d: "M48 153 C41 161 39 188 44 207 C48 214 55 211 59 200 L61 166 C59 156 54 152 48 153Z" } },
+  { id: "forearms", el: "path", attrs: { d: "M172 153 C179 161 181 188 176 207 C172 214 165 211 161 200 L159 166 C161 156 166 152 172 153Z" } },
+  { id: "core", el: "path", attrs: { d: "M88 135 C96 132 104 134 110 140 C116 134 124 132 132 135 L128 195 C124 207 116 214 110 216 C104 214 96 207 92 195Z" } },
+  { id: "quads", el: "path", attrs: { d: "M82 220 C75 237 76 286 83 310 C89 320 101 315 106 300 L106 234 C101 221 91 216 82 220Z" } },
+  { id: "quads", el: "path", attrs: { d: "M138 220 C145 237 144 286 137 310 C131 320 119 315 114 300 L114 234 C119 221 129 216 138 220Z" } },
+  { id: "calves", el: "path", attrs: { d: "M84 323 C77 340 78 378 84 394 C89 401 98 396 101 384 L100 339 C96 325 90 320 84 323Z" } },
+  { id: "calves", el: "path", attrs: { d: "M136 323 C143 340 142 378 136 394 C131 401 122 396 119 384 L120 339 C124 325 130 320 136 323Z" } },
 ];
 
 const rearShapes: MuscleShape[] = [
-  { id: "traps", el: "path", attrs: { d: "M92,76 L110,66 L128,76 L120,100 L100,100 Z" } },
-  { id: "shoulders", el: "ellipse", attrs: { cx: 70, cy: 88, rx: 13, ry: 11 } },
-  { id: "shoulders", el: "ellipse", attrs: { cx: 150, cy: 88, rx: 13, ry: 11 } },
-  { id: "back", el: "path", attrs: { d: "M84,104 Q110,96 136,104 L132,156 Q110,172 88,156 Z" } },
-  { id: "triceps", el: "ellipse", attrs: { cx: 63, cy: 128, rx: 9, ry: 16, transform: "rotate(8 63 128)" } },
-  { id: "triceps", el: "ellipse", attrs: { cx: 157, cy: 128, rx: 9, ry: 16, transform: "rotate(-8 157 128)" } },
-  { id: "forearms", el: "ellipse", attrs: { cx: 55, cy: 176, rx: 7, ry: 21, transform: "rotate(9 55 176)" } },
-  { id: "forearms", el: "ellipse", attrs: { cx: 165, cy: 176, rx: 7, ry: 21, transform: "rotate(-9 165 176)" } },
-  { id: "glutes", el: "circle", attrs: { cx: 97, cy: 216, r: 16 } },
-  { id: "glutes", el: "circle", attrs: { cx: 123, cy: 216, r: 16 } },
-  { id: "hamstrings", el: "ellipse", attrs: { cx: 93, cy: 280, rx: 14, ry: 38 } },
-  { id: "hamstrings", el: "ellipse", attrs: { cx: 127, cy: 280, rx: 14, ry: 38 } },
-  { id: "calves", el: "ellipse", attrs: { cx: 90, cy: 356, rx: 10, ry: 29 } },
-  { id: "calves", el: "ellipse", attrs: { cx: 130, cy: 356, rx: 10, ry: 29 } },
+  { id: "traps", el: "path", attrs: { d: "M91 70 L110 61 L129 70 L137 95 C126 101 119 105 110 112 C101 105 94 101 83 95Z" } },
+  { id: "shoulders", el: "path", attrs: { d: "M75 77 C61 75 51 84 52 98 C55 106 63 110 74 106 C82 100 84 88 75 77Z" } },
+  { id: "shoulders", el: "path", attrs: { d: "M145 77 C159 75 169 84 168 98 C165 106 157 110 146 106 C138 100 136 88 145 77Z" } },
+  { id: "back", el: "path", attrs: { d: "M80 97 C91 91 101 95 110 108 C119 95 129 91 140 97 C146 117 142 155 131 178 C124 188 116 193 110 194 C104 193 96 188 89 178 C78 155 74 117 80 97Z" } },
+  { id: "triceps", el: "path", attrs: { d: "M54 109 C44 118 44 139 51 154 C57 158 65 151 68 138 C69 124 65 112 59 109Z" } },
+  { id: "triceps", el: "path", attrs: { d: "M166 109 C176 118 176 139 169 154 C163 158 155 151 152 138 C151 124 155 112 161 109Z" } },
+  { id: "forearms", el: "path", attrs: { d: "M48 155 C41 164 39 189 44 207 C48 214 55 211 59 200 L61 168 C59 158 54 154 48 155Z" } },
+  { id: "forearms", el: "path", attrs: { d: "M172 155 C179 164 181 189 176 207 C172 214 165 211 161 200 L159 168 C161 158 166 154 172 155Z" } },
+  { id: "glutes", el: "path", attrs: { d: "M82 197 C92 190 104 194 109 205 L107 230 C100 242 84 240 78 227 C76 216 77 204 82 197Z" } },
+  { id: "glutes", el: "path", attrs: { d: "M138 197 C128 190 116 194 111 205 L113 230 C120 242 136 240 142 227 C144 216 143 204 138 197Z" } },
+  { id: "hamstrings", el: "path", attrs: { d: "M82 235 C76 252 77 290 84 313 C90 321 101 315 105 300 L105 248 C100 235 90 230 82 235Z" } },
+  { id: "hamstrings", el: "path", attrs: { d: "M138 235 C144 252 143 290 136 313 C130 321 119 315 115 300 L115 248 C120 235 130 230 138 235Z" } },
+  { id: "calves", el: "path", attrs: { d: "M84 323 C77 340 78 378 84 394 C89 401 98 396 101 384 L100 339 C96 325 90 320 84 323Z" } },
+  { id: "calves", el: "path", attrs: { d: "M136 323 C143 340 142 378 136 394 C131 401 122 396 119 384 L120 339 C124 325 130 320 136 323Z" } },
 ];
 
-function BodySilhouette() {
+function BodyModelDefs({ view }: { view: BodyView }) {
+  const suffix = view === "front" ? "front" : "rear";
+
   return (
-    <g fill="rgba(255,255,255,0.035)" stroke="rgba(255,255,255,0.07)" strokeWidth="1">
-      <circle cx="110" cy="36" r="19" />
-      <rect x="100" y="54" width="20" height="14" rx="5" />
-      <rect x="74" y="66" width="72" height="150" rx="26" />
-      <rect x="46" y="80" width="20" height="140" rx="10" transform="rotate(7 56 150)" />
-      <rect x="154" y="80" width="20" height="140" rx="10" transform="rotate(-7 164 150)" />
-      <rect x="80" y="212" width="26" height="216" rx="13" />
-      <rect x="114" y="212" width="26" height="216" rx="13" />
+    <defs>
+      <linearGradient id={`body-skin-${suffix}`} x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0" stopColor="#19191d" />
+        <stop offset="0.22" stopColor="#3b3b42" />
+        <stop offset="0.48" stopColor="#1f2025" />
+        <stop offset="0.72" stopColor="#4a4a52" />
+        <stop offset="1" stopColor="#141418" />
+      </linearGradient>
+      <radialGradient id={`body-glow-${suffix}`} cx="42%" cy="28%" r="70%">
+        <stop offset="0" stopColor="#ffffff" stopOpacity="0.24" />
+        <stop offset="0.42" stopColor="#ffffff" stopOpacity="0.04" />
+        <stop offset="1" stopColor="#000000" stopOpacity="0.32" />
+      </radialGradient>
+      <filter id={`model-shadow-${suffix}`} x="-30%" y="-20%" width="160%" height="160%">
+        <feDropShadow dx="0" dy="10" stdDeviation="9" floodColor="#000000" floodOpacity="0.72" />
+      </filter>
+      <filter id={`muscle-glow-${suffix}`} x="-40%" y="-40%" width="180%" height="180%">
+        <feDropShadow dx="0" dy="0" stdDeviation="2.5" floodColor="currentColor" floodOpacity="0.42" />
+      </filter>
+    </defs>
+  );
+}
+
+function BodySilhouette({ view }: { view: BodyView }) {
+  const suffix = view === "front" ? "front" : "rear";
+  const fill = `url(#body-skin-${suffix})`;
+
+  return (
+    <g filter={`url(#model-shadow-${suffix})`}>
+      <ellipse cx="110" cy="425" rx="52" ry="8" fill="#000" opacity="0.55" />
+      <g fill={fill} stroke="rgba(255,255,255,0.11)" strokeWidth="1.1" strokeLinejoin="round">
+        <ellipse cx="110" cy="35" rx="18" ry="22" />
+        <path d="M99 54 C101 63 98 68 91 72 L110 86 L129 72 C122 68 119 63 121 54Z" />
+        <path d="M88 68 C70 67 59 72 51 85 C46 94 48 105 55 111 C62 113 68 109 73 104 C76 133 79 166 87 190 C92 203 99 212 110 216 C121 212 128 203 133 190 C141 166 144 133 147 104 C152 109 158 113 165 111 C172 105 174 94 169 85 C161 72 150 67 132 68 L110 81Z" />
+        <path d="M53 100 C43 111 40 136 43 157 L39 194 C38 207 43 218 50 220 C58 219 61 210 61 199 L64 160 C71 142 70 119 63 106Z" />
+        <path d="M167 100 C177 111 180 136 177 157 L181 194 C182 207 177 218 170 220 C162 219 159 210 159 199 L156 160 C149 142 150 119 157 106Z" />
+        <path d="M87 187 C80 199 77 215 79 230 C82 240 91 245 103 242 L110 232 L117 242 C129 245 138 240 141 230 C143 215 140 199 133 187Z" />
+        <path d="M81 228 C74 248 76 287 80 310 C82 319 82 326 79 340 L80 390 C80 409 88 418 99 414 C104 406 103 392 102 380 L105 320 C111 292 110 255 103 236Z" />
+        <path d="M139 228 C146 248 144 287 140 310 C138 319 138 326 141 340 L140 390 C140 409 132 418 121 414 C116 406 117 392 118 380 L115 320 C109 292 110 255 117 236Z" />
+        <path d="M80 391 C73 404 68 417 72 424 C81 429 94 427 101 419 L99 405Z" />
+        <path d="M140 391 C147 404 152 417 148 424 C139 429 126 427 119 419 L121 405Z" />
+      </g>
+      <path d="M110 13 C102 15 97 22 96 35 C98 48 103 54 110 57Z" fill="rgba(255,255,255,0.09)" />
+      <path d="M110 82 C94 76 78 76 68 88 C80 92 91 96 110 103Z" fill="rgba(255,255,255,0.055)" />
+      <path d="M110 82 C126 76 142 76 152 88 C140 92 129 96 110 103Z" fill="rgba(0,0,0,0.2)" />
+      <path d="M85 190 C94 201 102 207 110 210 L110 231 L102 241 C91 243 83 237 81 228Z" fill="rgba(255,255,255,0.045)" />
+      <path d="M110 12 C132 46 120 145 110 216 C104 291 106 363 110 421" fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="1" />
+      {view === "front" ? (
+        <g fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="1">
+          <path d="M81 120 C91 127 101 127 108 123 M112 123 C119 127 129 127 139 120" />
+          <path d="M96 151 L108 151 M112 151 L124 151 M96 170 L108 170 M112 170 L124 170 M98 188 L108 188 M112 188 L122 188" />
+        </g>
+      ) : (
+        <g fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="1">
+          <path d="M76 104 C87 116 93 137 91 169 M144 104 C133 116 127 137 129 169" />
+          <path d="M110 75 L110 191" />
+        </g>
+      )}
+      <path d="M53 100 C43 126 47 175 44 201 M167 100 C177 126 173 175 176 201 M81 232 C89 270 84 319 82 390 M139 232 C131 270 136 319 138 390" fill="none" stroke="rgba(255,255,255,0.12)" strokeWidth="1.2" />
+      <path d="M54 87 C79 62 95 79 110 81 C125 79 141 62 166 87" fill="none" stroke="rgba(255,255,255,0.18)" strokeWidth="1.2" />
+      <path d="M54 88 C79 67 95 81 110 83 C125 81 141 67 166 88 L160 108 C139 97 129 95 110 102 C91 95 81 97 60 108Z" fill={`url(#body-glow-${suffix})`} opacity="0.48" />
     </g>
   );
 }
@@ -87,11 +142,13 @@ function BodyMap({
   intelligence,
   selected,
   onSelect,
+  active,
 }: {
   view: BodyView;
   intelligence: BodyIntelligence;
   selected: MuscleGroupId | null;
   onSelect: (id: MuscleGroupId) => void;
+  active: boolean;
 }) {
   const shapes = view === "front" ? frontShapes : rearShapes;
 
@@ -100,9 +157,11 @@ function BodyMap({
       viewBox="0 0 220 440"
       role="group"
       aria-label={`${view === "front" ? "Front" : "Rear"} body muscle map`}
-      className="mx-auto h-full max-h-[26rem] w-auto"
+      aria-hidden={!active}
+      className="mx-auto h-full max-h-[27rem] w-auto drop-shadow-[0_22px_24px_rgba(0,0,0,0.52)]"
     >
-      <BodySilhouette />
+      <BodyModelDefs view={view} />
+      <BodySilhouette view={view} />
       {shapes.map((shape, index) => {
         const status = intelligence.groups[shape.id];
         const color = stateColors[status.state];
@@ -115,11 +174,13 @@ function BodyMap({
             {...shape.attrs}
             className="lf-muscle"
             fill={color}
-            fillOpacity={status.state === "neglected" ? 0.5 : 0.55}
+            fillOpacity={status.state === "neglected" ? 0.34 : 0.68}
             stroke={isSelected ? "var(--foreground)" : color}
-            strokeOpacity={isSelected ? 0.9 : 0.5}
-            strokeWidth={isSelected ? 2 : 1}
-            tabIndex={0}
+            strokeOpacity={isSelected ? 1 : 0.72}
+            strokeWidth={isSelected ? 2.4 : 1.1}
+            filter={`url(#muscle-glow-${view})`}
+            style={{ color }}
+            tabIndex={active ? 0 : -1}
             role="button"
             aria-label={`${status.name}: ${stateLabels[status.state]}, ${status.weeklySets} sets this week`}
             onClick={() => onSelect(shape.id)}
@@ -273,6 +334,7 @@ function MuscleDetail({
 export function BodyIntelligencePage() {
   const [view, setView] = useState<BodyView>("front");
   const [selected, setSelected] = useState<MuscleGroupId | null>(null);
+  const dragStartX = useRef<number | null>(null);
   const [intelligence, setIntelligence] = useState<BodyIntelligence | null>(
     null
   );
@@ -312,6 +374,29 @@ export function BodyIntelligencePage() {
     () => (selected && intelligence ? intelligence.groups[selected] : null),
     [selected, intelligence]
   );
+
+  function rotateBody(nextView?: BodyView) {
+    setView((current) => nextView ?? (current === "front" ? "rear" : "front"));
+  }
+
+  function handleModelPointerDown(event: React.PointerEvent<HTMLDivElement>) {
+    dragStartX.current = event.clientX;
+  }
+
+  function handleModelPointerUp(event: React.PointerEvent<HTMLDivElement>) {
+    const startX = dragStartX.current;
+    dragStartX.current = null;
+
+    if (startX === null) {
+      return;
+    }
+
+    const distance = event.clientX - startX;
+
+    if (Math.abs(distance) >= 36) {
+      rotateBody(distance < 0 ? "rear" : "front");
+    }
+  }
 
   if (isLoading) {
     return (
@@ -366,8 +451,10 @@ export function BodyIntelligencePage() {
       </header>
 
       <div className="lf-rise lf-rise-1 grid gap-3 lg:grid-cols-[1fr_1fr]">
-        <section className="lf-panel relative p-4">
-          <div className="flex items-center justify-between">
+        <section className="lf-panel relative isolate overflow-hidden border-white/[0.08] bg-[radial-gradient(circle_at_50%_24%,rgba(240,71,46,0.13),transparent_32%),linear-gradient(150deg,rgba(255,255,255,0.045),rgba(255,255,255,0.008)_48%,rgba(0,0,0,0.2))] p-4 shadow-[0_36px_100px_rgba(0,0,0,0.56),inset_0_1px_0_rgba(255,255,255,0.08)]">
+          <div className="pointer-events-none absolute inset-x-[12%] top-14 -z-10 h-64 rounded-full bg-accent/[0.055] blur-3xl" />
+          <div className="pointer-events-none absolute inset-x-10 bottom-16 -z-10 h-16 rounded-[50%] bg-black/70 blur-xl" />
+          <div className="relative flex items-center justify-between">
             <p className="lf-num text-xs font-bold text-muted">
               {intelligence.totalWeeklySets} sets · 7 days
             </p>
@@ -377,17 +464,73 @@ export function BodyIntelligencePage() {
               </p>
             ) : null}
           </div>
-          <div className="mt-2 h-[22rem] sm:h-[24rem]">
-            <BodyMap
-              view={view}
-              intelligence={intelligence}
-              selected={selected}
-              onSelect={(id) =>
-                setSelected((current) => (current === id ? null : id))
+          <div
+            role="region"
+            tabIndex={0}
+            aria-label={`Interactive 3D body, showing ${view}. Drag horizontally or use arrow keys to rotate.`}
+            onPointerDown={handleModelPointerDown}
+            onPointerUp={handleModelPointerUp}
+            onPointerCancel={() => {
+              dragStartX.current = null;
+            }}
+            onKeyDown={(event) => {
+              if (event.key === "ArrowLeft") {
+                event.preventDefault();
+                rotateBody("front");
               }
-            />
+
+              if (event.key === "ArrowRight") {
+                event.preventDefault();
+                rotateBody("rear");
+              }
+            }}
+            className="relative mt-2 h-[24rem] cursor-grab touch-pan-y select-none outline-none [perspective:1100px] active:cursor-grabbing focus-visible:ring-2 focus-visible:ring-accent/60 sm:h-[26rem]"
+          >
+            <div className="pointer-events-none absolute left-1/2 top-[46%] h-[19rem] w-[12rem] -translate-x-1/2 -translate-y-1/2 rounded-[50%] border border-white/[0.055] shadow-[0_0_70px_rgba(240,71,46,0.08),inset_0_0_55px_rgba(255,255,255,0.025)]" />
+            <div
+              className="relative size-full transition-transform duration-700 ease-[cubic-bezier(0.22,0.8,0.2,1)] [transform-style:preserve-3d] motion-reduce:transition-none"
+              style={{
+                transform: `rotateY(${view === "front" ? 0 : 180}deg)`,
+              }}
+            >
+              <div className="absolute inset-0 [backface-visibility:hidden]">
+                <BodyMap
+                  view="front"
+                  active={view === "front"}
+                  intelligence={intelligence}
+                  selected={selected}
+                  onSelect={(id) =>
+                    setSelected((current) => (current === id ? null : id))
+                  }
+                />
+              </div>
+              <div className="absolute inset-0 [backface-visibility:hidden] [transform:rotateY(180deg)]">
+                <BodyMap
+                  view="rear"
+                  active={view === "rear"}
+                  intelligence={intelligence}
+                  selected={selected}
+                  onSelect={(id) =>
+                    setSelected((current) => (current === id ? null : id))
+                  }
+                />
+              </div>
+            </div>
+            <div className="pointer-events-none absolute inset-x-0 bottom-1 flex justify-center">
+              <span className="rounded-full border border-white/[0.08] bg-black/45 px-3 py-1 text-[0.6rem] font-black uppercase tracking-[0.16em] text-muted backdrop-blur">
+                {view} view
+              </span>
+            </div>
           </div>
-          <div className="mt-2 flex flex-wrap items-center justify-center gap-x-3 gap-y-1">
+          <button
+            type="button"
+            onClick={() => rotateBody()}
+            className="lf-press mx-auto mt-1 flex items-center gap-2 rounded-full border border-line bg-black/25 px-3 py-1.5 text-[0.68rem] font-bold text-muted transition hover:border-accent/40 hover:text-foreground"
+          >
+            <RotateCcw className="size-3.5" />
+            Drag or tap to rotate
+          </button>
+          <div className="mt-3 flex flex-wrap items-center justify-center gap-x-3 gap-y-1">
             {(
               ["fresh", "recovering", "ready", "neglected"] as MuscleState[]
             ).map((state) => (

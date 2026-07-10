@@ -274,13 +274,13 @@ export function calculateMacroBreakdown(
       label: "Carbs",
       grams: macros.carbs,
       percentage: getPercentage(macros.carbs),
-      barClassName: "bg-orange-500",
+      barClassName: "bg-sun",
     },
     {
       label: "Fat",
       grams: macros.fat,
       percentage: getPercentage(macros.fat),
-      barClassName: "bg-red-500",
+      barClassName: "bg-ready",
     },
   ];
 }

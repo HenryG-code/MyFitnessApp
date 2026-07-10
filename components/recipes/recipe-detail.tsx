@@ -94,6 +94,11 @@ export function RecipeDetail({ recipe }: RecipeDetailProps) {
         ))}
       </section>
 
+      <p className="lf-rise lf-rise-1 px-1 text-[0.68rem] leading-snug text-ink-dim">
+        Approximate nutrition per serving. Exact values vary with ingredient
+        brands, trimming, and cooked weight.
+      </p>
+
       <p className="lf-rise lf-rise-1 px-1 text-[0.7rem] font-bold text-ink-dim">
         {recipe.prepTimeMinutes} min prep
         {recipe.cookTimeMinutes ? ` · ${recipe.cookTimeMinutes} min cook` : ""} ·{" "}

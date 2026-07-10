@@ -11,47 +11,47 @@ export function PlanOverview({ plan }: PlanOverviewProps) {
   const summary = calculateTrainingPlanSummary(plan);
 
   return (
-    <div className="space-y-5">
-      <FitnessCard>
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+    <div className="space-y-3 sm:space-y-5">
+      <FitnessCard className="!p-3 sm:!p-5">
+        <div className="flex flex-col gap-3 sm:gap-4 lg:flex-row lg:items-start lg:justify-between">
           <div>
             <p className="text-xs font-black uppercase tracking-[0.22em] text-accent">
               Selected plan
             </p>
-            <h2 className="mt-2 font-display text-3xl font-black tracking-tight">
+            <h2 className="mt-1 font-display text-xl font-black tracking-tight sm:mt-2 sm:text-3xl">
               {plan.title}
             </h2>
-            <p className="mt-3 max-w-3xl text-sm leading-6 text-muted">
+            <p className="mt-2 max-w-3xl text-xs leading-5 text-muted sm:mt-3 sm:text-sm sm:leading-6">
               {plan.description}
             </p>
           </div>
-          <span className="inline-flex items-center gap-2 rounded-full border border-accent/25 bg-accent/10 px-3 py-2 text-sm font-black text-soft-yellow">
+          <span className="inline-flex w-fit items-center gap-2 rounded-full border border-accent/25 bg-accent/10 px-3 py-1.5 text-xs font-black text-soft-yellow sm:py-2 sm:text-sm">
             <ShieldCheck className="size-4" />
             General guidance
           </span>
         </div>
 
-        <div className="mt-5 grid gap-3 lg:grid-cols-2">
-          <div className="rounded-[1.25rem] bg-white/[0.055] p-4 shadow-inner shadow-white/[0.02]">
+        <div className="mt-3 grid grid-cols-2 gap-2 sm:mt-5 sm:gap-3">
+          <div className="rounded-xl bg-white/[0.055] p-3 shadow-inner shadow-white/[0.02] sm:rounded-[1.25rem] sm:p-4">
             <p className="text-xs font-black uppercase tracking-[0.18em] text-muted">
               Recommended for
             </p>
-            <p className="mt-2 text-sm font-bold leading-6 text-muted">
+            <p className="mt-1.5 text-xs font-bold leading-5 text-muted sm:mt-2 sm:text-sm sm:leading-6">
               {plan.recommendedFor}
             </p>
           </div>
-          <div className="rounded-[1.25rem] bg-white/[0.055] p-4 shadow-inner shadow-white/[0.02]">
+          <div className="rounded-xl bg-white/[0.055] p-3 shadow-inner shadow-white/[0.02] sm:rounded-[1.25rem] sm:p-4">
             <p className="text-xs font-black uppercase tracking-[0.18em] text-muted">
               Weekly focus
             </p>
-            <p className="mt-2 text-sm font-bold leading-6 text-muted">
+            <p className="mt-1.5 text-xs font-bold leading-5 text-muted sm:mt-2 sm:text-sm sm:leading-6">
               {plan.weeklyFocus}
             </p>
           </div>
         </div>
       </FitnessCard>
 
-      <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
+      <section className="grid grid-cols-2 gap-2 sm:gap-4 xl:grid-cols-5">
         <MetricCard
           label="Sessions"
           value={`${summary.sessions}`}

@@ -98,9 +98,9 @@ export function AvatarUploadCard({
   }
 
   return (
-    <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
-      <div className="flex items-center gap-4">
-        <div className="relative grid size-24 shrink-0 place-items-center overflow-hidden rounded-[1.75rem] border border-accent/30 bg-accent/10 shadow-[0_18px_60px_rgba(0,0,0,0.28)]">
+    <div className="flex flex-col gap-3 sm:gap-5 lg:flex-row lg:items-center lg:justify-between">
+      <div className="flex items-center gap-3 sm:gap-4">
+        <div className="relative grid size-16 shrink-0 place-items-center overflow-hidden rounded-2xl border border-accent/30 bg-accent/10 shadow-[0_18px_60px_rgba(0,0,0,0.28)] sm:size-24 sm:rounded-[1.75rem]">
           {avatarUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
@@ -109,11 +109,11 @@ export function AvatarUploadCard({
               className="size-full object-cover"
             />
           ) : (
-            <span className="font-display text-3xl font-black text-accent">
+            <span className="font-display text-xl font-black text-accent sm:text-3xl">
               {getInitials(fullName, email)}
             </span>
           )}
-          <span className="absolute bottom-2 right-2 grid size-8 place-items-center rounded-xl bg-accent text-stone-950">
+          <span className="absolute bottom-1 right-1 grid size-6 place-items-center rounded-lg bg-accent text-stone-950 sm:bottom-2 sm:right-2 sm:size-8 sm:rounded-xl">
             <Camera className="size-4" />
           </span>
         </div>
@@ -121,17 +121,17 @@ export function AvatarUploadCard({
           <p className="text-xs font-black uppercase tracking-[0.22em] text-accent">
             Profile photo
           </p>
-          <h2 className="mt-2 font-display text-2xl font-black">
+          <h2 className="mt-1 font-display text-lg font-black sm:mt-2 sm:text-2xl">
             {fullName || "Signed-in user"}
           </h2>
-          <p className="mt-1 break-all text-sm leading-6 text-muted">
+          <p className="mt-0.5 break-all text-xs leading-5 text-muted sm:mt-1 sm:text-sm sm:leading-6">
             Upload a square image for the cleanest fit. JPEG, PNG, or WebP up to
             2MB.
           </p>
         </div>
       </div>
 
-      <div className="grid gap-3 sm:min-w-64">
+      <div className="grid grid-cols-2 gap-2 sm:min-w-64 sm:grid-cols-1 sm:gap-3">
         <input
           ref={inputRef}
           type="file"
@@ -143,7 +143,7 @@ export function AvatarUploadCard({
           type="button"
           onClick={() => inputRef.current?.click()}
           disabled={isSaving}
-          className="inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl bg-accent px-5 py-3 text-sm font-black text-stone-950 transition hover:-translate-y-0.5 hover:bg-accent-strong disabled:cursor-not-allowed disabled:opacity-60"
+          className="inline-flex min-h-10 items-center justify-center gap-2 rounded-xl bg-accent px-3 py-2.5 text-sm font-black text-stone-950 transition hover:-translate-y-0.5 hover:bg-accent-strong disabled:cursor-not-allowed disabled:opacity-60 sm:min-h-12 sm:rounded-2xl sm:px-5 sm:py-3"
         >
           <Upload className="size-4" />
           {isSaving ? "Saving..." : "Upload avatar"}
