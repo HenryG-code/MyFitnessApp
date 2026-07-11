@@ -7,13 +7,19 @@ import { FitnessCard } from "@/components/ui/fitness-card";
 import { HeroPanel } from "@/components/ui/hero-panel";
 import {
   defaultTrainingGoal,
+  defaultTrainingLevel,
   getTrainingPlanByGoal,
 } from "@/src/lib/training-plans/data";
 import {
   loadTrainingGoalFromStorage,
+  loadTrainingLevelFromStorage,
   saveTrainingGoalToStorage,
+  saveTrainingLevelToStorage,
 } from "@/src/lib/training-plans/storage";
-import type { TrainingGoal } from "@/src/lib/training-plans/types";
+import type {
+  TrainingGoal,
+  TrainingLevel,
+} from "@/src/lib/training-plans/types";
 import {
   ensureUserPreferences,
   parseSelectedTrainingGoal,
@@ -27,15 +33,19 @@ import { useEffect, useState } from "react";
 export function TrainingPlanPage() {
   const [selectedGoal, setSelectedGoal] =
     useState<TrainingGoal>(defaultTrainingGoal);
+  const [selectedLevel, setSelectedLevel] =
+    useState<TrainingLevel>(defaultTrainingLevel);
   const [hasLoadedGoal, setHasLoadedGoal] = useState(false);
-  const selectedPlan = getTrainingPlanByGoal(selectedGoal);
+  const selectedPlan = getTrainingPlanByGoal(selectedGoal, selectedLevel);
 
   useEffect(() => {
     let isMounted = true;
 
     async function loadGoal() {
       const storedGoal = loadTrainingGoalFromStorage();
+      const storedLevel = loadTrainingLevelFromStorage();
       setSelectedGoal(storedGoal);
+      setSelectedLevel(storedLevel);
 
       try {
         const preferences = await ensureUserPreferences();
@@ -69,18 +79,19 @@ export function TrainingPlanPage() {
   useEffect(() => {
     if (hasLoadedGoal) {
       saveTrainingGoalToStorage(selectedGoal);
+      saveTrainingLevelToStorage(selectedLevel);
       updateSelectedTrainingGoal(selectedGoal).catch(() => {
         announcePreferenceSyncStatus("fallback", "Saved on this device.");
       });
     }
-  }, [hasLoadedGoal, selectedGoal]);
+  }, [hasLoadedGoal, selectedGoal, selectedLevel]);
 
   return (
     <div className="space-y-3 sm:space-y-5">
       <HeroPanel
         eyebrow="Suggested training plan"
         title="Suggested training plan"
-        description="Choose your goal and get a balanced weekly routine."
+        description="Choose your goal, experience level, and weekly schedule."
         imageSrc={fitnessImages.cardioRunner}
         imageAlt="Runner doing cardio training"
         variant="amber"
@@ -118,7 +129,12 @@ export function TrainingPlanPage() {
         </div>
       </FitnessCard>
 
-      <GoalSelector selectedGoal={selectedGoal} onChange={setSelectedGoal} />
+      <GoalSelector
+        selectedGoal={selectedGoal}
+        selectedLevel={selectedLevel}
+        onChange={setSelectedGoal}
+        onLevelChange={setSelectedLevel}
+      />
       <PlanOverview plan={selectedPlan} />
 
       <section className="grid gap-3 sm:gap-5 xl:grid-cols-2">

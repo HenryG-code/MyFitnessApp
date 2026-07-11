@@ -1,35 +1,54 @@
-# LiftLog
+# LogFit — Personal Performance OS
 
-LiftLog is a full-stack fitness tracker built with Next.js, Supabase, and
-Tailwind CSS. It helps users track workouts, weight, habits, meals, groceries,
-recipes, and suggested training plans in one clean dashboard.
+LogFit is a full-stack personal performance OS built with Next.js, Supabase, and
+Tailwind CSS. It turns everyday training, body progress, recovery, habits, and
+nutrition into one focused system that helps users stay consistent over the long
+term. A native mobile companion (Expo) syncs Apple Health and Android Health
+Connect data back into the same account.
 
 Live demo: https://fitness.weblytics.co.za
 
 Repository: https://github.com/HenryG-code/MyFitnessApp
 
+## Overview
+
+LogFit is organised into two areas:
+
+- **Perform** — the daily performance loop: a Command Centre dashboard, guided
+  Workout Mode, a body-intelligence muscle map, progress trends, and a weekly
+  report.
+- **Lifestyle** — supporting tools: weight tracking, flexible habits, recipes,
+  meal planning, grocery lists, and suggested training plans.
+
+All performance insights are deterministic calculations from the user's own
+activity. No AI, paid recipe/grocery APIs, payment SDKs, or scraping workflows
+are used, and guidance is framed as fitness support, not medical advice.
+
 ## Screenshots
 
 Portfolio screenshots are stored in `public/screenshots/`.
 
-| Dashboard | Workouts |
+| Command Centre | Workout Mode |
 | --- | --- |
-| ![LiftLog dashboard](public/screenshots/dashboard.png) | ![LiftLog workout tracker](public/screenshots/workouts.png) |
+| ![LogFit dashboard](public/screenshots/dashboard.png) | ![LogFit workout tracker](public/screenshots/workouts.png) |
 
 | Recipes | Meal Planner |
 | --- | --- |
-| ![LiftLog healthy recipes](public/screenshots/recipes.png) | ![LiftLog meal planner](public/screenshots/meal-planner.png) |
+| ![LogFit healthy recipes](public/screenshots/recipes.png) | ![LogFit meal planner](public/screenshots/meal-planner.png) |
 
 | Grocery List | Training Plan |
 | --- | --- |
-| ![LiftLog grocery list](public/screenshots/grocery-list.png) | ![LiftLog suggested training plan](public/screenshots/training-plan.png) |
+| ![LogFit grocery list](public/screenshots/grocery-list.png) | ![LogFit suggested training plan](public/screenshots/training-plan.png) |
 
 | Login | Register |
 | --- | --- |
-| ![LiftLog login screen](public/screenshots/login.png) | ![LiftLog register screen](public/screenshots/register.png) |
+| ![LogFit login screen](public/screenshots/login.png) | ![LogFit register screen](public/screenshots/register.png) |
 
 Additional screenshot placeholders to capture later:
 
+- `public/screenshots/body.png`
+- `public/screenshots/progress.png`
+- `public/screenshots/report.png`
 - `public/screenshots/weight.png`
 - `public/screenshots/habits.png`
 - `public/screenshots/settings.png`
@@ -43,101 +62,120 @@ Recommended capture flow:
    if desired.
 5. Save screenshots with consistent lowercase kebab-case filenames.
 
-Screenshot capture checklist:
+## Perform Screens
 
-- Use clean test data that looks realistic.
-- Hide sensitive email addresses and personal account details where necessary.
-- Capture `/dashboard`.
-- Capture `/weight`.
-- Capture `/habits`.
-- Capture `/workouts`.
-- Capture `/recipes`.
-- Capture `/meal-planner`.
-- Capture `/grocery-list`.
-- Capture `/training-plan`.
-- Capture `/settings`.
+- **Today (`/dashboard`)** — the Command Centre. A readiness ring, today's
+  mission, training streak, weekly load, weekly consistency, and nutrition
+  macros. When Connected Health data exists, the strip swaps in Steps and Sleep.
+- **Train (`/workouts`)** — workout history and manual logging, plus a live
+  guided **Workout Mode** at `/workouts/live` that records a per-set breakdown.
+- **Body (`/body`)** — Body Intelligence, an SVG muscle map that highlights
+  worked muscle groups from recent training.
+- **Progress (`/progress`)** — long-term journey trends across weight, training,
+  habits, and consistency.
+- **Report (`/report`)** — a deterministic weekly report summarising the week's
+  activity and momentum.
 
 ## Features
 
-- Supabase email/password authentication.
-- Protected dashboard and app routes.
-- Real dashboard data from user-scoped Supabase records.
-- Weekly consistency score based on habits, workouts, and weight check-ins.
-- Dashboard nutrition macros from planned meals.
-- Weekly report, deterministic motivation, and progress insights powered by
-  user activity.
-- Fitness journey overview across weight, training, habits, nutrition, and
-  planning.
-- Profile-backed goal weight shown in dashboard progress.
-- Weight Tracker CRUD with stats and charting.
-- Flexible Daily Habits tracking with default habits, custom user habits,
-  soft-hide, editing, and per-day completions.
-- Workout Tracker CRUD with workout exercises.
-- Healthy Recipes using static local TypeScript data.
-- Meal Planner with browser `localStorage` persistence.
+- Supabase email/password authentication with protected app routes.
+- Command Centre dashboard with readiness scoring, daily mission, training
+  streak, weekly load classification, consistency, and nutrition macros.
+- Guided live Workout Mode with per-set logging and a built-in rest timer.
+- Body Intelligence SVG muscle map driven by recent workout history.
+- Progress and weekly report screens powered entirely by user activity.
+- Weight Tracker CRUD with stats and charting, plus profile goal weight.
+- Flexible Daily Habits with default habits, custom user habits, soft-hide,
+  editing, and per-day completions.
+- Healthy Recipes using static local TypeScript data with filtering and detail
+  pages.
+- Meal Planner with Supabase-synced weekly state and `localStorage` fallback.
 - Grocery List generated from planned meals with persistent checked state.
-- Suggested Training Plans using static goal-based templates.
-- Settings page with real profile data, privacy notes, logout, and quick links.
-- Profile avatar uploads through Supabase Storage.
-- External PayPal support link with Yoco marked as coming soon.
-- Responsive desktop sidebar and mobile bottom navigation.
-- Dark, screenshot-ready visual theme designed for comfortable longer use.
-- Suggested Training Plan sessions can be logged directly into the workout log.
+- Suggested Training Plans using goal-based templates that can be logged
+  straight into the workout log.
+- Connected Health: import Apple Health / Android Health Connect metrics through
+  the native companion app; readiness prefers synced sleep and resting heart
+  rate with a manual-habit fallback.
+- Settings with real profile data, avatar uploads, privacy notes, logout, and
+  quick links.
+- Responsive desktop sidebar (Perform + Lifestyle groups) and a five-item mobile
+  bottom nav with a lifestyle menu sheet for secondary tools.
+- Dark, screenshot-ready `lf-*` design system built for comfortable longer use.
 - PWA install support from supported desktop and mobile browsers.
-- Opt-in notification preferences with a generic test notification.
-- Supabase-synced user preferences for training goal, reminders, meal plan, and
-  grocery checklist state.
-- Mobile dashboard tools grid for Recipes, Meal Planner, Grocery List,
-  Training Plan, Settings, and install guidance.
+- Opt-in notification preferences with web-push background reminders and a
+  generic test notification.
+- Supabase-synced user preferences for training goal, reminders, meal plan,
+  grocery checklist, and health goals.
 
 ## Tech Stack
 
 - Next.js App Router
 - TypeScript
-- Tailwind CSS
-- Supabase Auth
-- Supabase PostgreSQL
-- Supabase Row Level Security
+- Tailwind CSS with a custom `lf-*` utility design system
+- Archivo (display) + Inter (body) fonts via `next/font`
+- Supabase Auth, PostgreSQL, and Row Level Security
+- Supabase Storage (avatars)
 - Recharts
 - Lucide React
-- React Hook Form
-- Zod
-- Vercel
+- React Hook Form + Zod
+- web-push + Vercel Cron (notifications)
+- Expo / React Native mobile companion (`apps/mobile`)
+- Vercel hosting + Vercel Analytics
 
 ## Architecture Overview
 
-LiftLog uses the Next.js App Router for public auth routes and protected app
-routes. Shared UI lives in `components/`, while feature-specific query helpers,
-types, static data, and browser-storage utilities live under `src/lib/`.
+LogFit uses the Next.js App Router for public auth routes (`/login`,
+`/register`) and protected app routes. Shared UI lives in `components/`, while
+feature-specific query helpers, types, static data, and browser-storage
+utilities live under `src/lib/`.
 
-The app uses a browser Supabase client from `src/lib/supabase/client.ts`.
-Supabase-backed features fetch only the signed-in user's rows and rely on Row
-Level Security as the final protection layer.
+Deterministic performance logic lives in `src/lib/performance/` (readiness,
+mission, muscles, journey, history, report). These are pure calculations from
+workouts, flexible daily habits, weight logs, goal weight, and planned-meal
+nutrition macros — no AI or paid services.
 
-Dashboard insights are deterministic calculations from workouts, flexible daily
-habits, weight logs, goal weight, and planned-meal nutrition macros. They do
-not use AI or paid services.
+All data fetching is client-side via the browser Supabase client in
+`src/lib/supabase/client.ts`. Supabase-backed features fetch only the signed-in
+user's rows and rely on Row Level Security as the final protection layer.
 
-Recipes and training plan templates are static local TypeScript data in v1.
-Meal Planner, Grocery List checked state, selected training goal, and
-notification preferences sync through Supabase user preferences with
-`localStorage` retained as a fallback. Dashboard nutrition cards reuse the same
-meal plan and static recipe nutrition data. No AI APIs, paid recipe APIs,
-grocery APIs, payment SDKs, or scraping workflows are used.
+The design system uses `lf-*` utility classes in `app/globals.css`
+(`lf-panel`, `lf-inset`, `lf-eyebrow`, `lf-press`, `lf-rise`, `lf-num`) with an
+ember accent (`--accent`) and semantic readiness state tokens (`--ready`,
+`--caution`, `--strain`).
+
+Recipes and training-plan templates are static local TypeScript data. Meal
+Planner, Grocery List checked state, selected training goal, notification
+preferences, and health goals sync through Supabase user preferences, with
+`localStorage` retained as a fallback so the app stays usable when sync is
+unavailable.
+
+## Repository Layout
+
+```text
+app/                Next.js App Router routes (auth + protected app)
+components/         Shared and feature UI (dashboard, workout-mode, body, ...)
+src/lib/            Query helpers, performance logic, types, static data
+supabase/           schema.sql (core) + health-schema.sql (Connected Health)
+public/             Icons, screenshots, manifest, service worker
+apps/mobile/        Expo React Native companion for Connected Health
+```
+
+`apps/` is excluded from the web `tsconfig` and ESLint config; the mobile app
+has its own `package.json` and `tsconfig`.
 
 ## Database Overview
 
-The Supabase schema is stored in `supabase/schema.sql`.
+The core Supabase schema is stored in `supabase/schema.sql`.
 
 Core tables:
 
 - `profiles`
 - `weight_logs`
+- `workouts`
+- `workout_exercises`
 - `daily_habits`
 - `habit_definitions`
 - `habit_completions`
-- `workouts`
-- `workout_exercises`
 - `user_preferences`
 
 User-owned tables are scoped through Supabase Auth. RLS policies restrict rows
@@ -147,21 +185,20 @@ through their parent workout ownership.
 Profile avatars use Supabase Storage in a public `avatars` bucket. The profile
 row stores the public avatar URL in `profiles.avatar_url`.
 
-Daily habit definitions are created per user. Default habits are inserted the
-first time a user opens Habits, and custom habit completions are stored per
-habit per day. The older `daily_habits` table remains in the schema for
-compatibility while the new flexible habit system is the source of truth going
-forward.
+Live Workout Mode saves a per-set breakdown into `workout_exercises.notes`
+(for example `Sets: 60kg×8, 62.5kg×6`), the top weight in `weight`, and set
+count in `sets` — no schema change is required.
 
-Recipes and training plans are static local data in v1. Meal Planner and Grocery
-List use browser storage as a fallback.
+The older `daily_habits` table remains in the schema for compatibility, while
+the flexible habit tables (`habit_definitions` and `habit_completions`) are the
+source of truth going forward.
 
 ## Flexible Daily Habits
 
-The Habits page now supports user-created habits in addition to the default
-LiftLog routine. Each user gets default habit definitions on first visit, can
-add custom habits, edit custom habit names/descriptions, hide habits they do not
-want, and track completions per habit per day.
+The Habits page supports user-created habits in addition to the default LogFit
+routine. Each user gets default habit definitions on first visit, can add custom
+habits, edit custom habit names/descriptions, hide habits they do not want, and
+track completions per habit per day.
 
 New tables:
 
@@ -170,8 +207,7 @@ New tables:
 - `habit_completions`: one completion state per habit per date.
 
 Run the latest `supabase/schema.sql` in the Supabase SQL Editor if your live
-project does not have these tables yet. The schema keeps `daily_habits` for
-compatibility, but dashboard and habits now use the flexible habit tables.
+project does not have these tables yet.
 
 Core SQL added for this milestone:
 
@@ -215,7 +251,7 @@ alter table public.habit_completions enable row level security;
 
 ## User Preferences Sync
 
-LiftLog stores long-term preferences in the `user_preferences` table so key
+LogFit stores long-term preferences in the `user_preferences` table so key
 settings can follow the user across devices.
 
 Synced preferences include:
@@ -225,13 +261,14 @@ Synced preferences include:
 - Preferred reminder time.
 - Meal Planner weekly state.
 - Grocery List checked state.
+- Health goals (added with Connected Health).
 
 Local device storage is still retained as a fallback. If sync is unavailable,
 the app stays usable and saves preferences on the current device.
 
-Recipes and training plan templates remain static local app data. Weight logs,
-habits, workouts, profiles, avatars, goal weight, and user preferences are
-Supabase-backed.
+Recipes and training-plan templates remain static local app data. Weight logs,
+habits, workouts, profiles, avatars, goal weight, user preferences, and health
+metrics are Supabase-backed.
 
 Run this SQL in Supabase if your project does not have the preferences table
 yet:
@@ -283,13 +320,40 @@ create trigger set_user_preferences_updated_at
 notify pgrst, 'reload schema';
 ```
 
+## Connected Health
+
+Connected Health lets users import health data from Apple Health (iOS) and
+Android Health Connect through the native companion app in `apps/mobile`. The
+companion is an Expo React Native app that signs in with the same Supabase
+accounts and performs an idempotent 14-day sync keyed on
+`(user_id, metric_date, platform)`.
+
+- Native health access uses `react-native-health-connect` (Android) and
+  `@kingstinct/react-native-healthkit` (iOS) behind a provider abstraction.
+- The web layer (`src/lib/health/queries.ts`) **fails soft**: if the health
+  tables are missing it returns an empty summary, so the web app keeps working
+  without Connected Health.
+- Readiness prefers synced sleep and resting heart rate when available and falls
+  back to manual habit data otherwise.
+- The Command Centre strip swaps in Steps/Sleep cells when data exists, and
+  Settings includes a Connected Health card (`/settings#connected-health`).
+
+The Connected Health schema is isolated in `supabase/health-schema.sql`
+(additive and idempotent). Apply it in the Supabase SQL Editor. It adds:
+
+- `health_connections`: one row per user per platform, tracking status and last
+  sync.
+- `health_daily_metrics`: one row per user per day per platform (steps, sleep,
+  resting heart rate, active energy, distance, weight, exercise minutes).
+- A `health_goals` JSONB column on `user_preferences`.
+
 ## Supabase Setup
 
 1. Create a free Supabase project.
 2. Enable Email authentication in Authentication > Providers.
 3. Open the SQL Editor.
-4. Copy the contents of `supabase/schema.sql`.
-5. Run the SQL in Supabase.
+4. Copy the contents of `supabase/schema.sql` and run it.
+5. (Optional) Run `supabase/health-schema.sql` to enable Connected Health.
 6. Confirm RLS is enabled on the user-owned tables.
 7. Add the local and production auth URLs listed in the Deployment section.
 
@@ -395,9 +459,23 @@ npm run build
 
 Open http://localhost:3000 while developing.
 
+### Mobile companion (optional)
+
+The Connected Health companion lives in `apps/mobile` and is managed
+separately:
+
+```bash
+cd apps/mobile
+npm install
+npm run start
+```
+
+It uses the same Supabase project. Requires an Expo dev client and a physical
+device for real health-platform data.
+
 ## Deployment
 
-LiftLog is designed for Vercel Hobby hosting and Supabase Free.
+LogFit is designed for Vercel Hobby hosting and Supabase Free.
 
 Vercel steps:
 
@@ -422,22 +500,21 @@ Production URLs:
 - `https://fitness.weblytics.co.za/auth/callback`
 - `https://fitness.weblytics.co.za/dashboard`
 
-Payment note: the Settings support card uses external links only. LiftLog does
+Payment note: the Settings support card uses external links only. LogFit does
 not load PayPal or Yoco SDKs, process payments internally, collect card details,
 store payment information, or run payment webhooks.
 
 ## PWA Install Support
 
-LiftLog includes a web app manifest and install metadata so supported browsers
+LogFit includes a web app manifest and install metadata so supported browsers
 can install it without an app store. The Settings page includes an Install
-LiftLog card with an `Install app` button where the browser exposes the install
+LogFit card with an `Install app` button where the browser exposes the install
 prompt, plus manual instructions for browsers that do not.
 
 - Android: Chrome menu > Install app or Add to Home Screen.
 - iPhone: Safari > Share > Add to Home Screen.
 - Desktop: use the browser address bar install icon or browser menu.
 - Browser support varies, so manual instructions remain visible as a fallback.
-- Notification preferences are available in Settings.
 - The notification-only service worker does not cache private dashboard,
   workout, weight, habit, or meal data.
 - PWA icons live in `public/icons/` and can be replaced later with final brand
@@ -445,7 +522,7 @@ prompt, plus manual instructions for browsers that do not.
 
 ## Notifications
 
-LiftLog includes opt-in notification preferences in Settings. Users can request
+LogFit includes opt-in notification preferences in Settings. Users can request
 browser notification permission, choose reminder categories, set a preferred
 time, configure a two-to-fourteen-day training inactivity threshold, disable
 reminders, and send a test notification.
@@ -459,8 +536,7 @@ reminders, and send a test notification.
 - `vercel.json` runs the endpoint daily at 06:00 UTC, which is compatible with
   Vercel Hobby cron limits. The endpoint removes expired subscriptions and
   records delivery time to prevent duplicate daily reminders.
-- Browser and device support varies.
-- Users can disable reminders anytime from Settings.
+- Browser and device support varies, and users can disable reminders anytime.
 - Notification content is motivational and avoids private workout, weight,
   habit, or meal details.
 
@@ -485,33 +561,33 @@ fallbacks.
 Use this checklist before demos or deployments:
 
 1. Register and log in with a Supabase email/password user.
-2. Confirm `/dashboard` loads real user-scoped data, weekly consistency,
-   nutrition macros, weekly report, deterministic motivation, journey overview,
-   and empty states.
-3. Test `/weight` add, edit, delete, chart, and stats.
-4. Test `/habits` habit toggles and 7-day summary persistence.
-5. Test `/workouts` create, edit, delete, exercise rows, and detail page.
-6. Test `/recipes` filters and several `/recipes/[slug]` detail pages.
-7. Test `/meal-planner` selections, refresh persistence, clear slot, and clear
+2. Confirm `/dashboard` loads real user-scoped data: readiness, today's mission,
+   streak, weekly load, consistency, nutrition macros, and empty states.
+3. Test `/workouts` create/edit/delete and the live `/workouts/live` Workout
+   Mode with per-set logging and rest timer.
+4. Test `/body` muscle map reflects recent training.
+5. Test `/progress` trends and `/report` weekly summary.
+6. Test `/weight` add, edit, delete, chart, and stats.
+7. Test `/habits` toggles and 7-day summary persistence.
+8. Test `/recipes` filters and several `/recipes/[slug]` detail pages.
+9. Test `/meal-planner` selections, refresh persistence, clear slot, and clear
    week.
-8. Test `/grocery-list` generation, category grouping, checked persistence,
-   clear checked, and reset checked.
-9. Test `/training-plan` goal selection, refresh persistence, and Log workout
-   links.
-10. Test `/settings` profile data, avatar upload/remove, notification
-    preferences, inactivity threshold, test notification, share options,
-    PayPal support link, Yoco coming soon state, and logout.
-11. Log out and confirm protected pages redirect to `/login`.
+10. Test `/grocery-list` generation, category grouping, checked persistence,
+    clear checked, and reset checked.
+11. Test `/training-plan` goal selection, refresh persistence, and Log workout
+    links.
+12. Test `/settings` profile data, avatar upload/remove, notification
+    preferences, inactivity threshold, test notification, Connected Health card,
+    share options, PayPal support link, Yoco coming soon state, and logout.
+13. Log out and confirm protected pages redirect to `/login`.
 
 ## Future Improvements
 
 - Safe static asset service worker support.
 - Desktop app version with Tauri.
-- Supabase persistence for Meal Planner, Grocery List, and training
-  preferences.
 - Custom training plan builder.
 - More healthy recipes.
-- Mobile app version later.
+- Broader Connected Health metrics and richer body-intelligence insights.
 
 ## Author
 

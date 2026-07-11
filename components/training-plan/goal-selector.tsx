@@ -1,16 +1,43 @@
 "use client";
 
-import { trainingGoals } from "@/src/lib/training-plans/data";
-import type { TrainingGoal } from "@/src/lib/training-plans/types";
-import { Target } from "lucide-react";
+import {
+  trainingGoals,
+  trainingLevels,
+} from "@/src/lib/training-plans/data";
+import type {
+  TrainingGoal,
+  TrainingLevel,
+} from "@/src/lib/training-plans/types";
+import { CalendarDays, Target } from "lucide-react";
 import { FitnessCard } from "@/components/ui/fitness-card";
 
 type GoalSelectorProps = {
   selectedGoal: TrainingGoal;
+  selectedLevel: TrainingLevel;
   onChange: (goal: TrainingGoal) => void;
+  onLevelChange: (level: TrainingLevel) => void;
 };
 
-export function GoalSelector({ selectedGoal, onChange }: GoalSelectorProps) {
+const levelDetails: Record<
+  TrainingLevel,
+  { schedule: string; description: string }
+> = {
+  Beginner: {
+    schedule: "4 days / week",
+    description: "Build consistency with more recovery between sessions.",
+  },
+  Intermediate: {
+    schedule: "5 days / week",
+    description: "Increase training frequency with focused daily sessions.",
+  },
+};
+
+export function GoalSelector({
+  selectedGoal,
+  selectedLevel,
+  onChange,
+  onLevelChange,
+}: GoalSelectorProps) {
   return (
     <FitnessCard className="!p-3 sm:!p-5">
       <div className="mb-3 flex items-center gap-2.5 sm:mb-5 sm:gap-3">
@@ -19,12 +46,55 @@ export function GoalSelector({ selectedGoal, onChange }: GoalSelectorProps) {
         </span>
         <div>
           <p className="text-xs font-black uppercase tracking-[0.22em] text-accent">
-            Goal selector
+            Plan builder
           </p>
           <h2 className="font-display text-lg font-black sm:text-2xl">
-            Choose your training focus
+            Choose your goal and schedule
           </h2>
         </div>
+      </div>
+
+      <div className="grid grid-cols-2 gap-2 sm:gap-3">
+        {trainingLevels.map((level) => {
+          const active = level === selectedLevel;
+          const detail = levelDetails[level];
+
+          return (
+            <button
+              key={level}
+              type="button"
+              onClick={() => onLevelChange(level)}
+              aria-pressed={active}
+              className={`rounded-xl border p-3 text-left outline-none transition focus-visible:ring-4 focus-visible:ring-accent/35 sm:rounded-2xl sm:p-4 ${
+                active
+                  ? "border-accent bg-accent text-white shadow-lg shadow-accent/20"
+                  : "border-line/80 bg-white/75 text-foreground hover:border-accent"
+              }`}
+            >
+              <span className="flex items-center gap-2">
+                <CalendarDays className="size-4" />
+                <span className="font-display text-sm font-black sm:text-lg">
+                  {level}
+                </span>
+              </span>
+              <span className={`mt-2 block text-xs font-black ${active ? "text-red-50/90" : "text-accent-strong"}`}>
+                {detail.schedule}
+              </span>
+              <span className={`mt-1 hidden text-sm leading-6 sm:block ${active ? "text-red-50/90" : "text-muted"}`}>
+                {detail.description}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+
+      <div className="mt-4 flex items-center justify-between gap-3 sm:mt-5">
+        <p className="text-xs font-black uppercase tracking-[0.18em] text-muted">
+          Training goal
+        </p>
+        <p className="text-xs font-bold text-muted">
+          {levelDetails[selectedLevel].schedule}
+        </p>
       </div>
 
       <div className="grid grid-cols-3 gap-2 sm:grid-cols-2 sm:gap-3 xl:grid-cols-3">
@@ -48,7 +118,7 @@ export function GoalSelector({ selectedGoal, onChange }: GoalSelectorProps) {
                   active ? "text-red-50/90" : "text-muted"
                 }`}
               >
-                Beginner/intermediate, 4 days, gym/mixed.
+                {selectedLevel} · {levelDetails[selectedLevel].schedule}
               </span>
             </button>
           );

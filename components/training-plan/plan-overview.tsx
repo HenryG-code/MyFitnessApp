@@ -27,7 +27,7 @@ export function PlanOverview({ plan }: PlanOverviewProps) {
           </div>
           <span className="inline-flex w-fit items-center gap-2 rounded-full border border-accent/25 bg-accent/10 px-3 py-1.5 text-xs font-black text-soft-yellow sm:py-2 sm:text-sm">
             <ShieldCheck className="size-4" />
-            General guidance
+            {plan.level} · {plan.days.length} days/week
           </span>
         </div>
 

@@ -6,6 +6,8 @@ export type TrainingGoal =
   | "Improve cardio"
   | "General health";
 
+export type TrainingLevel = "Beginner" | "Intermediate";
+
 export type SessionType =
   | "Strength"
   | "Cardio"
@@ -38,6 +40,7 @@ export type TrainingSession = {
 export type TrainingPlan = {
   slug: string;
   goal: TrainingGoal;
+  level: TrainingLevel;
   title: string;
   description: string;
   recommendedFor: string;
