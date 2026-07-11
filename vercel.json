@@ -1,0 +1,8 @@
+{
+  "crons": [
+    {
+      "path": "/api/notifications/inactivity",
+      "schedule": "0 6 * * *"
+    }
+  ]
+}

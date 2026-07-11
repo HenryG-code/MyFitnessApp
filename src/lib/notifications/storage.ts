@@ -5,6 +5,8 @@ import {
 
 export const notificationPreferencesStorageKey =
   "liftlog-notification-preferences-v1";
+export const lastInactivityNotificationStorageKey =
+  "liftlog-last-inactivity-notification-v1";
 
 function hasBrowserStorage() {
   return typeof window !== "undefined" && typeof window.localStorage !== "undefined";
@@ -28,6 +30,14 @@ function getPreferredTime(value: unknown) {
     : defaultNotificationPreferences.preferredTime;
 }
 
+function getInactivityDays(value: unknown) {
+  if (typeof value !== "number" || !Number.isFinite(value)) {
+    return defaultNotificationPreferences.inactivityDays;
+  }
+
+  return Math.min(30, Math.max(2, Math.round(value)));
+}
+
 export function normalizeNotificationPreferences(
   value: unknown
 ): NotificationPreferences {
@@ -44,6 +54,11 @@ export function normalizeNotificationPreferences(
       value.workoutReminders,
       defaultNotificationPreferences.workoutReminders
     ),
+    inactivityReminders: getBooleanValue(
+      value.inactivityReminders,
+      defaultNotificationPreferences.inactivityReminders
+    ),
+    inactivityDays: getInactivityDays(value.inactivityDays),
     habitReminders: getBooleanValue(
       value.habitReminders,
       defaultNotificationPreferences.habitReminders
@@ -100,10 +115,27 @@ export function getDisabledNotificationPreferences(
     ...preferences,
     enabled: false,
     workoutReminders: false,
+    inactivityReminders: false,
     habitReminders: false,
     weeklyCheckIn: false,
     mealPlanning: false,
   };
+}
+
+export function loadLastInactivityNotificationDate() {
+  if (!hasBrowserStorage()) {
+    return null;
+  }
+
+  return window.localStorage.getItem(lastInactivityNotificationStorageKey);
+}
+
+export function saveLastInactivityNotificationDate(date: string) {
+  if (!hasBrowserStorage()) {
+    return;
+  }
+
+  window.localStorage.setItem(lastInactivityNotificationStorageKey, date);
 }
 
 export function resetNotificationPreferences() {

@@ -7,6 +7,8 @@ export type NotificationPermissionStatus =
 export type NotificationPreferences = {
   enabled: boolean;
   workoutReminders: boolean;
+  inactivityReminders: boolean;
+  inactivityDays: number;
   habitReminders: boolean;
   weeklyCheckIn: boolean;
   mealPlanning: boolean;
@@ -15,6 +17,7 @@ export type NotificationPreferences = {
 
 export type NotificationPreferenceKey =
   | "workoutReminders"
+  | "inactivityReminders"
   | "habitReminders"
   | "weeklyCheckIn"
   | "mealPlanning";
@@ -22,6 +25,8 @@ export type NotificationPreferenceKey =
 export const defaultNotificationPreferences: NotificationPreferences = {
   enabled: false,
   workoutReminders: false,
+  inactivityReminders: false,
+  inactivityDays: 5,
   habitReminders: false,
   weeklyCheckIn: false,
   mealPlanning: false,

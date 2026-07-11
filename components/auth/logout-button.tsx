@@ -4,6 +4,7 @@ import {
   createBrowserSupabaseClient,
   hasSupabaseEnv,
 } from "@/src/lib/supabase/client";
+import { removePushSubscription } from "@/src/lib/notifications/push";
 import { LogOut } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -27,6 +28,7 @@ export function LogoutButton({
 
     try {
       if (hasSupabaseEnv) {
+        await removePushSubscription().catch(() => undefined);
         const supabase = createBrowserSupabaseClient();
         const { error: signOutError } = await supabase.auth.signOut();
 

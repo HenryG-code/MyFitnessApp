@@ -16,6 +16,7 @@ const categoryKeywords: Record<GroceryCategory, string[]> = {
     "biltong",
     "edamame",
     "chickpea",
+    "lamb",
   ],
   Vegetables: [
     "lettuce",
@@ -34,6 +35,9 @@ const categoryKeywords: Record<GroceryCategory, string[]> = {
     "pak choi",
     "cabbage",
     "spring onion",
+    "red pepper",
+    "bell pepper",
+    "sugar snap peas",
   ],
   Fruit: ["banana", "apple", "berries", "lime", "lemon"],
   Carbs: [
@@ -51,6 +55,8 @@ const categoryKeywords: Record<GroceryCategory, string[]> = {
     "soba",
     "granola",
     "rice cake",
+    "naan",
+    "roti",
   ],
   Dairy: [
     "greek yogurt",
@@ -71,6 +77,8 @@ const categoryKeywords: Record<GroceryCategory, string[]> = {
     "mayonnaise",
     "dressing",
     "sesame seeds",
+    "passata",
+    "coconut milk",
   ],
   "Fats & Oils": [
     "avocado",
@@ -80,6 +88,7 @@ const categoryKeywords: Record<GroceryCategory, string[]> = {
     "cooking oil",
     "almonds",
     "chilli crisp",
+    "ground almonds",
   ],
   Spices: [
     "cinnamon",
