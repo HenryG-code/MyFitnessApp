@@ -11,6 +11,11 @@ import {
   saveNotificationPreferences,
 } from "@/src/lib/notifications/storage";
 import {
+  ensurePushSubscription,
+  removePushSubscription,
+  type PushSetupResult,
+} from "@/src/lib/notifications/push";
+import {
   type NotificationPreferenceKey,
   type NotificationPermissionStatus,
   type NotificationPreferences,
@@ -35,6 +40,12 @@ const reminderOptions: Array<{
     description: "Gentle nudges to keep training on your radar.",
   },
   {
+    key: "inactivityReminders",
+    label: "Comeback motivation",
+    description:
+      "A private motivational nudge when you have not trained for your chosen number of days.",
+  },
+  {
     key: "habitReminders",
     label: "Daily habit reminders",
     description: "A simple check-in for today's healthy habits.",
@@ -50,6 +61,8 @@ const reminderOptions: Array<{
     description: "A prompt to plan meals before the week gets busy.",
   },
 ];
+
+const inactivityDayOptions = [2, 3, 5, 7, 10, 14];
 
 const permissionLabels: Record<NotificationPermissionStatus, string> = {
   "not-requested": "Not requested",
@@ -71,6 +84,22 @@ function getStatusMessage(
   }
 
   return preferences.enabled ? "Reminders are on." : "Reminders are off.";
+}
+
+function getPushSetupMessage(result: PushSetupResult) {
+  if (result === "subscribed") {
+    return "Notifications are enabled on this device, including background delivery.";
+  }
+
+  if (result === "unconfigured") {
+    return "Browser notifications are enabled. Add the web-push environment keys for background delivery.";
+  }
+
+  if (result === "unsupported") {
+    return "Browser notifications are enabled while LogFit is open; this device does not support background push.";
+  }
+
+  return "Allow notifications before enabling background delivery.";
 }
 
 export function NotificationPreferencesCard() {
@@ -130,7 +159,16 @@ export function NotificationPreferencesCard() {
 
       if (nextPermissionStatus === "granted") {
         persistPreferences({ ...preferences, enabled: true });
-        setMessage("Notifications are enabled. Choose your reminder types below.");
+        try {
+          const pushResult = await ensurePushSubscription();
+          setMessage(getPushSetupMessage(pushResult));
+        } catch (pushError) {
+          setMessage(
+            pushError instanceof Error
+              ? `${pushError.message} Notifications will still work while LogFit is open.`
+              : "Background delivery could not be enabled. Notifications will still work while LogFit is open."
+          );
+        }
       } else if (nextPermissionStatus === "denied") {
         persistPreferences(getDisabledNotificationPreferences(preferences));
         setMessage("Notifications are blocked in your browser settings.");
@@ -145,13 +183,14 @@ export function NotificationPreferencesCard() {
     }
   }
 
-  function handleDisableReminders() {
+  async function handleDisableReminders() {
     persistPreferences(getDisabledNotificationPreferences(preferences));
+    await removePushSubscription().catch(() => undefined);
     setPermissionStatus(getNotificationPermissionStatus());
     setMessage("Reminders are off.");
   }
 
-  function handleTogglePreference(
+  async function handleTogglePreference(
     key: NotificationPreferenceKey,
     checked: boolean
   ) {
@@ -160,7 +199,24 @@ export function NotificationPreferencesCard() {
       return;
     }
 
-    persistPreferences({ ...preferences, [key]: checked });
+    const nextPreferences = { ...preferences, [key]: checked };
+    persistPreferences(nextPreferences);
+
+    if (key === "inactivityReminders" && checked) {
+      try {
+        const pushResult = await ensurePushSubscription();
+        setMessage(getPushSetupMessage(pushResult));
+        return;
+      } catch (pushError) {
+        setMessage(
+          pushError instanceof Error
+            ? `${pushError.message} In-app reminders will still work.`
+            : "Background delivery could not be enabled. In-app reminders will still work."
+        );
+        return;
+      }
+    }
+
     setMessage("Notification preferences saved.");
   }
 
@@ -169,8 +225,16 @@ export function NotificationPreferencesCard() {
     setMessage("Preferred reminder time saved.");
   }
 
-  function handleSendTestNotification() {
-    const didSend = sendTestNotification();
+  function handleInactivityDaysChange(value: string) {
+    persistPreferences({
+      ...preferences,
+      inactivityDays: Number(value) || 5,
+    });
+    setMessage("Comeback reminder timing saved.");
+  }
+
+  async function handleSendTestNotification() {
+    const didSend = await sendTestNotification();
     setPermissionStatus(getNotificationPermissionStatus());
     setMessage(
       didSend
@@ -223,7 +287,7 @@ export function NotificationPreferencesCard() {
         </button>
         <button
           type="button"
-          onClick={handleDisableReminders}
+          onClick={() => void handleDisableReminders()}
           className="inline-flex items-center justify-center gap-2 rounded-xl border border-line bg-white/75 px-3 py-2.5 text-xs font-black transition hover:-translate-y-0.5 hover:border-accent sm:rounded-2xl sm:px-4 sm:py-3 sm:text-sm"
         >
           <BellOff className="size-4" />
@@ -231,7 +295,7 @@ export function NotificationPreferencesCard() {
         </button>
         <button
           type="button"
-          onClick={handleSendTestNotification}
+          onClick={() => void handleSendTestNotification()}
           disabled={!canSendTest}
           className="col-span-2 inline-flex items-center justify-center gap-2 rounded-xl border border-line bg-white/75 px-3 py-2.5 text-xs font-black transition hover:-translate-y-0.5 hover:border-accent disabled:cursor-not-allowed disabled:opacity-55 disabled:hover:translate-y-0 sm:col-span-1 sm:rounded-2xl sm:px-4 sm:py-3 sm:text-sm"
         >
@@ -240,6 +304,7 @@ export function NotificationPreferencesCard() {
         </button>
       </div>
 
+      <div className="grid gap-2 sm:gap-3 md:grid-cols-2">
       <div className="rounded-xl border border-line bg-surface/80 p-3 sm:rounded-[1.25rem] sm:p-4">
         <label
           htmlFor="preferredTime"
@@ -260,6 +325,33 @@ export function NotificationPreferencesCard() {
           className="mt-3 min-h-10 w-full rounded-xl border border-line bg-[#080807] px-3 py-2 text-sm font-black text-foreground outline-none transition focus:border-accent focus:ring-4 focus:ring-accent/20 disabled:cursor-not-allowed disabled:bg-white/10 disabled:text-muted disabled:opacity-70 sm:mt-4 sm:min-h-12 sm:max-w-xs sm:rounded-2xl sm:px-4 sm:py-3 sm:text-base"
         />
       </div>
+      <div className="rounded-xl border border-line bg-surface/80 p-3 sm:rounded-[1.25rem] sm:p-4">
+        <label
+          htmlFor="inactivityDays"
+          className="flex items-center gap-2 text-sm font-black"
+        >
+          <BellOff className="size-4 text-accent" />
+          Remind me after
+        </label>
+        <p className="mt-2 text-sm leading-6 text-muted">
+          Wait this many days after the latest logged workout before sending a
+          comeback message.
+        </p>
+        <select
+          id="inactivityDays"
+          value={preferences.inactivityDays}
+          disabled={!canUseReminders || !preferences.inactivityReminders}
+          onChange={(event) => handleInactivityDaysChange(event.target.value)}
+          className="mt-3 min-h-10 w-full rounded-xl border border-line bg-[#080807] px-3 py-2 text-sm font-black text-foreground outline-none transition focus:border-accent focus:ring-4 focus:ring-accent/20 disabled:cursor-not-allowed disabled:bg-white/10 disabled:text-muted disabled:opacity-70 sm:mt-4 sm:min-h-12 sm:rounded-2xl sm:px-4 sm:py-3 sm:text-base"
+        >
+          {inactivityDayOptions.map((days) => (
+            <option key={days} value={days}>
+              {days} days without training
+            </option>
+          ))}
+        </select>
+      </div>
+      </div>
 
       <div className="grid gap-2 sm:gap-3 md:grid-cols-2">
         {reminderOptions.map((option) => (
@@ -276,7 +368,7 @@ export function NotificationPreferencesCard() {
               checked={preferences[option.key]}
               disabled={!canUseReminders}
               onChange={(event) =>
-                handleTogglePreference(option.key, event.target.checked)
+                void handleTogglePreference(option.key, event.target.checked)
               }
               className="mt-1 size-5 rounded border-line text-accent focus:ring-accent disabled:cursor-not-allowed disabled:opacity-50"
             />

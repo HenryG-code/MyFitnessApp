@@ -6,6 +6,7 @@ import { AvatarUploadCard } from "@/components/settings/avatar-upload-card";
 import { ConnectedHealthCard } from "@/components/settings/connected-health-card";
 import { NotificationPreferencesCard } from "@/components/settings/notification-preferences-card";
 import { PreferenceSyncStatusCard } from "@/components/settings/preference-sync-status-card";
+import { ShareAppCard } from "@/components/settings/share-app-card";
 import { FitnessCard, SectionHeader } from "@/components/ui/fitness-card";
 import {
   fetchAuthenticatedProfile,
@@ -281,6 +282,10 @@ export function SettingsPanel() {
             );
           })}
         </div>
+      </FitnessCard>
+
+      <FitnessCard className="!p-3 sm:!p-5">
+        <ShareAppCard />
       </FitnessCard>
 
       <FitnessCard className="!p-3 sm:!p-5">

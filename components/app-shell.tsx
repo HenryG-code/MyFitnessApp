@@ -1,6 +1,7 @@
 "use client";
 
 import { LogoutButton } from "@/components/auth/logout-button";
+import { NotificationCoordinator } from "@/components/notifications/notification-coordinator";
 import { BackToTopButton } from "@/components/ui/back-to-top-button";
 import { getUserDisplayName } from "@/src/lib/auth/user";
 import { createBrowserSupabaseClient } from "@/src/lib/supabase/client";
@@ -169,6 +170,7 @@ export function AppShell({
 
   return (
     <div className="min-h-screen text-foreground">
+      <NotificationCoordinator />
       <aside className="fixed inset-y-0 left-0 z-30 hidden w-64 flex-col border-r border-line bg-surface/80 px-4 py-5 backdrop-blur-xl lg:flex">
         <Link href="/dashboard" className="flex items-center gap-3 px-2">
           <span className="grid size-10 place-items-center rounded-xl bg-accent text-white shadow-[0_6px_20px_rgba(240,71,46,0.35)]">

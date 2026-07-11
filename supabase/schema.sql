@@ -111,6 +111,19 @@ create table if not exists public.user_preferences (
   updated_at timestamptz not null default now()
 );
 
+create table if not exists public.push_subscriptions (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users(id) on delete cascade,
+  endpoint text not null unique,
+  p256dh text not null,
+  auth text not null,
+  timezone text not null default 'UTC',
+  user_agent text,
+  last_inactivity_notification_at timestamptz,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
 create index if not exists profiles_email_idx
   on public.profiles (email);
 
@@ -135,6 +148,9 @@ create index if not exists habit_completions_user_date_idx
 create index if not exists habit_completions_habit_date_idx
   on public.habit_completions (habit_id, completed_date);
 
+create index if not exists push_subscriptions_user_id_idx
+  on public.push_subscriptions (user_id);
+
 alter table public.profiles enable row level security;
 alter table public.weight_logs enable row level security;
 alter table public.workouts enable row level security;
@@ -143,6 +159,7 @@ alter table public.daily_habits enable row level security;
 alter table public.habit_definitions enable row level security;
 alter table public.habit_completions enable row level security;
 alter table public.user_preferences enable row level security;
+alter table public.push_subscriptions enable row level security;
 
 drop policy if exists "Users can view their own profile" on public.profiles;
 drop policy if exists "Users can insert their own profile" on public.profiles;
@@ -176,6 +193,10 @@ drop policy if exists "Users can view their own preferences" on public.user_pref
 drop policy if exists "Users can insert their own preferences" on public.user_preferences;
 drop policy if exists "Users can update their own preferences" on public.user_preferences;
 drop policy if exists "Users can delete their own preferences" on public.user_preferences;
+drop policy if exists "Users can view their own push subscriptions" on public.push_subscriptions;
+drop policy if exists "Users can insert their own push subscriptions" on public.push_subscriptions;
+drop policy if exists "Users can update their own push subscriptions" on public.push_subscriptions;
+drop policy if exists "Users can delete their own push subscriptions" on public.push_subscriptions;
 
 create policy "Users can view their own profile"
   on public.profiles for select
@@ -356,6 +377,27 @@ create policy "Users can delete their own preferences"
   on public.user_preferences for delete
   using (auth.uid() = user_id);
 
+create policy "Users can view their own push subscriptions"
+  on public.push_subscriptions for select
+  to authenticated
+  using (auth.uid() = user_id);
+
+create policy "Users can insert their own push subscriptions"
+  on public.push_subscriptions for insert
+  to authenticated
+  with check (auth.uid() = user_id);
+
+create policy "Users can update their own push subscriptions"
+  on public.push_subscriptions for update
+  to authenticated
+  using (auth.uid() = user_id)
+  with check (auth.uid() = user_id);
+
+create policy "Users can delete their own push subscriptions"
+  on public.push_subscriptions for delete
+  to authenticated
+  using (auth.uid() = user_id);
+
 drop trigger if exists set_profiles_updated_at on public.profiles;
 create trigger set_profiles_updated_at
   before update on public.profiles
@@ -384,6 +426,11 @@ create trigger set_habit_completions_updated_at
 drop trigger if exists set_user_preferences_updated_at on public.user_preferences;
 create trigger set_user_preferences_updated_at
   before update on public.user_preferences
+  for each row execute function public.set_updated_at();
+
+drop trigger if exists set_push_subscriptions_updated_at on public.push_subscriptions;
+create trigger set_push_subscriptions_updated_at
+  before update on public.push_subscriptions
   for each row execute function public.set_updated_at();
 
 create or replace function public.handle_new_user()

@@ -99,6 +99,19 @@ export type UserPreferences = {
   updated_at: string;
 };
 
+export type PushSubscription = {
+  id: string;
+  user_id: string;
+  endpoint: string;
+  p256dh: string;
+  auth: string;
+  timezone: string;
+  user_agent: string | null;
+  last_inactivity_notification_at: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
 export type HealthPlatform = "apple_health" | "health_connect";
 
 export type HealthConnection = {
@@ -259,6 +272,23 @@ export type UserPreferencesInsert = {
   updated_at?: string;
 };
 
+export type PushSubscriptionInsert = {
+  id?: string;
+  user_id: string;
+  endpoint: string;
+  p256dh: string;
+  auth: string;
+  timezone?: string;
+  user_agent?: string | null;
+  last_inactivity_notification_at?: string | null;
+  created_at?: string;
+  updated_at?: string;
+};
+
+export type PushSubscriptionUpdate = Partial<
+  Omit<PushSubscription, "id" | "user_id" | "created_at">
+>;
+
 export type HealthConnectionInsert = {
   id?: string;
   user_id: string;
@@ -408,6 +438,19 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "user_preferences_user_id_fkey";
+            columns: ["user_id"];
+            referencedRelation: "users";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      push_subscriptions: {
+        Row: PushSubscription;
+        Insert: PushSubscriptionInsert;
+        Update: PushSubscriptionUpdate;
+        Relationships: [
+          {
+            foreignKeyName: "push_subscriptions_user_id_fkey";
             columns: ["user_id"];
             referencedRelation: "users";
             referencedColumns: ["id"];

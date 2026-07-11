@@ -363,6 +363,11 @@ Create `.env.local` locally and add:
 ```bash
 NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_ANON_KEY=
+SUPABASE_SERVICE_ROLE_KEY=
+NEXT_PUBLIC_WEB_PUSH_PUBLIC_KEY=
+WEB_PUSH_PRIVATE_KEY=
+WEB_PUSH_CONTACT=mailto:you@example.com
+CRON_SECRET=
 ```
 
 Use `.env.local` for local development, never commit it, and add the same
@@ -397,8 +402,9 @@ LiftLog is designed for Vercel Hobby hosting and Supabase Free.
 Vercel steps:
 
 1. Connect the GitHub repository to Vercel.
-2. Add `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` in Vercel
-   Project Settings > Environment Variables.
+2. Add the variables from `.env.example` in Vercel Project Settings >
+   Environment Variables. Keep the service-role key, private VAPID key, and
+   cron secret server-only.
 3. Deploy from the main branch.
 4. Add the custom domain `https://fitness.weblytics.co.za`.
 
@@ -432,8 +438,8 @@ prompt, plus manual instructions for browsers that do not.
 - Desktop: use the browser address bar install icon or browser menu.
 - Browser support varies, so manual instructions remain visible as a fallback.
 - Notification preferences are available in Settings.
-- Service worker caching is intentionally skipped for now to avoid stale private
-  dashboard, workout, weight, or habit data.
+- The notification-only service worker does not cache private dashboard,
+  workout, weight, habit, or meal data.
 - PWA icons live in `public/icons/` and can be replaced later with final brand
   assets if needed.
 
@@ -441,14 +447,38 @@ prompt, plus manual instructions for browsers that do not.
 
 LiftLog includes opt-in notification preferences in Settings. Users can request
 browser notification permission, choose reminder categories, set a preferred
-time, disable reminders, and send a generic test notification.
+time, configure a two-to-fourteen-day training inactivity threshold, disable
+reminders, and send a test notification.
 
-- Preferences are stored on the device in v1.
+- Preferences are stored on the device and synced to the signed-in account.
+- While LogFit is open, a private coordinator checks for inactivity at the
+  preferred reminder time and sends at most one comeback message per day.
+- Background delivery uses `public/notification-sw.js`, VAPID web-push keys,
+  the `push_subscriptions` table in `supabase/schema.sql`, and the protected
+  `/api/notifications/inactivity` endpoint.
+- `vercel.json` runs the endpoint daily at 06:00 UTC, which is compatible with
+  Vercel Hobby cron limits. The endpoint removes expired subscriptions and
+  records delivery time to prevent duplicate daily reminders.
 - Browser and device support varies.
 - Users can disable reminders anytime from Settings.
-- Notification content avoids private workout, weight, habit, or meal details.
-- This milestone supports permission handling and test notifications.
-- Full background push reminders are future work.
+- Notification content is motivational and avoids private workout, weight,
+  habit, or meal details.
+
+Generate VAPID keys once for a deployment:
+
+```bash
+npx web-push generate-vapid-keys
+```
+
+Apply `supabase/schema.sql`, add the public and private VAPID keys to the
+matching environment variables, set a random `CRON_SECRET` of at least 16
+characters, and redeploy.
+
+## Sharing
+
+Settings includes a Share LogFit card. It uses the device-native share sheet
+when available and provides direct WhatsApp, Telegram, SMS, email, and copy-link
+fallbacks.
 
 ## Manual QA Checklist
 
@@ -469,13 +499,13 @@ Use this checklist before demos or deployments:
 9. Test `/training-plan` goal selection, refresh persistence, and Log workout
    links.
 10. Test `/settings` profile data, avatar upload/remove, notification
-    preferences, PayPal support link, Yoco coming soon state, and logout.
+    preferences, inactivity threshold, test notification, share options,
+    PayPal support link, Yoco coming soon state, and logout.
 11. Log out and confirm protected pages redirect to `/login`.
 
 ## Future Improvements
 
 - Safe static asset service worker support.
-- Background push reminders.
 - Desktop app version with Tauri.
 - Supabase persistence for Meal Planner, Grocery List, and training
   preferences.
