@@ -243,7 +243,7 @@ type StepperName =
   | `exercises.${number}.reps`
   | `exercises.${number}.weight`;
 
-/** Registered numeric input flanked by −/+ tap targets. */
+/** Compact registered numeric input with tap-friendly adjustment controls. */
 function StepperField({
   label,
   name,
@@ -273,16 +273,16 @@ function StepperField({
   }
 
   return (
-    <div>
-      <p className="text-[0.65rem] font-black uppercase tracking-[0.14em] text-muted">
+    <div className="min-w-0 rounded-xl border border-line bg-black/10 p-1.5">
+      <p className="text-center text-[0.6rem] font-black uppercase tracking-[0.12em] text-muted sm:text-[0.65rem]">
         {label}
       </p>
-      <div className="mt-1.5 flex items-center gap-1">
+      <div className="mt-1 grid grid-cols-[1.75rem_minmax(0,1fr)_1.75rem] items-center gap-0.5 sm:grid-cols-[2rem_minmax(0,1fr)_2rem]">
         <button
           type="button"
           aria-label={`Decrease ${label}`}
           onClick={() => adjust(-1)}
-          className="lf-press grid size-10 shrink-0 place-items-center rounded-lg border border-line bg-white/[0.04] text-muted transition hover:text-foreground"
+          className="lf-press grid size-7 place-items-center rounded-lg text-muted transition hover:bg-white/[0.06] hover:text-foreground sm:size-8"
         >
           <Minus className="size-3.5" />
         </button>
@@ -290,14 +290,14 @@ function StepperField({
           inputMode="decimal"
           aria-label={label}
           placeholder="—"
-          className="lf-num min-h-10 w-full min-w-0 rounded-lg border border-line bg-surface/80 px-1 text-center text-sm font-black outline-none transition focus:border-accent"
+          className="lf-num min-h-9 w-full min-w-0 rounded-lg border border-line bg-surface/80 px-0.5 text-center text-base font-black outline-none transition focus:border-accent sm:text-sm"
           {...register(name)}
         />
         <button
           type="button"
           aria-label={`Increase ${label}`}
           onClick={() => adjust(1)}
-          className="lf-press grid size-10 shrink-0 place-items-center rounded-lg border border-line bg-white/[0.04] text-muted transition hover:text-foreground"
+          className="lf-press grid size-7 place-items-center rounded-lg text-muted transition hover:bg-white/[0.06] hover:text-foreground sm:size-8"
         >
           <Plus className="size-3.5" />
         </button>
@@ -328,7 +328,7 @@ export function WorkoutForm({ mode = "create", workout }: WorkoutFormProps) {
     control,
     name: "exercises",
   });
-  const watchedExercises = useWatch({ control, name: "exercises" });
+  const [showWorkoutNotes, setShowWorkoutNotes] = useState(Boolean(workout?.notes));
   // Rows with pre-existing distance/duration/notes start expanded.
   const [expandedRows, setExpandedRows] = useState<Set<number>>(() => {
     const expanded = new Set<number>();
@@ -353,7 +353,9 @@ export function WorkoutForm({ mode = "create", workout }: WorkoutFormProps) {
   }
 
   function addExercise() {
-    append(getEmptyExercise());
+    append(getEmptyExercise(), {
+      focusName: `exercises.${fields.length}.exercise_name`,
+    });
   }
 
   function applyTitleSuggestion(title: string) {
@@ -362,24 +364,6 @@ export function WorkoutForm({ mode = "create", workout }: WorkoutFormProps) {
     if (!currentTitle || window.confirm(`Replace "${currentTitle}" with "${title}"?`)) {
       setValue("title", title, { shouldDirty: true, shouldValidate: true });
     }
-  }
-
-  function getExerciseSummary(index: number) {
-    const exercise = watchedExercises[index];
-
-    if (!exercise?.exercise_name?.trim()) {
-      return "Add exercise details";
-    }
-
-    const summaryParts = [
-      exercise.sets && exercise.reps
-        ? `${exercise.sets} x ${exercise.reps}`
-        : null,
-      exercise.weight ? `${exercise.weight} kg` : null,
-      exercise.duration_minutes ? `${exercise.duration_minutes} min` : null,
-    ].filter(Boolean);
-
-    return summaryParts.length ? summaryParts.join(" - ") : "Optional details";
   }
 
   async function onSubmit(values: WorkoutFormValues) {
@@ -412,16 +396,16 @@ export function WorkoutForm({ mode = "create", workout }: WorkoutFormProps) {
 
   return (
     <form
-      className="space-y-4 pb-28 sm:space-y-5 sm:pb-0"
+      className="space-y-3 pb-24 sm:space-y-5 sm:pb-0"
       onSubmit={handleSubmit(onSubmit)}
     >
       <div>
-        <label className="text-sm font-black" htmlFor="title">
+        <label className="text-xs font-black sm:text-sm" htmlFor="title">
           Workout name
         </label>
         <input
           id="title"
-          className="mt-2 min-h-12 w-full rounded-2xl border border-line bg-surface/80 px-4 py-3 text-base outline-none transition focus:border-accent focus:ring-4 focus:ring-accent/20"
+          className="mt-1.5 min-h-11 w-full rounded-xl border border-line bg-surface/80 px-3 py-2.5 text-base font-semibold outline-none transition focus:border-accent focus:ring-4 focus:ring-accent/20 sm:mt-2 sm:min-h-12 sm:rounded-2xl sm:px-4 sm:py-3"
           placeholder="Upper body strength"
           {...register("title")}
         />
@@ -430,13 +414,13 @@ export function WorkoutForm({ mode = "create", workout }: WorkoutFormProps) {
             {errors.title.message}
           </p>
         ) : null}
-        <div className="mt-3 flex gap-2 overflow-x-auto pb-1">
+        <div className="mt-2 flex gap-1.5 overflow-x-auto pb-1 sm:mt-3 sm:gap-2">
           {workoutTitleSuggestions.map((title) => (
             <button
               key={title}
               type="button"
               onClick={() => applyTitleSuggestion(title)}
-              className="shrink-0 rounded-full border border-line bg-white/65 px-3 py-2 text-xs font-black text-muted transition hover:border-accent hover:text-foreground focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-accent/25"
+              className="shrink-0 rounded-full border border-line bg-white/65 px-2.5 py-1.5 text-[0.7rem] font-black text-muted transition hover:border-accent hover:text-foreground focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-accent/25 sm:px-3 sm:py-2 sm:text-xs"
             >
               {title}
             </button>
@@ -444,15 +428,15 @@ export function WorkoutForm({ mode = "create", workout }: WorkoutFormProps) {
         </div>
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-2">
+      <div className="grid grid-cols-[minmax(0,1.35fr)_minmax(0,0.65fr)] gap-2 sm:grid-cols-2 sm:gap-3">
         <div>
-          <label className="text-sm font-black" htmlFor="workout_date">
-            Workout date
+          <label className="text-xs font-black sm:text-sm" htmlFor="workout_date">
+            Date
           </label>
           <input
             id="workout_date"
             type="date"
-            className="mt-2 min-h-12 w-full rounded-2xl border border-line bg-surface/80 px-4 py-3 outline-none transition focus:border-accent focus:ring-4 focus:ring-accent/20"
+            className="mt-1.5 min-h-11 w-full min-w-0 rounded-xl border border-line bg-surface/80 px-2.5 py-2 text-base outline-none transition focus:border-accent focus:ring-4 focus:ring-accent/20 sm:mt-2 sm:min-h-12 sm:rounded-2xl sm:px-4 sm:py-3"
             {...register("workout_date")}
           />
           {errors.workout_date ? (
@@ -463,15 +447,15 @@ export function WorkoutForm({ mode = "create", workout }: WorkoutFormProps) {
         </div>
 
         <div>
-          <label className="text-sm font-black" htmlFor="duration_minutes">
-            Duration, minutes
+          <label className="text-xs font-black sm:text-sm" htmlFor="duration_minutes">
+            Minutes
           </label>
           <input
             id="duration_minutes"
             type="number"
             min="1"
             step="1"
-            className="mt-2 min-h-12 w-full rounded-2xl border border-line bg-surface/80 px-4 py-3 outline-none transition focus:border-accent focus:ring-4 focus:ring-accent/20"
+            className="mt-1.5 min-h-11 w-full min-w-0 rounded-xl border border-line bg-surface/80 px-2.5 py-2 text-base outline-none transition focus:border-accent focus:ring-4 focus:ring-accent/20 sm:mt-2 sm:min-h-12 sm:rounded-2xl sm:px-4 sm:py-3"
             placeholder="45"
             {...register("duration_minutes")}
           />
@@ -483,32 +467,45 @@ export function WorkoutForm({ mode = "create", workout }: WorkoutFormProps) {
         </div>
       </div>
 
-      <div>
-        <label className="text-sm font-black" htmlFor="notes">
-          Notes
-        </label>
-        <textarea
-          id="notes"
-          rows={3}
-          className="mt-2 w-full rounded-2xl border border-line bg-surface/80 px-4 py-3 outline-none transition focus:border-accent focus:ring-4 focus:ring-accent/20"
-          placeholder="How did the session feel?"
-          {...register("notes")}
-        />
-        {errors.notes ? (
-          <p className="mt-2 text-sm font-medium text-red-700">
-            {errors.notes.message}
-          </p>
+      <div className="rounded-xl border border-line bg-black/10 px-3 py-2.5">
+        <button
+          type="button"
+          onClick={() => setShowWorkoutNotes((current) => !current)}
+          aria-expanded={showWorkoutNotes}
+          className="lf-press flex w-full items-center gap-3 text-left text-xs font-black sm:text-sm"
+        >
+          Workout notes
+          <span className="font-medium text-muted">Optional</span>
+          <ChevronDown
+            className={`ml-auto size-4 text-muted transition-transform ${showWorkoutNotes ? "rotate-180" : ""}`}
+          />
+        </button>
+        {showWorkoutNotes ? (
+          <div className="lf-fade pt-2.5">
+            <textarea
+              id="notes"
+              rows={2}
+              className="w-full rounded-xl border border-line bg-surface/80 px-3 py-2.5 text-base outline-none transition focus:border-accent focus:ring-4 focus:ring-accent/20 sm:text-sm"
+              placeholder="How did the session feel?"
+              {...register("notes")}
+            />
+            {errors.notes ? (
+              <p className="mt-1.5 text-xs font-medium text-red-700">
+                {errors.notes.message}
+              </p>
+            ) : null}
+          </div>
         ) : null}
       </div>
 
-      <div className="rounded-[1.5rem] border border-line bg-white/45 p-3 sm:p-4">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <div className="rounded-2xl border border-line bg-white/45 p-2.5 sm:rounded-[1.5rem] sm:p-4">
+        <div className="flex items-center justify-between gap-3">
           <div>
-            <p className="text-xs font-black uppercase tracking-[0.24em] text-accent">
+            <p className="text-[0.7rem] font-black uppercase tracking-[0.2em] text-accent sm:text-xs sm:tracking-[0.24em]">
               Exercises
             </p>
-            <p className="mt-1 text-sm leading-6 text-muted">
-              Add each exercise you completed. Empty rows will be skipped.
+            <p className="mt-0.5 text-xs text-muted sm:mt-1 sm:text-sm sm:leading-6">
+              {fields.length} {fields.length === 1 ? "exercise" : "exercises"} added
             </p>
           </div>
           <button
@@ -521,50 +518,45 @@ export function WorkoutForm({ mode = "create", workout }: WorkoutFormProps) {
           </button>
         </div>
 
-        <div className="mt-4 divide-y divide-line rounded-[1.35rem] border border-line bg-card/70">
+        <div className="mt-2.5 divide-y divide-line overflow-hidden rounded-2xl border border-line bg-card/70 sm:mt-4 sm:rounded-[1.35rem]">
           {fields.map((field, index) => (
             <div
               key={field.id}
-              className="liftlog-slide-in relative p-4 transition hover:bg-white/[0.035] sm:p-5"
+              className="liftlog-slide-in relative p-3 transition hover:bg-white/[0.035] sm:p-5"
             >
-              <div className="absolute inset-y-4 left-0 w-1 rounded-r-full bg-accent/80" />
-              <div className="flex items-start justify-between gap-3">
-                <div className="min-w-0 pl-2">
-                  <p className="font-display text-lg font-black">
-                    Exercise {index + 1}
-                  </p>
-                  <p className="mt-1 truncate text-xs font-bold text-muted">
-                    {getExerciseSummary(index)}
-                  </p>
+              <div className="absolute inset-y-3 left-0 w-1 rounded-r-full bg-accent/80 sm:inset-y-4" />
+              <div className="flex items-start gap-2 pl-1">
+                <span className="lf-num grid size-9 shrink-0 place-items-center rounded-xl bg-accent/15 text-xs font-black text-accent-strong">
+                  {String(index + 1).padStart(2, "0")}
+                </span>
+                <div className="min-w-0 flex-1">
+                  <input
+                    aria-label={`Exercise ${index + 1} name`}
+                    className="min-h-9 w-full rounded-xl border border-line bg-surface/80 px-3 py-2 text-base font-semibold outline-none transition focus:border-accent sm:text-sm"
+                    placeholder="Exercise name"
+                    {...register(`exercises.${index}.exercise_name`)}
+                  />
+                  {errors.exercises?.[index]?.exercise_name ? (
+                    <p className="mt-1 text-xs font-medium text-strain">
+                      {errors.exercises[index]?.exercise_name?.message}
+                    </p>
+                  ) : null}
                 </div>
                 {fields.length > 1 ? (
                   <button
                     type="button"
                     onClick={() => remove(index)}
-                    className="inline-flex min-h-10 shrink-0 items-center gap-2 rounded-2xl bg-red-50 px-3 py-2 text-xs font-black text-red-700"
+                    aria-label={`Remove exercise ${index + 1}`}
+                    className="lf-press grid size-9 shrink-0 place-items-center rounded-xl bg-red-50 text-red-700 sm:inline-flex sm:w-auto sm:gap-2 sm:px-3"
                   >
                     <Trash2 className="size-4" />
-                    Remove
+                    <span className="hidden text-xs font-black sm:inline">Remove</span>
                   </button>
                 ) : null}
               </div>
 
-              <div className="mt-3 space-y-3">
-                <div>
-                  <input
-                    aria-label={`Exercise ${index + 1} name`}
-                    className="min-h-11 w-full rounded-xl border border-line bg-surface/80 px-3 py-2.5 text-sm font-semibold outline-none transition focus:border-accent"
-                    placeholder="Exercise name, e.g. Bench press"
-                    {...register(`exercises.${index}.exercise_name`)}
-                  />
-                  {errors.exercises?.[index]?.exercise_name ? (
-                    <p className="mt-1.5 text-xs font-medium text-strain">
-                      {errors.exercises[index]?.exercise_name?.message}
-                    </p>
-                  ) : null}
-                </div>
-
-                <div className="grid grid-cols-3 gap-2">
+              <div className="mt-2.5 space-y-2.5 pl-1 sm:mt-3 sm:space-y-3">
+                <div className="grid grid-cols-3 gap-1.5 sm:gap-2">
                   <StepperField
                     label="Sets"
                     name={`exercises.${index}.sets`}
@@ -600,7 +592,8 @@ export function WorkoutForm({ mode = "create", workout }: WorkoutFormProps) {
                   aria-expanded={expandedRows.has(index)}
                   className="lf-press flex items-center gap-1 py-1 text-xs font-bold text-ink-dim transition hover:text-foreground"
                 >
-                  Distance, duration & notes
+                  <span className="sm:hidden">More details</span>
+                  <span className="hidden sm:inline">Distance, duration & notes</span>
                   <ChevronDown
                     className={`size-3.5 transition-transform ${expandedRows.has(index) ? "rotate-180" : ""}`}
                   />
@@ -614,7 +607,7 @@ export function WorkoutForm({ mode = "create", workout }: WorkoutFormProps) {
                       </label>
                       <input
                         inputMode="decimal"
-                        className="lf-num mt-1.5 min-h-10 w-full rounded-lg border border-line bg-surface/80 px-3 text-sm outline-none transition focus:border-accent"
+                        className="lf-num mt-1.5 min-h-10 w-full rounded-lg border border-line bg-surface/80 px-3 text-base outline-none transition focus:border-accent sm:text-sm"
                         {...register(`exercises.${index}.distance_km`)}
                       />
                       {errors.exercises?.[index]?.distance_km ? (
@@ -629,7 +622,7 @@ export function WorkoutForm({ mode = "create", workout }: WorkoutFormProps) {
                       </label>
                       <input
                         inputMode="numeric"
-                        className="lf-num mt-1.5 min-h-10 w-full rounded-lg border border-line bg-surface/80 px-3 text-sm outline-none transition focus:border-accent"
+                        className="lf-num mt-1.5 min-h-10 w-full rounded-lg border border-line bg-surface/80 px-3 text-base outline-none transition focus:border-accent sm:text-sm"
                         {...register(`exercises.${index}.duration_minutes`)}
                       />
                       {errors.exercises?.[index]?.duration_minutes ? (
@@ -644,7 +637,7 @@ export function WorkoutForm({ mode = "create", workout }: WorkoutFormProps) {
                       </label>
                       <textarea
                         rows={2}
-                        className="mt-1.5 w-full rounded-lg border border-line bg-surface/80 px-3 py-2 text-sm outline-none transition focus:border-accent"
+                        className="mt-1.5 w-full rounded-lg border border-line bg-surface/80 px-3 py-2 text-base outline-none transition focus:border-accent sm:text-sm"
                         placeholder="Optional cues or set details."
                         {...register(`exercises.${index}.notes`)}
                       />
@@ -690,22 +683,22 @@ export function WorkoutForm({ mode = "create", workout }: WorkoutFormProps) {
         </button>
       </div>
 
-      <div className="fixed inset-x-3 bottom-[5.75rem] z-30 rounded-[1.35rem] border border-line bg-card/95 p-2 shadow-[0_18px_60px_rgba(0,0,0,0.48)] backdrop-blur sm:hidden">
+      <div className="fixed inset-x-3 bottom-[5.75rem] z-30 rounded-2xl border border-line bg-card/95 p-1.5 shadow-[0_18px_60px_rgba(0,0,0,0.48)] backdrop-blur sm:hidden">
         <div className="grid grid-cols-[1fr_auto] gap-2">
           <button
             type="submit"
             disabled={isSubmitting}
-            className="min-h-12 rounded-2xl bg-accent px-4 py-3 text-sm font-black text-stone-950 shadow-lg shadow-accent/20 transition disabled:cursor-not-allowed disabled:opacity-70"
+            className="min-h-11 rounded-xl bg-accent px-4 py-2.5 text-sm font-black text-stone-950 shadow-lg shadow-accent/20 transition disabled:cursor-not-allowed disabled:opacity-70"
           >
-          {isSubmitting ? "Saving..." : "Save workout"}
+            {isSubmitting ? "Saving..." : "Save workout"}
           </button>
           <button
             type="button"
             onClick={addExercise}
-            className="inline-flex min-h-12 items-center gap-2 rounded-2xl border border-line bg-white/65 px-4 py-3 text-sm font-black"
+            className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-line bg-white/65 px-3 py-2.5 text-sm font-black"
           >
             <Plus className="size-4" />
-            Add exercise
+            Add
           </button>
         </div>
       </div>
