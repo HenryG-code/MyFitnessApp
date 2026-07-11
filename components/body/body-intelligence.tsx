@@ -1,5 +1,6 @@
 "use client";
 
+import { ExerciseSuggestions } from "@/components/body/exercise-suggestions";
 import {
   analyzeBodyIntelligence,
   fetchDatedExercises,
@@ -625,6 +626,14 @@ export function BodyIntelligencePage() {
           )}
         </section>
       </div>
+
+      {selectedStatus ? (
+        <ExerciseSuggestions
+          key={selectedStatus.id}
+          muscleId={selectedStatus.id}
+          muscleName={selectedStatus.name}
+        />
+      ) : null}
     </div>
   );
 }
