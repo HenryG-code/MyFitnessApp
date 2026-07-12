@@ -88,35 +88,35 @@ export function RestTimer() {
 
   return (
     <section
-      className={`rounded-[1.5rem] border border-accent/25 bg-gradient-to-br from-accent/10 via-white/[0.04] to-sun/10 p-4 shadow-[0_18px_60px_rgba(0,0,0,0.25)] transition ${
+      className={`rounded-[1.25rem] border border-accent/25 bg-gradient-to-br from-accent/10 via-white/[0.04] to-sun/10 p-3 shadow-[0_18px_60px_rgba(0,0,0,0.25)] transition sm:rounded-[1.5rem] sm:p-4 ${
         message ? "liftlog-complete-pulse" : isRunning ? "liftlog-timer-running" : ""
       }`}
     >
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
+      <div className="grid grid-cols-[1fr_auto] items-center gap-3 sm:flex sm:items-center sm:justify-between">
+        <div className="min-w-0">
           <div className="flex items-center gap-3">
-            <span className="grid size-11 place-items-center rounded-2xl bg-accent text-stone-950">
+            <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-accent text-white sm:size-11 sm:rounded-2xl">
               <Timer className="size-5" />
             </span>
             <div>
-              <p className="text-xs font-black uppercase tracking-[0.22em] text-accent">
+              <p className="text-[0.6rem] font-black uppercase tracking-[0.18em] text-accent sm:text-xs sm:tracking-[0.22em]">
                 Workout tools
               </p>
-              <h2 className="font-display text-2xl font-black">Rest timer</h2>
+              <h2 className="font-display text-lg font-black sm:text-2xl">Rest timer</h2>
             </div>
           </div>
-          <p className="mt-3 text-sm leading-6 text-muted">
+          <p className="mt-3 hidden text-sm leading-6 text-muted sm:block">
             Use this between sets to keep your workout moving.
           </p>
         </div>
-        <div className="text-left sm:text-right">
+        <div className="text-right">
           <p
             key={remaining}
-            className="liftlog-number-change font-display text-5xl font-black tracking-tight text-foreground"
+            className="liftlog-number-change lf-num font-display text-4xl font-black tracking-tight text-foreground sm:text-5xl"
           >
             {formatTime(remaining)}
           </p>
-          <p className="mt-1 text-xs font-black uppercase tracking-[0.18em] text-muted">
+          <p className="text-[0.6rem] font-black uppercase tracking-[0.18em] text-muted sm:mt-1 sm:text-xs">
             {isRunning ? "Resting" : "Ready"}
           </p>
         </div>
@@ -129,13 +129,13 @@ export function RestTimer() {
         />
       </div>
 
-      <div className="mt-4 flex flex-wrap gap-2">
+      <div className="mt-3 grid grid-cols-4 gap-1.5 sm:mt-4 sm:flex sm:flex-wrap sm:gap-2">
         {presets.map((seconds) => (
           <button
             key={seconds}
             type="button"
             onClick={() => selectPreset(seconds)}
-            className={`rounded-full border px-3 py-2 text-xs font-black transition hover:-translate-y-0.5 ${
+            className={`min-h-9 rounded-lg border px-2 py-1.5 text-xs font-black transition hover:-translate-y-0.5 sm:rounded-full sm:px-3 sm:py-2 ${
               duration === seconds
                 ? "border-accent bg-accent text-stone-950"
                 : "border-line bg-white/65 text-muted hover:border-accent hover:text-foreground"
@@ -146,14 +146,14 @@ export function RestTimer() {
         ))}
       </div>
 
-      <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
+      <div className="mt-2 grid grid-cols-3 gap-1.5 sm:mt-4 sm:grid-cols-4 sm:gap-2">
         <button
           type="button"
           onClick={() => {
             setIsRunning((current) => !current);
             setMessage("");
           }}
-          className="inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl bg-accent px-4 py-2 text-sm font-black text-stone-950 transition hover:-translate-y-0.5"
+          className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-xl bg-accent px-2 py-2 text-xs font-black text-white transition hover:-translate-y-0.5 sm:gap-2 sm:rounded-2xl sm:px-4 sm:text-sm"
         >
           {isRunning ? <Pause className="size-4" /> : <Play className="size-4" />}
           {isRunning ? "Pause" : "Start"}
@@ -161,7 +161,7 @@ export function RestTimer() {
         <button
           type="button"
           onClick={resetTimer}
-          className="inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl border border-line bg-white/65 px-4 py-2 text-sm font-black transition hover:border-accent"
+          className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-xl border border-line bg-white/65 px-2 py-2 text-xs font-black transition hover:border-accent sm:gap-2 sm:rounded-2xl sm:px-4 sm:text-sm"
         >
           <RotateCcw className="size-4" />
           Reset
@@ -169,12 +169,12 @@ export function RestTimer() {
         <button
           type="button"
           onClick={() => addTime(15)}
-          className="inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl border border-line bg-white/65 px-4 py-2 text-sm font-black transition hover:border-accent"
+          className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-xl border border-line bg-white/65 px-2 py-2 text-xs font-black transition hover:border-accent sm:gap-2 sm:rounded-2xl sm:px-4 sm:text-sm"
         >
           <TimerReset className="size-4" />
           +15 sec
         </button>
-        <label className="flex min-h-11 items-center gap-2 rounded-2xl border border-line bg-white/65 px-3 py-2 text-sm font-black">
+        <label className="col-span-3 flex min-h-11 items-center gap-2 rounded-xl border border-line bg-white/65 px-3 py-2 text-xs font-black sm:col-span-1 sm:rounded-2xl sm:text-sm">
           Custom
           <input
             type="number"
