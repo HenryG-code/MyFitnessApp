@@ -32,12 +32,12 @@ export function HabitCompletionChart({
   );
 
   if (!mounted) {
-    return <div className="h-64 w-full rounded-[1.5rem] bg-surface" />;
+    return <div className="h-56 w-full min-w-0 max-w-full rounded-[1.5rem] bg-surface sm:h-64" />;
   }
 
   return (
-    <div className="h-64 w-full">
-      <ResponsiveContainer width="100%" height="100%">
+    <div className="h-56 w-full min-w-0 max-w-full overflow-hidden sm:h-64">
+      <ResponsiveContainer width="100%" height="100%" minWidth={0}>
         <BarChart data={data} margin={{ top: 8, right: 8, left: -18, bottom: 0 }}>
           <CartesianGrid stroke="#2a2a33" strokeDasharray="4 6" vertical={false} />
           <XAxis

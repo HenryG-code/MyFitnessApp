@@ -308,8 +308,8 @@ export function HabitsTracker() {
   }
 
   return (
-    <div className="space-y-3 sm:space-y-5">
-      <section className="lf-panel p-3 sm:hidden">
+    <div className="min-w-0 max-w-full space-y-3 overflow-x-clip sm:space-y-5">
+      <section className="lf-panel min-w-0 p-3 sm:hidden">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
             <p className="lf-eyebrow">Habits</p>
@@ -373,7 +373,7 @@ export function HabitsTracker() {
         </p>
       ) : null}
 
-      <section className="lf-panel p-3 sm:hidden" aria-label="Today's habit progress">
+      <section className="lf-panel min-w-0 p-3 sm:hidden" aria-label="Today's habit progress">
         <div className="flex items-end justify-between gap-3">
           <div>
             <p className="lf-eyebrow">Today&apos;s progress</p>
@@ -381,7 +381,7 @@ export function HabitsTracker() {
               {todaySummary.percentage}%
             </p>
           </div>
-          <p className="pb-1 text-xs font-bold text-muted">
+          <p className="min-w-0 pb-1 text-right text-xs font-bold text-muted">
             {todaySummary.completed} done · {Math.max(todaySummary.total - todaySummary.completed, 0)} left
           </p>
         </div>
@@ -433,7 +433,7 @@ export function HabitsTracker() {
       </section>
 
       {isFormOpen ? (
-        <FitnessCard className="border-accent/25">
+        <FitnessCard className="min-w-0 border-accent/25">
           <div className="flex items-start justify-between gap-3">
             <SectionHeader
               eyebrow={editingHabit ? "Edit habit" : "Add habit"}
@@ -459,7 +459,7 @@ export function HabitsTracker() {
                     name: event.target.value,
                   }))
                 }
-                className="mt-2 min-h-12 w-full rounded-2xl border border-line bg-surface/80 px-4 py-3 outline-none transition focus:border-accent focus:ring-4 focus:ring-accent/20"
+                className="mt-2 min-h-12 w-full min-w-0 rounded-2xl border border-line bg-surface/80 px-4 py-3 outline-none transition focus:border-accent focus:ring-4 focus:ring-accent/20"
                 placeholder="Stretch for 10 minutes"
                 maxLength={60}
               />
@@ -474,7 +474,7 @@ export function HabitsTracker() {
                     description: event.target.value,
                   }))
                 }
-                className="mt-2 min-h-12 w-full rounded-2xl border border-line bg-surface/80 px-4 py-3 outline-none transition focus:border-accent focus:ring-4 focus:ring-accent/20"
+                className="mt-2 min-h-12 w-full min-w-0 rounded-2xl border border-line bg-surface/80 px-4 py-3 outline-none transition focus:border-accent focus:ring-4 focus:ring-accent/20"
                 placeholder="Small cue or reason"
                 maxLength={160}
               />
@@ -491,15 +491,15 @@ export function HabitsTracker() {
         </FitnessCard>
       ) : null}
 
-      <section className="grid gap-3 sm:gap-5 xl:grid-cols-[1.35fr_0.9fr]">
-        <FitnessCard className="!p-3 sm:!p-5">
+      <section className="grid min-w-0 gap-3 sm:gap-5 xl:grid-cols-[minmax(0,1.35fr)_minmax(0,0.9fr)]">
+        <FitnessCard className="min-w-0 overflow-hidden !p-3 sm:!p-5">
           <SectionHeader eyebrow="Today's habits" title={formatDate(today)} />
           {isLoading ? (
             <div className="rounded-[1.5rem] bg-stone-100 p-6 text-sm font-black text-muted">
               Loading today&apos;s habits...
             </div>
           ) : activeDefinitions.length ? (
-            <div className="space-y-2">
+            <div className="min-w-0 space-y-2">
               {activeDefinitions.map((habit, habitIndex) => {
                 const isComplete = completedHabitIds.has(habit.id);
                 const isSaving = savingHabitId === habit.id;
@@ -507,7 +507,7 @@ export function HabitsTracker() {
                 return (
                   <div
                     key={habit.id}
-                    className={`rounded-xl p-2.5 shadow-inner shadow-white/[0.02] transition sm:p-3 ${
+                    className={`min-w-0 overflow-hidden rounded-xl p-2.5 shadow-inner shadow-white/[0.02] transition sm:p-3 ${
                       isComplete
                         ? "liftlog-complete-pulse border border-accent/35 bg-accent/15"
                         : "bg-white/[0.055]"
@@ -570,13 +570,13 @@ export function HabitsTracker() {
                     {managingHabitId === habit.id ? (
                       <div
                         id={`habit-actions-${habit.id}`}
-                        className="mt-2 grid grid-cols-2 gap-1.5 border-t border-line pt-2 sm:grid-cols-5"
+                        className="mt-2 grid min-w-0 grid-cols-2 gap-1.5 border-t border-line pt-2 sm:grid-cols-5"
                       >
                         <button
                           type="button"
                           onClick={() => void handleMoveHabit(habit, "up")}
                           disabled={isSaving || habitIndex === 0}
-                          className="lf-press inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-white/[0.04] px-2 text-xs font-black text-muted disabled:opacity-25"
+                          className="lf-press inline-flex min-h-11 min-w-0 items-center justify-center gap-1 rounded-xl bg-white/[0.04] px-1.5 text-xs font-black text-muted disabled:opacity-25"
                         >
                           <ChevronUp className="size-4" />
                           Move up
@@ -585,7 +585,7 @@ export function HabitsTracker() {
                           type="button"
                           onClick={() => void handleMoveHabit(habit, "down")}
                           disabled={isSaving || habitIndex === activeDefinitions.length - 1}
-                          className="lf-press inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-white/[0.04] px-2 text-xs font-black text-muted disabled:opacity-25"
+                          className="lf-press inline-flex min-h-11 min-w-0 items-center justify-center gap-1 rounded-xl bg-white/[0.04] px-1.5 text-xs font-black text-muted disabled:opacity-25"
                         >
                           <ChevronDown className="size-4" />
                           Move down
@@ -594,7 +594,7 @@ export function HabitsTracker() {
                           <button
                             type="button"
                             onClick={() => openEditForm(habit)}
-                            className="lf-press inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-white/[0.04] px-2 text-xs font-black text-muted"
+                            className="lf-press inline-flex min-h-11 min-w-0 items-center justify-center gap-1 rounded-xl bg-white/[0.04] px-1.5 text-xs font-black text-muted"
                           >
                             <Pencil className="size-4" />
                             Edit
@@ -604,7 +604,7 @@ export function HabitsTracker() {
                           type="button"
                           onClick={() => void handleHideHabit(habit)}
                           disabled={isSaving}
-                          className="lf-press inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-white/[0.04] px-2 text-xs font-black text-muted disabled:opacity-50"
+                          className="lf-press inline-flex min-h-11 min-w-0 items-center justify-center gap-1 rounded-xl bg-white/[0.04] px-1.5 text-xs font-black text-muted disabled:opacity-50"
                         >
                           <EyeOff className="size-4" />
                           Hide
@@ -613,7 +613,7 @@ export function HabitsTracker() {
                           type="button"
                           onClick={() => void handleDeleteHabit(habit)}
                           disabled={isSaving}
-                          className="lf-press inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-strain/25 bg-strain/10 px-2 text-xs font-black text-strain disabled:opacity-50"
+                          className="lf-press inline-flex min-h-11 min-w-0 items-center justify-center gap-1 rounded-xl border border-strain/25 bg-strain/10 px-1.5 text-xs font-black text-strain disabled:opacity-50"
                         >
                           <Trash2 className="size-4" />
                           Delete
@@ -643,7 +643,7 @@ export function HabitsTracker() {
           )}
         </FitnessCard>
 
-        <FitnessCard>
+        <FitnessCard className="min-w-0 overflow-hidden">
           <SectionHeader eyebrow="7-day summary" title="Habit completion trend" />
           {isLoading ? (
             <div className="grid h-64 place-items-center rounded-[1.5rem] bg-stone-100 text-sm font-black text-muted">
@@ -656,10 +656,10 @@ export function HabitsTracker() {
             {weeklySummary.map((day) => (
               <div
                 key={day.date}
-                className="flex items-center justify-between rounded-2xl bg-white/60 px-4 py-3 text-sm"
+                className="flex min-w-0 items-center justify-between gap-2 rounded-2xl bg-white/60 px-3 py-3 text-sm sm:px-4"
               >
-                <span className="font-black">{day.displayDate}</span>
-                <span className="font-bold text-muted">
+                <span className="min-w-0 font-black">{day.displayDate}</span>
+                <span className="min-w-0 text-right text-xs font-bold text-muted sm:text-sm">
                   {day.total
                     ? `${day.percentage}% - ${day.completed}/${day.total}`
                     : "No active habits"}
