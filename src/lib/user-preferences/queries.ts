@@ -6,6 +6,7 @@ import {
   type NotificationPreferences,
 } from "@/src/lib/notifications/types";
 import { createBrowserSupabaseClient } from "@/src/lib/supabase/client";
+import { getPreferenceSaveError } from "@/src/lib/user-preferences/errors";
 import type {
   Json,
   UserPreferences,
@@ -116,8 +117,9 @@ export async function updateUserPreferences(update: UserPreferencesUpdate) {
     .single();
 
   if (error) {
-    announcePreferenceSyncStatus("fallback", "Saved on this device.");
-    throw new Error("Could not save preferences. Saved on this device.");
+    const message = getPreferenceSaveError(error);
+    announcePreferenceSyncStatus("error", message);
+    throw new Error(message);
   }
 
   announcePreferenceSyncStatus("synced");
