@@ -15,9 +15,11 @@ import {
 import { fitnessImages } from "@/src/lib/visuals/fitness-images";
 import {
   CalendarDays,
+  ChevronDown,
   Clock,
   Dumbbell,
   Flame,
+  History,
   Plus,
   Target,
   Trash2,
@@ -65,6 +67,7 @@ export function WorkoutsList() {
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [isHistoryOpen, setIsHistoryOpen] = useState(false);
 
   async function refreshWorkouts() {
     setError("");
@@ -306,7 +309,37 @@ export function WorkoutsList() {
         </FitnessCard>
       ) : workouts.length ? (
         <section aria-label="Logged workouts">
-          <div className="mb-2 flex items-end justify-between gap-3 sm:mb-4">
+          <button
+            type="button"
+            onClick={() => setIsHistoryOpen((current) => !current)}
+            aria-expanded={isHistoryOpen}
+            aria-controls="mobile-workout-history"
+            className="lf-press lf-panel flex min-h-16 w-full items-center gap-3 p-3 text-left sm:hidden"
+          >
+            <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-accent/10 text-accent-strong">
+              <History className="size-5" />
+            </span>
+            <span className="min-w-0 flex-1">
+              <span className="flex items-center gap-2">
+                <span className="font-display text-base font-black">
+                  Workout history
+                </span>
+                <span className="rounded-full bg-white/[0.05] px-2 py-0.5 text-[0.6rem] font-black text-muted">
+                  {workouts.length}
+                </span>
+              </span>
+              <span className="mt-0.5 block truncate text-xs text-muted">
+                Latest: {stats.latestWorkout?.title} · {formatDate(stats.latestWorkout.workout_date)}
+              </span>
+            </span>
+            <ChevronDown
+              className={`size-5 shrink-0 text-muted transition-transform ${
+                isHistoryOpen ? "rotate-180" : ""
+              }`}
+            />
+          </button>
+
+          <div className="mb-4 hidden items-end justify-between gap-3 sm:flex">
             <div>
               <p className="lf-eyebrow">Recent training</p>
               <h2 className="mt-1 font-display text-lg font-black sm:text-xl">
@@ -317,18 +350,31 @@ export function WorkoutsList() {
               {workouts.length} total
             </span>
           </div>
-          <div className="grid gap-2 sm:gap-4 lg:grid-cols-3">
+
+          <div
+            id="mobile-workout-history"
+            className={`${isHistoryOpen ? "mt-2 grid" : "hidden"} gap-2 sm:mt-0 sm:grid sm:gap-4 lg:grid-cols-3`}
+          >
             {workouts.map((workout) => (
             <FitnessCard key={workout.id} className="!p-3 sm:!p-5">
-              <SectionHeader
-                eyebrow="Workout"
-                title={workout.title}
-              />
-              <p className="line-clamp-2 text-xs leading-5 text-muted sm:line-clamp-3 sm:text-sm sm:leading-6">
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="hidden text-[0.65rem] font-black uppercase tracking-[0.2em] text-accent sm:block">
+                    Workout
+                  </p>
+                  <h3 className="truncate font-display text-base font-black tracking-tight sm:mt-0.5 sm:text-xl">
+                    {workout.title}
+                  </h3>
+                </div>
+                <span className="shrink-0 text-[0.68rem] font-bold text-ink-dim sm:hidden">
+                  {formatDate(workout.workout_date)}
+                </span>
+              </div>
+              <p className="mt-2 hidden text-sm leading-6 text-muted sm:line-clamp-3">
                 {workout.notes ?? "No notes for this session yet."}
               </p>
-              <div className="mt-3 flex flex-wrap gap-1.5 text-[0.7rem] font-bold text-muted sm:mt-5 sm:gap-3 sm:text-sm">
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-stone-100 px-2.5 py-1.5 sm:gap-2 sm:px-3 sm:py-2">
+              <div className="mt-2 flex flex-wrap gap-1.5 text-[0.68rem] font-bold text-muted sm:mt-5 sm:gap-3 sm:text-sm">
+                <span className="hidden items-center gap-1.5 rounded-full bg-stone-100 px-2.5 py-1.5 sm:inline-flex sm:gap-2 sm:px-3 sm:py-2">
                   <CalendarDays className="size-4" />
                   {formatDate(workout.workout_date)}
                 </span>
@@ -341,7 +387,7 @@ export function WorkoutsList() {
                   {workout.exercise_count} exercises
                 </span>
               </div>
-              <div className="mt-3 grid grid-cols-[1fr_auto] gap-2 sm:mt-5">
+              <div className="mt-2.5 grid grid-cols-[1fr_auto] gap-2 sm:mt-5">
                 <Link
                   href={`/workouts/${workout.id}`}
                   className="lf-press inline-flex min-h-11 items-center justify-center rounded-xl bg-stone-950 px-4 text-sm font-black text-white transition hover:bg-accent sm:rounded-2xl"
@@ -364,6 +410,16 @@ export function WorkoutsList() {
             </FitnessCard>
             ))}
           </div>
+
+          {isHistoryOpen ? (
+            <button
+              type="button"
+              onClick={() => setIsHistoryOpen(false)}
+              className="lf-press mt-2 min-h-10 w-full rounded-xl text-xs font-black text-muted sm:hidden"
+            >
+              Collapse history
+            </button>
+          ) : null}
         </section>
       ) : (
         <FitnessCard>

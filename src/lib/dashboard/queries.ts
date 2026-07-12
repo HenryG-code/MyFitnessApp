@@ -14,7 +14,8 @@ import {
   type MealPlanTotals,
   type Weekday,
 } from "@/src/lib/meal-planner/types";
-import { getAllRecipes } from "@/src/lib/recipes/data";
+import type { Recipe } from "@/src/lib/recipes/types";
+import type { TodayMission } from "@/src/lib/performance/mission";
 import {
   buildHabitDaySummary,
   ensureDefaultHabits,
@@ -48,6 +49,8 @@ export type DashboardData = {
   workoutsThisWeek: Workout[];
   workoutsLastSevenDays: Workout[];
   selectedTrainingGoal: TrainingGoal | null;
+  recipeMap: Map<string, Recipe>;
+  todayMission: TodayMission;
 };
 
 export type WeeklyConsistencyPoint = {
@@ -96,7 +99,6 @@ export type FitnessJourneyItem = {
   href: string;
 };
 
-const recipeMap = createRecipeMap(getAllRecipes());
 
 async function getAuthenticatedUserId() {
   const supabase = createBrowserSupabaseClient();
@@ -241,7 +243,7 @@ export function calculateWeightProgress(data: DashboardData): WeightProgress {
 
 export function calculateTodayMacros(data: DashboardData): MacroTotals {
   const today = getCurrentWeekday();
-  const totals = calculateDayTotals(data.mealPlan, today, recipeMap);
+  const totals = calculateDayTotals(data.mealPlan, today, data.recipeMap);
 
   return {
     calories: totals.calories,
@@ -253,7 +255,7 @@ export function calculateTodayMacros(data: DashboardData): MacroTotals {
 }
 
 export function calculateWeeklyMacros(data: DashboardData): MealPlanTotals {
-  return calculateWeekTotals(data.mealPlan, recipeMap);
+  return calculateWeekTotals(data.mealPlan, data.recipeMap);
 }
 
 export function calculateMacroBreakdown(
@@ -505,6 +507,13 @@ export async function fetchDashboardData(): Promise<DashboardData> {
   const today = getDateInputValue();
   const sevenDaysAgo = getDateDaysAgo(6);
   const startOfWeek = getStartOfWeekDate();
+  // The recipe catalog and training-plan mission logic are dynamic imports so
+  // they load as a separate chunk, in parallel with the Supabase queries,
+  // instead of sitting in the dashboard's initial bundle.
+  const staticModulesPromise = Promise.all([
+    import("@/src/lib/recipes/data"),
+    import("@/src/lib/performance/mission"),
+  ]);
   const habitDefinitions = (await ensureDefaultHabits()).filter(
     (habit) => habit.is_active
   );
@@ -609,6 +618,13 @@ export async function fetchDashboardData(): Promise<DashboardData> {
     throw new Error(failed.error.message);
   }
 
+  const [{ getAllRecipes }, { buildTodayMission }] = await staticModulesPromise;
+  const workoutsThisWeek = workoutsThisWeekResult.data ?? [];
+  const selectedTrainingGoal = isTrainingGoal(
+    preferencesResult.data?.selected_training_goal
+  )
+    ? preferencesResult.data.selected_training_goal
+    : null;
   const todayHabitCompletions = todayHabitCompletionsResult.data ?? [];
   const recentHabitCompletions = recentHabitCompletionsResult.data ?? [];
   const recentHabits = getLastSevenDateValues().map((date) =>
@@ -636,12 +652,14 @@ export async function fetchDashboardData(): Promise<DashboardData> {
       ? normalizeMealPlanState(preferencesResult.data.meal_plan)
       : createEmptyMealPlan(),
     latestWorkout: latestWorkoutResult.data,
-    workoutsThisWeek: workoutsThisWeekResult.data ?? [],
+    workoutsThisWeek,
     workoutsLastSevenDays: workoutsLastSevenDaysResult.data ?? [],
-    selectedTrainingGoal: isTrainingGoal(
-      preferencesResult.data?.selected_training_goal
-    )
-      ? preferencesResult.data.selected_training_goal
-      : null,
+    selectedTrainingGoal,
+    recipeMap: createRecipeMap(getAllRecipes()),
+    todayMission: buildTodayMission({
+      selectedGoal: selectedTrainingGoal,
+      workoutsThisWeek,
+      todayDate: today,
+    }),
   };
 }

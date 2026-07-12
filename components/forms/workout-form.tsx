@@ -31,9 +31,14 @@ import { useFieldArray, useForm } from "react-hook-form";
 type WorkoutFormProps = {
   mode?: "create" | "edit";
   workout?: WorkoutWithExercises;
+  initialExercise?: string;
 };
 
-export function WorkoutForm({ mode = "create", workout }: WorkoutFormProps) {
+export function WorkoutForm({
+  mode = "create",
+  workout,
+  initialExercise = "",
+}: WorkoutFormProps) {
   const router = useRouter();
   const [formError, setFormError] = useState("");
   const [success, setSuccess] = useState("");
@@ -46,7 +51,7 @@ export function WorkoutForm({ mode = "create", workout }: WorkoutFormProps) {
     setValue,
   } = useForm<WorkoutFormValues>({
     resolver: zodResolver(workoutSchema),
-    defaultValues: getDefaultValues(workout),
+    defaultValues: getDefaultValues(workout, initialExercise),
   });
   const { append, fields, remove } = useFieldArray({
     control,

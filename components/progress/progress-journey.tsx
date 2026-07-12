@@ -15,15 +15,21 @@ import {
   fetchDatedExercises,
   type DatedExercise,
 } from "@/src/lib/performance/muscles";
+import {
+  estimateOneRepMax,
+  normalizeExerciseName,
+} from "@/src/lib/performance/history";
 import { fetchWeightLogs } from "@/src/lib/weight/queries";
 import type { WeightLog, Workout } from "@/src/lib/supabase/database.types";
 import {
   ArrowDownRight,
   ArrowUpRight,
+  Calculator,
   Award,
   Dumbbell,
   Flag,
   Flame,
+  Gauge,
   MapPin,
   Scale,
   TrendingUp,
@@ -41,6 +47,186 @@ const milestoneIcons = {
   streak: Flame,
   current: MapPin,
 } as const;
+
+const coreLifts = ["Bench press", "Back squat", "Deadlift", "Overhead press"];
+
+function StrengthLab({ trends }: { trends: StrengthTrend[] }) {
+  const trackedBench = trends.find((trend) =>
+    normalizeExerciseName(trend.exerciseName).includes("bench")
+  );
+  const initialLift = trackedBench?.exerciseName ?? trends[0]?.exerciseName ?? coreLifts[0];
+  const [selectedLift, setSelectedLift] = useState(initialLift);
+  const [weight, setWeight] = useState("80");
+  const [reps, setReps] = useState("5");
+  const liftOptions = useMemo(
+    () =>
+      Array.from(
+        new Set([...coreLifts, ...trends.map((trend) => trend.exerciseName)])
+      ),
+    [trends]
+  );
+  const selectedTrend = trends.find(
+    (trend) =>
+      normalizeExerciseName(trend.exerciseName) ===
+      normalizeExerciseName(selectedLift)
+  );
+  const estimate = estimateOneRepMax(Number(weight), Number(reps));
+
+  function chooseCoreLift(keyword: string, fallback: string) {
+    const tracked = trends.find((trend) =>
+      normalizeExerciseName(trend.exerciseName).includes(keyword)
+    );
+    setSelectedLift(tracked?.exerciseName ?? fallback);
+  }
+
+  return (
+    <section className="lf-rise lf-panel relative min-w-0 overflow-hidden p-3 sm:p-5">
+      <div className="pointer-events-none absolute -right-20 -top-24 size-64 rounded-full bg-accent/10 blur-3xl" />
+      <div className="relative">
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex min-w-0 items-center gap-3">
+            <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-accent text-white shadow-[0_8px_28px_rgba(240,71,46,0.28)]">
+              <Gauge className="size-5" />
+            </span>
+            <div className="min-w-0">
+              <p className="lf-eyebrow">Strength lab</p>
+              <h2 className="mt-0.5 font-display text-lg font-black tracking-tight sm:text-xl">
+                Track your estimated 1-rep max
+              </h2>
+            </div>
+          </div>
+          <Calculator className="hidden size-5 shrink-0 text-ink-dim sm:block" />
+        </div>
+
+        <div className="mt-3 grid grid-cols-3 gap-1.5 sm:flex sm:flex-wrap sm:gap-2">
+          <button
+            type="button"
+            onClick={() => chooseCoreLift("bench", "Bench press")}
+            className="lf-press min-h-9 rounded-lg border border-line bg-white/[0.03] px-2 text-xs font-black text-muted transition hover:border-accent/40 hover:text-foreground"
+          >
+            Bench
+          </button>
+          <button
+            type="button"
+            onClick={() => chooseCoreLift("squat", "Back squat")}
+            className="lf-press min-h-9 rounded-lg border border-line bg-white/[0.03] px-2 text-xs font-black text-muted transition hover:border-accent/40 hover:text-foreground"
+          >
+            Squat
+          </button>
+          <button
+            type="button"
+            onClick={() => chooseCoreLift("deadlift", "Deadlift")}
+            className="lf-press min-h-9 rounded-lg border border-line bg-white/[0.03] px-2 text-xs font-black text-muted transition hover:border-accent/40 hover:text-foreground"
+          >
+            Deadlift
+          </button>
+        </div>
+
+        <label className="mt-3 block">
+          <span className="text-[0.62rem] font-black uppercase tracking-[0.16em] text-ink-dim">
+            Lift to inspect
+          </span>
+          <select
+            value={selectedLift}
+            onChange={(event) => setSelectedLift(event.target.value)}
+            className="mt-1.5 min-h-11 w-full min-w-0 rounded-xl border border-line bg-surface px-3 text-sm font-black outline-none transition focus:border-accent sm:max-w-md"
+          >
+            {liftOptions.map((lift) => (
+              <option key={lift} value={lift}>
+                {lift}
+              </option>
+            ))}
+          </select>
+        </label>
+
+        <div className="mt-3 grid grid-cols-3 gap-2">
+          <div className="lf-inset min-w-0 p-2.5 sm:p-3">
+            <p className="lf-eyebrow !text-[0.55rem]">Current</p>
+            <p className="lf-num mt-1 truncate font-display text-xl font-black">
+              {selectedTrend ? `${selectedTrend.lastOneRepMax.toFixed(0)}` : "—"}
+            </p>
+            <p className="text-[0.62rem] font-bold text-muted">kg est. 1RM</p>
+          </div>
+          <div className="lf-inset min-w-0 p-2.5 sm:p-3">
+            <p className="lf-eyebrow !text-[0.55rem]">Best</p>
+            <p className="lf-num mt-1 truncate font-display text-xl font-black text-ready">
+              {selectedTrend ? `${selectedTrend.bestOneRepMax.toFixed(0)}` : "—"}
+            </p>
+            <p className="text-[0.62rem] font-bold text-muted">kg tracked</p>
+          </div>
+          <div className="lf-inset min-w-0 p-2.5 sm:p-3">
+            <p className="lf-eyebrow !text-[0.55rem]">Change</p>
+            <p className="lf-num mt-1 truncate font-display text-xl font-black text-accent-strong">
+              {selectedTrend
+                ? `${selectedTrend.changePercent > 0 ? "+" : ""}${selectedTrend.changePercent}%`
+                : "—"}
+            </p>
+            <p className="text-[0.62rem] font-bold text-muted">
+              {selectedTrend ? `${selectedTrend.sessions} sessions` : "No history"}
+            </p>
+          </div>
+        </div>
+
+        <div className="mt-3 rounded-xl border border-white/[0.07] bg-black/15 p-3">
+          <div className="flex items-center justify-between gap-2">
+            <div>
+              <p className="text-xs font-black">Estimate a new max</p>
+              <p className="mt-0.5 text-[0.65rem] text-muted">
+                Enter a recent working set.
+              </p>
+            </div>
+            <p className="lf-num text-right font-display text-2xl font-black text-accent-strong">
+              {estimate ? `${estimate.toFixed(0)} kg` : "—"}
+            </p>
+          </div>
+          <div className="mt-3 grid grid-cols-2 gap-2">
+            <label className="min-w-0">
+              <span className="text-[0.6rem] font-black uppercase tracking-wider text-ink-dim">
+                Weight, kg
+              </span>
+              <input
+                value={weight}
+                onChange={(event) => setWeight(event.target.value)}
+                type="number"
+                inputMode="decimal"
+                min="0"
+                step="0.5"
+                className="lf-num mt-1 min-h-11 w-full min-w-0 rounded-xl border border-line bg-surface px-3 text-lg font-black outline-none focus:border-accent"
+              />
+            </label>
+            <label className="min-w-0">
+              <span className="text-[0.6rem] font-black uppercase tracking-wider text-ink-dim">
+                Reps
+              </span>
+              <input
+                value={reps}
+                onChange={(event) => setReps(event.target.value)}
+                type="number"
+                inputMode="numeric"
+                min="1"
+                max="12"
+                step="1"
+                className="lf-num mt-1 min-h-11 w-full min-w-0 rounded-xl border border-line bg-surface px-3 text-lg font-black outline-none focus:border-accent"
+              />
+            </label>
+          </div>
+        </div>
+
+        <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-[0.65rem] leading-4 text-ink-dim">
+            Estimates use your logged weight and reps; they are a training guide, not a testing requirement.
+          </p>
+          <Link
+            href={`/workouts/new?exercise=${encodeURIComponent(selectedLift)}`}
+            className="lf-press inline-flex min-h-11 shrink-0 items-center justify-center rounded-xl bg-accent px-4 text-sm font-black text-white transition hover:bg-accent-strong"
+          >
+            Log {selectedLift}
+          </Link>
+        </div>
+      </div>
+    </section>
+  );
+}
 
 function formatDate(value: string) {
   return new Intl.DateTimeFormat("en", {
@@ -255,6 +441,8 @@ export function ProgressJourney() {
               <p className="lf-eyebrow mt-1 !text-[0.58rem]">Consistency</p>
             </div>
           </section>
+
+          <StrengthLab trends={trends} />
 
           {/* Tabs */}
           <div
