@@ -140,15 +140,28 @@ export function TrainingPlanPage() {
       </div>
       <PlanOverview plan={selectedPlan} />
 
-      <section className="grid gap-3 sm:gap-5 xl:grid-cols-2">
-        {selectedPlan.days.map((session) => (
-          <SessionCard
-            key={`${selectedPlan.slug}-${session.dayLabel}`}
-            plan={selectedPlan}
-            session={session}
-            onLogged={refreshWorkoutHistory}
-          />
-        ))}
+      <section className="min-w-0">
+        <div className="mb-2 flex items-end justify-between gap-3 px-1 sm:mb-3">
+          <div className="min-w-0">
+            <p className="lf-eyebrow">Weekly schedule</p>
+            <h2 className="mt-0.5 font-display text-lg font-black sm:text-xl">
+              Your training days
+            </h2>
+          </div>
+          <p className="shrink-0 text-[0.65rem] font-bold text-muted sm:text-xs">
+            Tap a day for details
+          </p>
+        </div>
+        <div className="grid min-w-0 gap-2 sm:gap-3 xl:grid-cols-2">
+          {selectedPlan.days.map((session) => (
+            <SessionCard
+              key={`${selectedPlan.slug}-${session.dayLabel}`}
+              plan={selectedPlan}
+              session={session}
+              onLogged={refreshWorkoutHistory}
+            />
+          ))}
+        </div>
       </section>
     </div>
   );
