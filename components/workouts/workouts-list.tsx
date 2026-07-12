@@ -141,36 +141,71 @@ export function WorkoutsList() {
   }
 
   return (
-    <div className="space-y-5">
-      <HeroPanel
-        eyebrow="Workout log"
-        title="Keep your training visible."
-        description="Track your sessions, exercises, notes, and progress over time."
-        imageSrc={fitnessImages.strengthTraining}
-        imageAlt="Strength training session"
-        variant="performance"
-      >
-        <div className="flex flex-wrap gap-2">
+    <div className="space-y-3 sm:space-y-5">
+      <section className="lf-panel p-3 sm:hidden">
+        <div className="flex items-center justify-between gap-3">
+          <div className="min-w-0">
+            <p className="lf-eyebrow">Workout log</p>
+            <h1 className="mt-1 font-display text-2xl font-black tracking-tight">
+              Train
+            </h1>
+            <p className="mt-1 text-xs leading-5 text-muted">
+              Time your rest, review sessions, and log today&apos;s work.
+            </p>
+          </div>
+          <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-accent text-white shadow-[0_8px_24px_rgba(240,71,46,0.3)]">
+            <Dumbbell className="size-5" />
+          </span>
+        </div>
+        <div className="mt-3 grid grid-cols-2 gap-2">
           <Link
             href="/training-plan"
-            className="inline-flex items-center justify-center gap-2 rounded-2xl bg-stone-950 px-5 py-3 text-sm font-black text-white shadow-lg shadow-stone-900/10 transition hover:bg-accent"
+            className="lf-press inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-line bg-white/[0.04] px-3 text-sm font-black"
           >
             <Target className="size-4" />
-            Training plan
+            Plan
           </Link>
           <Link
             href="/workouts/new"
-            className="inline-flex items-center justify-center gap-2 rounded-2xl bg-accent px-5 py-3 text-sm font-black text-stone-950 shadow-lg shadow-accent/20"
+            className="lf-press inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-accent px-3 text-sm font-black text-white"
           >
             <Plus className="size-4" />
             Log workout
           </Link>
         </div>
-      </HeroPanel>
+      </section>
 
-      <section className="grid gap-4 xl:grid-cols-[1.1fr_0.9fr]">
+      <div className="hidden sm:block">
+        <HeroPanel
+          eyebrow="Workout log"
+          title="Keep your training visible."
+          description="Track your sessions, exercises, notes, and progress over time."
+          imageSrc={fitnessImages.strengthTraining}
+          imageAlt="Strength training session"
+          variant="performance"
+        >
+          <div className="flex flex-wrap gap-2">
+            <Link
+              href="/training-plan"
+              className="inline-flex items-center justify-center gap-2 rounded-2xl bg-stone-950 px-5 py-3 text-sm font-black text-white shadow-lg shadow-stone-900/10 transition hover:bg-accent"
+            >
+              <Target className="size-4" />
+              Training plan
+            </Link>
+            <Link
+              href="/workouts/new"
+              className="inline-flex items-center justify-center gap-2 rounded-2xl bg-accent px-5 py-3 text-sm font-black text-stone-950 shadow-lg shadow-accent/20"
+            >
+              <Plus className="size-4" />
+              Log workout
+            </Link>
+          </div>
+        </HeroPanel>
+      </div>
+
+      <section className="grid gap-3 sm:gap-4 xl:grid-cols-[1.1fr_0.9fr]">
         <RestTimer />
-        <FitnessCard className="border-accent/25 bg-gradient-to-br from-white/[0.04] via-card to-sun/10">
+        <FitnessCard className="hidden border-accent/25 bg-gradient-to-br from-white/[0.04] via-card to-sun/10 sm:block">
           <SectionHeader eyebrow="Gym assistant" title="Ready when you train" />
           <p className="text-sm leading-6 text-muted">
             Keep this page open during your session. Time your rests, check your
@@ -207,7 +242,30 @@ export function WorkoutsList() {
         </p>
       ) : null}
 
-      <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <section className="grid grid-cols-2 gap-2 sm:hidden" aria-label="Training summary">
+        <div className="lf-inset p-3">
+          <div className="flex items-center justify-between gap-2">
+            <p className="lf-eyebrow !text-[0.58rem]">This week</p>
+            <Flame className="size-4 text-accent-strong" />
+          </div>
+          <p className="lf-num mt-2 font-display text-2xl font-black">
+            {stats.workoutsThisWeek}
+          </p>
+          <p className="text-[0.68rem] text-muted">workouts</p>
+        </div>
+        <div className="lf-inset p-3">
+          <div className="flex items-center justify-between gap-2">
+            <p className="lf-eyebrow !text-[0.58rem]">Total time</p>
+            <Clock className="size-4 text-sun" />
+          </div>
+          <p className="lf-num mt-2 font-display text-2xl font-black">
+            {stats.totalMinutes}
+          </p>
+          <p className="text-[0.68rem] text-muted">minutes logged</p>
+        </div>
+      </section>
+
+      <section className="hidden gap-4 sm:grid sm:grid-cols-2 xl:grid-cols-4">
         <MetricCard
           label="Workouts this week"
           value={`${stats.workoutsThisWeek}`}
@@ -247,34 +305,46 @@ export function WorkoutsList() {
           <p className="text-sm font-black text-muted">Loading workouts...</p>
         </FitnessCard>
       ) : workouts.length ? (
-        <div className="grid gap-4 lg:grid-cols-3">
-          {workouts.map((workout) => (
-            <FitnessCard key={workout.id}>
+        <section aria-label="Logged workouts">
+          <div className="mb-2 flex items-end justify-between gap-3 sm:mb-4">
+            <div>
+              <p className="lf-eyebrow">Recent training</p>
+              <h2 className="mt-1 font-display text-lg font-black sm:text-xl">
+                Workout history
+              </h2>
+            </div>
+            <span className="text-xs font-bold text-muted">
+              {workouts.length} total
+            </span>
+          </div>
+          <div className="grid gap-2 sm:gap-4 lg:grid-cols-3">
+            {workouts.map((workout) => (
+            <FitnessCard key={workout.id} className="!p-3 sm:!p-5">
               <SectionHeader
                 eyebrow="Workout"
                 title={workout.title}
               />
-              <p className="line-clamp-3 text-sm leading-6 text-muted">
+              <p className="line-clamp-2 text-xs leading-5 text-muted sm:line-clamp-3 sm:text-sm sm:leading-6">
                 {workout.notes ?? "No notes for this session yet."}
               </p>
-              <div className="mt-5 flex flex-wrap gap-3 text-sm font-bold text-muted">
-                <span className="inline-flex items-center gap-2 rounded-full bg-stone-100 px-3 py-2">
+              <div className="mt-3 flex flex-wrap gap-1.5 text-[0.7rem] font-bold text-muted sm:mt-5 sm:gap-3 sm:text-sm">
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-stone-100 px-2.5 py-1.5 sm:gap-2 sm:px-3 sm:py-2">
                   <CalendarDays className="size-4" />
                   {formatDate(workout.workout_date)}
                 </span>
-                <span className="inline-flex items-center gap-2 rounded-full bg-stone-100 px-3 py-2">
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-stone-100 px-2.5 py-1.5 sm:gap-2 sm:px-3 sm:py-2">
                   <Clock className="size-4" />
                   {workout.duration_minutes ?? 0} min
                 </span>
-                <span className="inline-flex items-center gap-2 rounded-full bg-stone-100 px-3 py-2">
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-stone-100 px-2.5 py-1.5 sm:gap-2 sm:px-3 sm:py-2">
                   <Dumbbell className="size-4" />
                   {workout.exercise_count} exercises
                 </span>
               </div>
-              <div className="mt-5 flex flex-wrap gap-2">
+              <div className="mt-3 grid grid-cols-[1fr_auto] gap-2 sm:mt-5">
                 <Link
                   href={`/workouts/${workout.id}`}
-                  className="rounded-2xl bg-stone-950 px-4 py-2 text-sm font-black text-white transition hover:bg-accent"
+                  className="lf-press inline-flex min-h-11 items-center justify-center rounded-xl bg-stone-950 px-4 text-sm font-black text-white transition hover:bg-accent sm:rounded-2xl"
                 >
                   View and edit
                 </Link>
@@ -282,15 +352,19 @@ export function WorkoutsList() {
                   type="button"
                   onClick={() => void handleDelete(workout)}
                   disabled={deletingId === workout.id}
-                  className="inline-flex items-center gap-2 rounded-2xl bg-red-50 px-4 py-2 text-sm font-black text-red-700 transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-70"
+                  aria-label={`Delete ${workout.title}`}
+                  className="lf-press inline-flex size-11 items-center justify-center rounded-xl border border-strain/25 bg-red-50 text-strain transition sm:w-auto sm:gap-2 sm:rounded-2xl sm:px-4 disabled:cursor-not-allowed disabled:opacity-70"
                 >
                   <Trash2 className="size-4" />
-                  {deletingId === workout.id ? "Deleting..." : "Delete"}
+                  <span className="hidden sm:inline">
+                    {deletingId === workout.id ? "Deleting..." : "Delete"}
+                  </span>
                 </button>
               </div>
             </FitnessCard>
-          ))}
-        </div>
+            ))}
+          </div>
+        </section>
       ) : (
         <FitnessCard>
           <div className="rounded-[1.5rem] border border-accent/25 bg-accent/10 p-6">

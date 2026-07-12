@@ -34,6 +34,7 @@ import {
   ChevronUp,
   ClipboardCheck,
   EyeOff,
+  MoreHorizontal,
   Pencil,
   Plus,
   Sparkles,
@@ -87,6 +88,7 @@ export function HabitsTracker() {
   const [isLoading, setIsLoading] = useState(true);
   const [savingHabitId, setSavingHabitId] = useState<string | null>(null);
   const [isSavingForm, setIsSavingForm] = useState(false);
+  const [managingHabitId, setManagingHabitId] = useState<string | null>(null);
 
   const activeDefinitions = useMemo(
     () => definitions.filter((habit) => habit.is_active),
@@ -142,6 +144,7 @@ export function HabitsTracker() {
     setNotice("");
     setEditingHabit(null);
     setFormValues(getInitialFormValues());
+    setManagingHabitId(null);
     setIsFormOpen(true);
   }
 
@@ -150,6 +153,7 @@ export function HabitsTracker() {
     setNotice("");
     setEditingHabit(habit);
     setFormValues(getInitialFormValues(habit));
+    setManagingHabitId(null);
     setIsFormOpen(true);
   }
 
@@ -215,6 +219,7 @@ export function HabitsTracker() {
     setError("");
     setNotice("");
     setSavingHabitId(habit.id);
+    setManagingHabitId(null);
 
     // Optimistic local swap for instant feedback.
     const index = activeDefinitions.findIndex((item) => item.id === habit.id);
@@ -258,6 +263,7 @@ export function HabitsTracker() {
     setError("");
     setNotice("");
     setSavingHabitId(habit.id);
+    setManagingHabitId(null);
 
     try {
       await deleteHabitDefinition(habit.id);
@@ -286,6 +292,7 @@ export function HabitsTracker() {
     setError("");
     setNotice("");
     setSavingHabitId(habit.id);
+    setManagingHabitId(null);
 
     try {
       await hideHabitDefinition(habit.id);
@@ -301,24 +308,51 @@ export function HabitsTracker() {
   }
 
   return (
-    <div className="space-y-5">
-      <HeroPanel
-        eyebrow="Habits"
-        title="Build your daily routine"
-        description="Tap a habit when it is done, add your own routines, and keep the list personal."
-        imageSrc={fitnessImages.treadmillRunner}
-        imageAlt="Runner training on a treadmill"
-        variant="amber"
-      >
+    <div className="space-y-3 sm:space-y-5">
+      <section className="lf-panel p-3 sm:hidden">
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <p className="lf-eyebrow">Habits</p>
+            <h1 className="mt-1 font-display text-2xl font-black tracking-tight">
+              Today&apos;s routine
+            </h1>
+            <p className="mt-1 text-xs leading-5 text-muted">
+              Tap a habit to check it off. Manage actions stay inside each card.
+            </p>
+          </div>
+          <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-accent text-white shadow-[0_8px_24px_rgba(240,71,46,0.3)]">
+            <Sprout className="size-5" />
+          </span>
+        </div>
         <button
           type="button"
           onClick={openCreateForm}
-          className="mt-6 inline-flex items-center gap-2 rounded-2xl bg-accent px-5 py-3 text-sm font-black text-white transition hover:-translate-y-0.5 hover:bg-accent-strong"
+          className="lf-press mt-3 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-accent px-4 text-sm font-black text-white"
         >
           <Plus className="size-4" />
           Add habit
         </button>
-      </HeroPanel>
+      </section>
+
+      <div className="hidden sm:block">
+        <HeroPanel
+          eyebrow="Habits"
+          title="Build your daily routine"
+          description="Tap a habit when it is done, add your own routines, and keep the list personal."
+          imageSrc={fitnessImages.treadmillRunner}
+          imageAlt="Runner training on a treadmill"
+          variant="amber"
+        >
+          <button
+            type="button"
+            onClick={openCreateForm}
+            className="mt-6 inline-flex items-center gap-2 rounded-2xl bg-accent px-5 py-3 text-sm font-black text-white transition hover:-translate-y-0.5 hover:bg-accent-strong"
+          >
+            <Plus className="size-4" />
+            Add habit
+          </button>
+        </HeroPanel>
+      </div>
 
       {notice ? (
         <p className="liftlog-pop-in rounded-[1.5rem] border border-accent/25 bg-accent/10 p-4 text-sm font-black text-soft-yellow">
@@ -339,7 +373,27 @@ export function HabitsTracker() {
         </p>
       ) : null}
 
-      <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <section className="lf-panel p-3 sm:hidden" aria-label="Today's habit progress">
+        <div className="flex items-end justify-between gap-3">
+          <div>
+            <p className="lf-eyebrow">Today&apos;s progress</p>
+            <p className="lf-num mt-1 font-display text-3xl font-black">
+              {todaySummary.percentage}%
+            </p>
+          </div>
+          <p className="pb-1 text-xs font-bold text-muted">
+            {todaySummary.completed} done · {Math.max(todaySummary.total - todaySummary.completed, 0)} left
+          </p>
+        </div>
+        <div className="mt-3 h-2 overflow-hidden rounded-full bg-white/10">
+          <div
+            className="h-full rounded-full bg-gradient-to-r from-accent to-sun transition-all"
+            style={{ width: `${todaySummary.percentage}%` }}
+          />
+        </div>
+      </section>
+
+      <section className="hidden gap-4 sm:grid sm:grid-cols-2 xl:grid-cols-4">
         <MetricCard
           label="Today's habit completion"
           value={`${todaySummary.percentage}%`}
@@ -437,8 +491,8 @@ export function HabitsTracker() {
         </FitnessCard>
       ) : null}
 
-      <section className="grid gap-5 xl:grid-cols-[1.35fr_0.9fr]">
-        <FitnessCard>
+      <section className="grid gap-3 sm:gap-5 xl:grid-cols-[1.35fr_0.9fr]">
+        <FitnessCard className="!p-3 sm:!p-5">
           <SectionHeader eyebrow="Today's habits" title={formatDate(today)} />
           {isLoading ? (
             <div className="rounded-[1.5rem] bg-stone-100 p-6 text-sm font-black text-muted">
@@ -482,9 +536,7 @@ export function HabitsTracker() {
                         </span>
                         <span className="min-w-0">
                           <span
-                            className={`block truncate font-display text-base font-black leading-tight ${
-                              isComplete ? "" : ""
-                            }`}
+                            className="block truncate font-display text-base font-black leading-tight"
                           >
                             {habit.name}
                           </span>
@@ -495,60 +547,79 @@ export function HabitsTracker() {
                           ) : null}
                         </span>
                       </button>
-                      <div className="flex shrink-0 items-center gap-0.5">
-                        <div className="flex flex-col">
-                          <button
-                            type="button"
-                            onClick={() => void handleMoveHabit(habit, "up")}
-                            disabled={isSaving || habitIndex === 0}
-                            aria-label={`Move ${habit.name} up`}
-                            className="lf-press grid size-6 place-items-center rounded-md text-ink-dim transition hover:text-foreground disabled:opacity-25"
-                          >
-                            <ChevronUp className="size-3.5" />
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => void handleMoveHabit(habit, "down")}
-                            disabled={
-                              isSaving ||
-                              habitIndex === activeDefinitions.length - 1
-                            }
-                            aria-label={`Move ${habit.name} down`}
-                            className="lf-press grid size-6 place-items-center rounded-md text-ink-dim transition hover:text-foreground disabled:opacity-25"
-                          >
-                            <ChevronDown className="size-3.5" />
-                          </button>
-                        </div>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setManagingHabitId((current) =>
+                            current === habit.id ? null : habit.id
+                          )
+                        }
+                        aria-expanded={managingHabitId === habit.id}
+                        aria-controls={`habit-actions-${habit.id}`}
+                        aria-label={`Manage ${habit.name}`}
+                        className={`lf-press grid size-11 shrink-0 place-items-center rounded-xl border transition ${
+                          managingHabitId === habit.id
+                            ? "border-accent bg-accent/15 text-accent-strong"
+                            : "border-line text-muted hover:text-foreground"
+                        }`}
+                      >
+                        <MoreHorizontal className="size-5" />
+                      </button>
+                    </div>
+
+                    {managingHabitId === habit.id ? (
+                      <div
+                        id={`habit-actions-${habit.id}`}
+                        className="mt-2 grid grid-cols-2 gap-1.5 border-t border-line pt-2 sm:grid-cols-5"
+                      >
+                        <button
+                          type="button"
+                          onClick={() => void handleMoveHabit(habit, "up")}
+                          disabled={isSaving || habitIndex === 0}
+                          className="lf-press inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-white/[0.04] px-2 text-xs font-black text-muted disabled:opacity-25"
+                        >
+                          <ChevronUp className="size-4" />
+                          Move up
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => void handleMoveHabit(habit, "down")}
+                          disabled={isSaving || habitIndex === activeDefinitions.length - 1}
+                          className="lf-press inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-white/[0.04] px-2 text-xs font-black text-muted disabled:opacity-25"
+                        >
+                          <ChevronDown className="size-4" />
+                          Move down
+                        </button>
                         {!habit.is_default ? (
                           <button
                             type="button"
                             onClick={() => openEditForm(habit)}
-                            aria-label={`Edit ${habit.name}`}
-                            className="lf-press grid size-9 place-items-center rounded-lg border border-line text-muted transition hover:text-foreground"
+                            className="lf-press inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-white/[0.04] px-2 text-xs font-black text-muted"
                           >
-                            <Pencil className="size-3.5" />
+                            <Pencil className="size-4" />
+                            Edit
                           </button>
                         ) : null}
                         <button
                           type="button"
                           onClick={() => void handleHideHabit(habit)}
                           disabled={isSaving}
-                          aria-label={`Hide ${habit.name}`}
-                          className="lf-press grid size-9 place-items-center rounded-lg border border-line text-muted transition hover:text-foreground disabled:opacity-50"
+                          className="lf-press inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-white/[0.04] px-2 text-xs font-black text-muted disabled:opacity-50"
                         >
-                          <EyeOff className="size-3.5" />
+                          <EyeOff className="size-4" />
+                          Hide
                         </button>
                         <button
                           type="button"
                           onClick={() => void handleDeleteHabit(habit)}
                           disabled={isSaving}
-                          aria-label={`Delete ${habit.name}`}
-                          className="lf-press grid size-9 place-items-center rounded-lg border border-strain/25 text-strain transition disabled:opacity-50"
+                          className="lf-press inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-strain/25 bg-strain/10 px-2 text-xs font-black text-strain disabled:opacity-50"
                         >
-                          <Trash2 className="size-3.5" />
+                          <Trash2 className="size-4" />
+                          Delete
                         </button>
                       </div>
-                    </div>
+                    ) : null}
                   </div>
                 );
               })}

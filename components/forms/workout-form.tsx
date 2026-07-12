@@ -1,313 +1,37 @@
 "use client";
 
+import { ExerciseRow } from "@/components/forms/exercise-row";
+import {
+  getDefaultValues,
+  getEmptyExercise,
+  toWorkoutInput,
+  workoutSchema,
+  workoutTitleSuggestions,
+  type WorkoutFormValues,
+} from "@/src/lib/workouts/form";
 import {
   createWorkout,
   updateWorkout,
-  type WorkoutInput,
   type WorkoutWithExercises,
 } from "@/src/lib/workouts/queries";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ChevronDown, Minus, Plus, Trash2 } from "lucide-react";
+import {
+  CalendarDays,
+  ChevronDown,
+  Clock3,
+  ListPlus,
+  NotebookPen,
+  Plus,
+  Save,
+} from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import {
-  useFieldArray,
-  useForm,
-  useWatch,
-  type Control,
-  type UseFormRegister,
-  type UseFormSetValue,
-} from "react-hook-form";
-import { z } from "zod";
-
-const exerciseSchema = z.object({
-  exercise_name: z.string(),
-  sets: z.string(),
-  reps: z.string(),
-  weight: z.string(),
-  distance_km: z.string(),
-  duration_minutes: z.string(),
-  notes: z.string().max(240, "Keep exercise notes under 240 characters."),
-});
-
-const workoutSchema = z
-  .object({
-    title: z.string().trim().min(2, "Title must be at least 2 characters."),
-    workout_date: z.string().min(1, "Workout date is required."),
-    duration_minutes: z.string(),
-    notes: z.string().max(500, "Keep workout notes under 500 characters."),
-    exercises: z.array(exerciseSchema),
-  })
-  .superRefine((values, context) => {
-    validateOptionalNumber(
-      values.duration_minutes,
-      "duration_minutes",
-      context,
-      "Duration must be positive.",
-      { allowZero: false, integerOnly: true }
-    );
-
-    values.exercises.forEach((exercise, index) => {
-      const hasAnyValue = [
-        exercise.exercise_name,
-        exercise.sets,
-        exercise.reps,
-        exercise.weight,
-        exercise.distance_km,
-        exercise.duration_minutes,
-        exercise.notes,
-      ].some((value) => value.trim());
-
-      if (!hasAnyValue) {
-        return;
-      }
-
-      if (!exercise.exercise_name.trim()) {
-        context.addIssue({
-          code: "custom",
-          message: "Exercise name is required.",
-          path: ["exercises", index, "exercise_name"],
-        });
-      }
-
-      validateOptionalNumber(
-        exercise.sets,
-        ["exercises", index, "sets"],
-        context,
-        "Sets cannot be negative.",
-        { integerOnly: true }
-      );
-      validateOptionalNumber(
-        exercise.reps,
-        ["exercises", index, "reps"],
-        context,
-        "Reps cannot be negative.",
-        { integerOnly: true }
-      );
-      validateOptionalNumber(
-        exercise.weight,
-        ["exercises", index, "weight"],
-        context,
-        "Weight cannot be negative."
-      );
-      validateOptionalNumber(
-        exercise.distance_km,
-        ["exercises", index, "distance_km"],
-        context,
-        "Distance cannot be negative."
-      );
-      validateOptionalNumber(
-        exercise.duration_minutes,
-        ["exercises", index, "duration_minutes"],
-        context,
-        "Duration cannot be negative.",
-        { integerOnly: true }
-      );
-    });
-  });
-
-type WorkoutFormValues = z.infer<typeof workoutSchema>;
+import { useFieldArray, useForm } from "react-hook-form";
 
 type WorkoutFormProps = {
   mode?: "create" | "edit";
   workout?: WorkoutWithExercises;
 };
-
-type IssuePath = string | (string | number)[];
-
-type NumberOptions = {
-  allowZero?: boolean;
-  integerOnly?: boolean;
-};
-
-const workoutTitleSuggestions = [
-  "Full body",
-  "Upper body",
-  "Lower body",
-  "Cardio",
-  "Mobility",
-  "Yoga",
-];
-
-function validateOptionalNumber(
-  value: string,
-  path: IssuePath,
-  context: z.RefinementCtx,
-  message: string,
-  options: NumberOptions = {}
-) {
-  const trimmed = value.trim();
-
-  if (!trimmed) {
-    return;
-  }
-
-  const parsed = Number(trimmed);
-  const allowZero = options.allowZero ?? true;
-  const isBelowMinimum = allowZero ? parsed < 0 : parsed <= 0;
-
-  if (
-    !Number.isFinite(parsed) ||
-    isBelowMinimum ||
-    (options.integerOnly && !Number.isInteger(parsed))
-  ) {
-    context.addIssue({
-      code: "custom",
-      message,
-      path: Array.isArray(path) ? path : [path],
-    });
-  }
-}
-
-function parseOptionalNumber(value: string) {
-  const trimmed = value.trim();
-  return trimmed ? Number(trimmed) : null;
-}
-
-function normalizeOptionalText(value: string) {
-  const trimmed = value.trim();
-  return trimmed ? trimmed : null;
-}
-
-function getDateInputValue(date = new Date()) {
-  const month = `${date.getMonth() + 1}`.padStart(2, "0");
-  const day = `${date.getDate()}`.padStart(2, "0");
-
-  return `${date.getFullYear()}-${month}-${day}`;
-}
-
-function getEmptyExercise() {
-  return {
-    exercise_name: "",
-    sets: "",
-    reps: "",
-    weight: "",
-    distance_km: "",
-    duration_minutes: "",
-    notes: "",
-  };
-}
-
-function getDefaultValues(workout?: WorkoutWithExercises): WorkoutFormValues {
-  if (!workout) {
-    return {
-      title: "",
-      workout_date: getDateInputValue(),
-      duration_minutes: "",
-      notes: "",
-      exercises: [getEmptyExercise()],
-    };
-  }
-
-  return {
-    title: workout.title,
-    workout_date: workout.workout_date,
-    duration_minutes: workout.duration_minutes?.toString() ?? "",
-    notes: workout.notes ?? "",
-    exercises: workout.exercises.length
-      ? workout.exercises.map((exercise) => ({
-          exercise_name: exercise.exercise_name,
-          sets: exercise.sets?.toString() ?? "",
-          reps: exercise.reps?.toString() ?? "",
-          weight: exercise.weight?.toString() ?? "",
-          distance_km: exercise.distance_km?.toString() ?? "",
-          duration_minutes: exercise.duration_minutes?.toString() ?? "",
-          notes: exercise.notes ?? "",
-        }))
-      : [getEmptyExercise()],
-  };
-}
-
-function toWorkoutInput(values: WorkoutFormValues): WorkoutInput {
-  return {
-    title: values.title.trim(),
-    workout_date: values.workout_date,
-    duration_minutes: parseOptionalNumber(values.duration_minutes),
-    notes: normalizeOptionalText(values.notes),
-    exercises: values.exercises
-      .filter((exercise) => exercise.exercise_name.trim())
-      .map((exercise) => ({
-        exercise_name: exercise.exercise_name.trim(),
-        sets: parseOptionalNumber(exercise.sets),
-        reps: parseOptionalNumber(exercise.reps),
-        weight: parseOptionalNumber(exercise.weight),
-        distance_km: parseOptionalNumber(exercise.distance_km),
-        duration_minutes: parseOptionalNumber(exercise.duration_minutes),
-        notes: normalizeOptionalText(exercise.notes),
-      })),
-  };
-}
-
-type StepperName =
-  | `exercises.${number}.sets`
-  | `exercises.${number}.reps`
-  | `exercises.${number}.weight`;
-
-/** Compact registered numeric input with tap-friendly adjustment controls. */
-function StepperField({
-  label,
-  name,
-  step,
-  control,
-  register,
-  setValue,
-  error,
-}: {
-  label: string;
-  name: StepperName;
-  step: number;
-  control: Control<WorkoutFormValues>;
-  register: UseFormRegister<WorkoutFormValues>;
-  setValue: UseFormSetValue<WorkoutFormValues>;
-  error?: string;
-}) {
-  const raw = useWatch({ control, name }) ?? "";
-
-  function adjust(direction: 1 | -1) {
-    const current = Number(String(raw).trim()) || 0;
-    const next = Math.max(0, Math.round((current + direction * step) * 10) / 10);
-    setValue(name, next ? String(next) : "", {
-      shouldDirty: true,
-      shouldValidate: true,
-    });
-  }
-
-  return (
-    <div className="min-w-0 rounded-xl border border-line bg-black/10 p-1.5">
-      <p className="text-center text-[0.6rem] font-black uppercase tracking-[0.12em] text-muted sm:text-[0.65rem]">
-        {label}
-      </p>
-      <div className="mt-1 grid grid-cols-[1.75rem_minmax(0,1fr)_1.75rem] items-center gap-0.5 sm:grid-cols-[2rem_minmax(0,1fr)_2rem]">
-        <button
-          type="button"
-          aria-label={`Decrease ${label}`}
-          onClick={() => adjust(-1)}
-          className="lf-press grid size-7 place-items-center rounded-lg text-muted transition hover:bg-white/[0.06] hover:text-foreground sm:size-8"
-        >
-          <Minus className="size-3.5" />
-        </button>
-        <input
-          inputMode="decimal"
-          aria-label={label}
-          placeholder="—"
-          className="lf-num min-h-9 w-full min-w-0 rounded-lg border border-line bg-surface/80 px-0.5 text-center text-base font-black outline-none transition focus:border-accent sm:text-sm"
-          {...register(name)}
-        />
-        <button
-          type="button"
-          aria-label={`Increase ${label}`}
-          onClick={() => adjust(1)}
-          className="lf-press grid size-7 place-items-center rounded-lg text-muted transition hover:bg-white/[0.06] hover:text-foreground sm:size-8"
-        >
-          <Plus className="size-3.5" />
-        </button>
-      </div>
-      {error ? (
-        <p className="mt-1 text-xs font-medium text-strain">{error}</p>
-      ) : null}
-    </div>
-  );
-}
 
 export function WorkoutForm({ mode = "create", workout }: WorkoutFormProps) {
   const router = useRouter();
@@ -396,17 +120,34 @@ export function WorkoutForm({ mode = "create", workout }: WorkoutFormProps) {
 
   return (
     <form
-      className="space-y-3 pb-24 sm:space-y-5 sm:pb-0"
+      className="space-y-3 pb-24 sm:space-y-4 sm:pb-0"
       onSubmit={handleSubmit(onSubmit)}
     >
-      <div>
-        <label className="text-xs font-black sm:text-sm" htmlFor="title">
+      <section className="rounded-[1.5rem] border border-white/[0.07] bg-gradient-to-br from-card via-card/95 to-surface/90 p-3 shadow-[0_22px_70px_rgba(0,0,0,0.3)] sm:rounded-[1.75rem] sm:p-5">
+        <div className="mb-4 flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <span className="lf-num grid size-9 place-items-center rounded-xl border border-accent/25 bg-accent/10 text-xs font-black text-accent-strong">
+              01
+            </span>
+            <div>
+              <p className="text-[0.62rem] font-black uppercase tracking-[0.2em] text-ink-dim">
+                Session
+              </p>
+              <h2 className="font-display text-lg font-black tracking-tight">
+                The essentials
+              </h2>
+            </div>
+          </div>
+          <NotebookPen className="size-5 text-ink-dim" />
+        </div>
+
+        <label className="sr-only" htmlFor="title">
           Workout name
         </label>
         <input
           id="title"
-          className="mt-1.5 min-h-11 w-full rounded-xl border border-line bg-surface/80 px-3 py-2.5 text-base font-semibold outline-none transition focus:border-accent focus:ring-4 focus:ring-accent/20 sm:mt-2 sm:min-h-12 sm:rounded-2xl sm:px-4 sm:py-3"
-          placeholder="Upper body strength"
+          className="min-h-14 w-full border-0 border-b border-line bg-transparent px-0 py-2 font-display text-xl font-black tracking-tight outline-none transition placeholder:text-ink-dim/55 focus:border-accent sm:min-h-16 sm:text-3xl"
+          placeholder="Name this workout"
           {...register("title")}
         />
         {errors.title ? (
@@ -414,246 +155,152 @@ export function WorkoutForm({ mode = "create", workout }: WorkoutFormProps) {
             {errors.title.message}
           </p>
         ) : null}
-        <div className="mt-2 flex gap-1.5 overflow-x-auto pb-1 sm:mt-3 sm:gap-2">
+        <div className="lf-scroll-x -mx-1 mt-2 flex gap-1.5 overflow-x-auto px-1 pb-1 sm:mt-3 sm:flex-wrap sm:gap-2">
           {workoutTitleSuggestions.map((title) => (
             <button
               key={title}
               type="button"
               onClick={() => applyTitleSuggestion(title)}
-              className="shrink-0 rounded-full border border-line bg-white/65 px-2.5 py-1.5 text-[0.7rem] font-black text-muted transition hover:border-accent hover:text-foreground focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-accent/25 sm:px-3 sm:py-2 sm:text-xs"
+              className="lf-press shrink-0 rounded-full border border-white/[0.08] bg-white/[0.035] px-3 py-2 text-[0.68rem] font-black text-muted transition hover:border-accent/50 hover:text-foreground focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-accent/25 sm:text-xs"
             >
               {title}
             </button>
           ))}
         </div>
-      </div>
 
-      <div className="grid grid-cols-[minmax(0,1.35fr)_minmax(0,0.65fr)] gap-2 sm:grid-cols-2 sm:gap-3">
-        <div>
-          <label className="text-xs font-black sm:text-sm" htmlFor="workout_date">
-            Date
-          </label>
-          <input
-            id="workout_date"
-            type="date"
-            className="mt-1.5 min-h-11 w-full min-w-0 rounded-xl border border-line bg-surface/80 px-2.5 py-2 text-base outline-none transition focus:border-accent focus:ring-4 focus:ring-accent/20 sm:mt-2 sm:min-h-12 sm:rounded-2xl sm:px-4 sm:py-3"
-            {...register("workout_date")}
-          />
-          {errors.workout_date ? (
-            <p className="mt-2 text-sm font-medium text-red-700">
-              {errors.workout_date.message}
-            </p>
-          ) : null}
-        </div>
-
-        <div>
-          <label className="text-xs font-black sm:text-sm" htmlFor="duration_minutes">
-            Minutes
-          </label>
-          <input
-            id="duration_minutes"
-            type="number"
-            min="1"
-            step="1"
-            className="mt-1.5 min-h-11 w-full min-w-0 rounded-xl border border-line bg-surface/80 px-2.5 py-2 text-base outline-none transition focus:border-accent focus:ring-4 focus:ring-accent/20 sm:mt-2 sm:min-h-12 sm:rounded-2xl sm:px-4 sm:py-3"
-            placeholder="45"
-            {...register("duration_minutes")}
-          />
-          {errors.duration_minutes ? (
-            <p className="mt-2 text-sm font-medium text-red-700">
-              {errors.duration_minutes.message}
-            </p>
-          ) : null}
-        </div>
-      </div>
-
-      <div className="rounded-xl border border-line bg-black/10 px-3 py-2.5">
-        <button
-          type="button"
-          onClick={() => setShowWorkoutNotes((current) => !current)}
-          aria-expanded={showWorkoutNotes}
-          className="lf-press flex w-full items-center gap-3 text-left text-xs font-black sm:text-sm"
-        >
-          Workout notes
-          <span className="font-medium text-muted">Optional</span>
-          <ChevronDown
-            className={`ml-auto size-4 text-muted transition-transform ${showWorkoutNotes ? "rotate-180" : ""}`}
-          />
-        </button>
-        {showWorkoutNotes ? (
-          <div className="lf-fade pt-2.5">
-            <textarea
-              id="notes"
-              rows={2}
-              className="w-full rounded-xl border border-line bg-surface/80 px-3 py-2.5 text-base outline-none transition focus:border-accent focus:ring-4 focus:ring-accent/20 sm:text-sm"
-              placeholder="How did the session feel?"
-              {...register("notes")}
+        <div className="mt-4 grid grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)] gap-2 sm:mt-5 sm:grid-cols-2 sm:gap-3">
+          <div className="rounded-xl border border-white/[0.07] bg-black/15 p-2.5 sm:rounded-2xl sm:p-3">
+            <label
+              className="flex items-center gap-2 text-[0.62rem] font-black uppercase tracking-[0.16em] text-muted"
+              htmlFor="workout_date"
+            >
+              <CalendarDays className="size-3.5 text-accent-strong" />
+              Date
+            </label>
+            <input
+              id="workout_date"
+              type="date"
+              className="mt-1 min-h-10 w-full min-w-0 bg-transparent text-sm font-black outline-none sm:text-base"
+              {...register("workout_date")}
             />
-            {errors.notes ? (
-              <p className="mt-1.5 text-xs font-medium text-red-700">
-                {errors.notes.message}
+            {errors.workout_date ? (
+              <p className="mt-2 text-sm font-medium text-red-700">
+                {errors.workout_date.message}
               </p>
             ) : null}
           </div>
-        ) : null}
-      </div>
 
-      <div className="rounded-2xl border border-line bg-white/45 p-2.5 sm:rounded-[1.5rem] sm:p-4">
+          <div className="rounded-xl border border-white/[0.07] bg-black/15 p-2.5 sm:rounded-2xl sm:p-3">
+            <label
+              className="flex items-center gap-2 text-[0.62rem] font-black uppercase tracking-[0.16em] text-muted"
+              htmlFor="duration_minutes"
+            >
+              <Clock3 className="size-3.5 text-sun" />
+              Minutes
+            </label>
+            <input
+              id="duration_minutes"
+              type="number"
+              min="1"
+              step="1"
+              className="lf-num mt-1 min-h-10 w-full min-w-0 bg-transparent text-xl font-black outline-none placeholder:text-ink-dim/50 sm:text-2xl"
+              placeholder="00"
+              {...register("duration_minutes")}
+            />
+            {errors.duration_minutes ? (
+              <p className="mt-2 text-sm font-medium text-red-700">
+                {errors.duration_minutes.message}
+              </p>
+            ) : null}
+          </div>
+        </div>
+
+        <div className="mt-3 rounded-xl border border-white/[0.07] bg-black/15 px-3 py-2.5 sm:rounded-2xl sm:px-4 sm:py-3">
+          <button
+            type="button"
+            onClick={() => setShowWorkoutNotes((current) => !current)}
+            aria-expanded={showWorkoutNotes}
+            className="lf-press flex min-h-8 w-full items-center gap-2.5 text-left text-xs font-black sm:text-sm"
+          >
+            <NotebookPen className="size-4 text-ink-dim" />
+            Workout notes
+            <span className="rounded-full bg-white/[0.05] px-2 py-0.5 text-[0.6rem] font-bold uppercase tracking-wider text-muted">
+              Optional
+            </span>
+            <ChevronDown
+              className={`ml-auto size-4 text-muted transition-transform ${showWorkoutNotes ? "rotate-180" : ""}`}
+            />
+          </button>
+          {showWorkoutNotes ? (
+            <div className="lf-fade pt-2.5">
+              <textarea
+                id="notes"
+                rows={2}
+                className="w-full resize-none rounded-xl border border-line bg-surface/80 px-3 py-2.5 text-base outline-none transition focus:border-accent focus:ring-4 focus:ring-accent/20 sm:text-sm"
+                placeholder="How did the session feel?"
+                {...register("notes")}
+              />
+              {errors.notes ? (
+                <p className="mt-1.5 text-xs font-medium text-red-700">
+                  {errors.notes.message}
+                </p>
+              ) : null}
+            </div>
+          ) : null}
+        </div>
+      </section>
+
+      <section className="rounded-[1.5rem] border border-white/[0.07] bg-gradient-to-br from-card via-card/95 to-surface/90 p-3 shadow-[0_22px_70px_rgba(0,0,0,0.3)] sm:rounded-[1.75rem] sm:p-5">
         <div className="flex items-center justify-between gap-3">
-          <div>
-            <p className="text-[0.7rem] font-black uppercase tracking-[0.2em] text-accent sm:text-xs sm:tracking-[0.24em]">
-              Exercises
-            </p>
-            <p className="mt-0.5 text-xs text-muted sm:mt-1 sm:text-sm sm:leading-6">
-              {fields.length} {fields.length === 1 ? "exercise" : "exercises"} added
-            </p>
+          <div className="flex items-center gap-3">
+            <span className="lf-num grid size-9 place-items-center rounded-xl border border-accent/25 bg-accent/10 text-xs font-black text-accent-strong">
+              02
+            </span>
+            <div>
+              <p className="text-[0.62rem] font-black uppercase tracking-[0.2em] text-ink-dim">
+                Movements
+              </p>
+              <h2 className="font-display text-lg font-black tracking-tight">
+                {fields.length} {fields.length === 1 ? "exercise" : "exercises"}
+              </h2>
+            </div>
           </div>
           <button
             type="button"
             onClick={addExercise}
-            className="hidden items-center justify-center gap-2 rounded-2xl bg-accent px-4 py-2 text-sm font-black text-stone-950 transition hover:bg-accent-strong sm:inline-flex"
+            className="lf-press hidden min-h-11 items-center justify-center gap-2 rounded-xl border border-accent/30 bg-accent/10 px-4 text-sm font-black text-accent-strong transition hover:bg-accent hover:text-white sm:inline-flex"
           >
             <Plus className="size-4" />
             Add exercise
           </button>
         </div>
 
-        <div className="mt-2.5 divide-y divide-line overflow-hidden rounded-2xl border border-line bg-card/70 sm:mt-4 sm:rounded-[1.35rem]">
+        <div className="mt-3 space-y-2.5 sm:mt-4 sm:space-y-3">
           {fields.map((field, index) => (
-            <div
+            <ExerciseRow
               key={field.id}
-              className="liftlog-slide-in relative p-3 transition hover:bg-white/[0.035] sm:p-5"
-            >
-              <div className="absolute inset-y-3 left-0 w-1 rounded-r-full bg-accent/80 sm:inset-y-4" />
-              <div className="flex items-start gap-2 pl-1">
-                <span className="lf-num grid size-9 shrink-0 place-items-center rounded-xl bg-accent/15 text-xs font-black text-accent-strong">
-                  {String(index + 1).padStart(2, "0")}
-                </span>
-                <div className="min-w-0 flex-1">
-                  <input
-                    aria-label={`Exercise ${index + 1} name`}
-                    className="min-h-9 w-full rounded-xl border border-line bg-surface/80 px-3 py-2 text-base font-semibold outline-none transition focus:border-accent sm:text-sm"
-                    placeholder="Exercise name"
-                    {...register(`exercises.${index}.exercise_name`)}
-                  />
-                  {errors.exercises?.[index]?.exercise_name ? (
-                    <p className="mt-1 text-xs font-medium text-strain">
-                      {errors.exercises[index]?.exercise_name?.message}
-                    </p>
-                  ) : null}
-                </div>
-                {fields.length > 1 ? (
-                  <button
-                    type="button"
-                    onClick={() => remove(index)}
-                    aria-label={`Remove exercise ${index + 1}`}
-                    className="lf-press grid size-9 shrink-0 place-items-center rounded-xl bg-red-50 text-red-700 sm:inline-flex sm:w-auto sm:gap-2 sm:px-3"
-                  >
-                    <Trash2 className="size-4" />
-                    <span className="hidden text-xs font-black sm:inline">Remove</span>
-                  </button>
-                ) : null}
-              </div>
-
-              <div className="mt-2.5 space-y-2.5 pl-1 sm:mt-3 sm:space-y-3">
-                <div className="grid grid-cols-3 gap-1.5 sm:gap-2">
-                  <StepperField
-                    label="Sets"
-                    name={`exercises.${index}.sets`}
-                    step={1}
-                    control={control}
-                    register={register}
-                    setValue={setValue}
-                    error={errors.exercises?.[index]?.sets?.message}
-                  />
-                  <StepperField
-                    label="Reps"
-                    name={`exercises.${index}.reps`}
-                    step={1}
-                    control={control}
-                    register={register}
-                    setValue={setValue}
-                    error={errors.exercises?.[index]?.reps?.message}
-                  />
-                  <StepperField
-                    label="Kg"
-                    name={`exercises.${index}.weight`}
-                    step={2.5}
-                    control={control}
-                    register={register}
-                    setValue={setValue}
-                    error={errors.exercises?.[index]?.weight?.message}
-                  />
-                </div>
-
-                <button
-                  type="button"
-                  onClick={() => toggleRowDetails(index)}
-                  aria-expanded={expandedRows.has(index)}
-                  className="lf-press flex items-center gap-1 py-1 text-xs font-bold text-ink-dim transition hover:text-foreground"
-                >
-                  <span className="sm:hidden">More details</span>
-                  <span className="hidden sm:inline">Distance, duration & notes</span>
-                  <ChevronDown
-                    className={`size-3.5 transition-transform ${expandedRows.has(index) ? "rotate-180" : ""}`}
-                  />
-                </button>
-
-                {expandedRows.has(index) ? (
-                  <div className="lf-fade grid grid-cols-2 gap-2">
-                    <div>
-                      <label className="text-[0.65rem] font-black uppercase tracking-[0.14em] text-muted">
-                        Distance, km
-                      </label>
-                      <input
-                        inputMode="decimal"
-                        className="lf-num mt-1.5 min-h-10 w-full rounded-lg border border-line bg-surface/80 px-3 text-base outline-none transition focus:border-accent sm:text-sm"
-                        {...register(`exercises.${index}.distance_km`)}
-                      />
-                      {errors.exercises?.[index]?.distance_km ? (
-                        <p className="mt-1 text-xs font-medium text-strain">
-                          {errors.exercises[index]?.distance_km?.message}
-                        </p>
-                      ) : null}
-                    </div>
-                    <div>
-                      <label className="text-[0.65rem] font-black uppercase tracking-[0.14em] text-muted">
-                        Duration, min
-                      </label>
-                      <input
-                        inputMode="numeric"
-                        className="lf-num mt-1.5 min-h-10 w-full rounded-lg border border-line bg-surface/80 px-3 text-base outline-none transition focus:border-accent sm:text-sm"
-                        {...register(`exercises.${index}.duration_minutes`)}
-                      />
-                      {errors.exercises?.[index]?.duration_minutes ? (
-                        <p className="mt-1 text-xs font-medium text-strain">
-                          {errors.exercises[index]?.duration_minutes?.message}
-                        </p>
-                      ) : null}
-                    </div>
-                    <div className="col-span-2">
-                      <label className="text-[0.65rem] font-black uppercase tracking-[0.14em] text-muted">
-                        Notes
-                      </label>
-                      <textarea
-                        rows={2}
-                        className="mt-1.5 w-full rounded-lg border border-line bg-surface/80 px-3 py-2 text-base outline-none transition focus:border-accent sm:text-sm"
-                        placeholder="Optional cues or set details."
-                        {...register(`exercises.${index}.notes`)}
-                      />
-                      {errors.exercises?.[index]?.notes ? (
-                        <p className="mt-1 text-xs font-medium text-strain">
-                          {errors.exercises[index]?.notes?.message}
-                        </p>
-                      ) : null}
-                    </div>
-                  </div>
-                ) : null}
-              </div>
-            </div>
+              index={index}
+              control={control}
+              register={register}
+              setValue={setValue}
+              errors={errors}
+              canRemove={fields.length > 1}
+              onRemove={() => remove(index)}
+              expanded={expandedRows.has(index)}
+              onToggleDetails={() => toggleRowDetails(index)}
+            />
           ))}
         </div>
-      </div>
+
+        <button
+          type="button"
+          onClick={addExercise}
+          className="lf-press mt-3 inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl border border-dashed border-white/[0.12] bg-white/[0.02] text-sm font-black text-muted transition hover:border-accent/50 hover:bg-accent/5 hover:text-foreground sm:hidden"
+        >
+          <ListPlus className="size-4" />
+          Add another exercise
+        </button>
+      </section>
 
       {formError ? (
         <p className="liftlog-pop-in rounded-2xl bg-red-50 p-3 text-sm font-medium text-red-700">
@@ -667,12 +314,21 @@ export function WorkoutForm({ mode = "create", workout }: WorkoutFormProps) {
         </p>
       ) : null}
 
-      <div className="hidden sm:block">
+      <div className="hidden items-center justify-between gap-4 rounded-[1.5rem] border border-white/[0.07] bg-card/85 p-4 sm:flex">
+        <div>
+          <p className="text-[0.62rem] font-black uppercase tracking-[0.18em] text-ink-dim">
+            Ready to finish?
+          </p>
+          <p className="mt-1 text-sm font-bold text-muted">
+            {fields.length} {fields.length === 1 ? "exercise" : "exercises"} in this session
+          </p>
+        </div>
         <button
           type="submit"
           disabled={isSubmitting}
-          className="rounded-2xl bg-accent px-5 py-3 text-sm font-black text-stone-950 shadow-lg shadow-accent/20 transition hover:-translate-y-0.5 hover:bg-accent-strong disabled:cursor-not-allowed disabled:opacity-70"
+          className="lf-press inline-flex min-h-12 items-center gap-2 rounded-xl bg-accent px-6 text-sm font-black text-white shadow-[0_10px_32px_rgba(240,71,46,0.28)] transition hover:bg-accent-strong disabled:cursor-not-allowed disabled:opacity-70"
         >
+          <Save className="size-4" />
           {isSubmitting
             ? mode === "edit"
               ? "Saving..."
@@ -683,22 +339,21 @@ export function WorkoutForm({ mode = "create", workout }: WorkoutFormProps) {
         </button>
       </div>
 
-      <div className="fixed inset-x-3 bottom-[5.75rem] z-30 rounded-2xl border border-line bg-card/95 p-1.5 shadow-[0_18px_60px_rgba(0,0,0,0.48)] backdrop-blur sm:hidden">
-        <div className="grid grid-cols-[1fr_auto] gap-2">
+      <div className="fixed inset-x-3 bottom-[5.75rem] z-30 rounded-2xl border border-white/[0.1] bg-[#151518]/95 p-1.5 shadow-[0_20px_70px_rgba(0,0,0,0.58)] backdrop-blur-xl sm:hidden">
+        <div className="grid grid-cols-[auto_1fr] items-center gap-2">
+          <div className="px-2 text-center">
+            <p className="lf-num text-lg font-black">{fields.length}</p>
+            <p className="text-[0.55rem] font-black uppercase tracking-wider text-ink-dim">
+              Moves
+            </p>
+          </div>
           <button
             type="submit"
             disabled={isSubmitting}
-            className="min-h-11 rounded-xl bg-accent px-4 py-2.5 text-sm font-black text-stone-950 shadow-lg shadow-accent/20 transition disabled:cursor-not-allowed disabled:opacity-70"
+            className="lf-press inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-accent px-4 py-2.5 text-sm font-black text-white shadow-lg shadow-accent/20 transition disabled:cursor-not-allowed disabled:opacity-70"
           >
+            <Save className="size-4" />
             {isSubmitting ? "Saving..." : "Save workout"}
-          </button>
-          <button
-            type="button"
-            onClick={addExercise}
-            className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-line bg-white/65 px-3 py-2.5 text-sm font-black"
-          >
-            <Plus className="size-4" />
-            Add
           </button>
         </div>
       </div>
