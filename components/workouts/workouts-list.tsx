@@ -161,27 +161,27 @@ export function WorkoutsList() {
             <Dumbbell className="size-5" />
           </span>
         </div>
-        <div className="mt-3 grid grid-cols-3 gap-2">
+        <div className="mt-3 grid min-w-0 grid-cols-2 gap-2">
           <Link
             href="/running-plan"
-            className="lf-press inline-flex min-h-11 min-w-0 items-center justify-center gap-1.5 rounded-xl border border-accent/25 bg-accent/10 px-2 text-xs font-black text-accent-strong"
+            className="lf-press inline-flex min-h-11 min-w-0 items-center justify-center gap-2 rounded-xl border border-accent/25 bg-accent/10 px-3 text-xs font-black text-accent-strong"
           >
             <Footprints className="size-4 shrink-0" />
-            <span className="truncate">Run goal</span>
+            <span>Running coach</span>
           </Link>
           <Link
             href="/training-plan"
-            className="lf-press inline-flex min-h-11 min-w-0 items-center justify-center gap-1.5 rounded-xl border border-line bg-white/[0.04] px-2 text-xs font-black"
+            className="lf-press inline-flex min-h-11 min-w-0 items-center justify-center gap-2 rounded-xl border border-line bg-white/[0.04] px-3 text-xs font-black"
           >
             <Target className="size-4 shrink-0" />
-            Plan
+            <span>Training plan</span>
           </Link>
           <Link
             href="/workouts/new"
-            className="lf-press inline-flex min-h-11 min-w-0 items-center justify-center gap-1.5 rounded-xl bg-accent px-2 text-xs font-black text-white"
+            className="lf-press col-span-2 inline-flex min-h-12 min-w-0 items-center justify-center gap-2 rounded-xl bg-accent px-4 text-sm font-black text-white"
           >
             <Plus className="size-4 shrink-0" />
-            <span className="truncate">Log workout</span>
+            <span>Log workout</span>
           </Link>
         </div>
       </section>
