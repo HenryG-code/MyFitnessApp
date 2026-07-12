@@ -17,8 +17,20 @@ import {
   type MuscleState,
 } from "@/src/lib/performance/muscles";
 import { ArrowDownRight, ArrowUpRight, RotateCcw, X } from "lucide-react";
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
+
+// three.js loads only on this page, and only when WebGL is available.
+const BodyScene = dynamic(
+  () => import("@/components/body/body-scene").then((mod) => mod.BodyScene),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="size-full animate-pulse rounded-[1.25rem] bg-white/[0.04]" />
+    ),
+  }
+);
 
 const stateColors: Record<MuscleState, string> = {
   fresh: "var(--accent)",
@@ -273,6 +285,23 @@ export function BodyIntelligencePage() {
     [selected, intelligence]
   );
 
+  // The SVG map remains as the fallback for devices without WebGL.
+  const [hasWebGL] = useState(() => {
+    if (typeof document === "undefined") return true;
+
+    try {
+      const canvas = document.createElement("canvas");
+      return Boolean(
+        canvas.getContext("webgl2") ?? canvas.getContext("webgl")
+      );
+    } catch {
+      return false;
+    }
+  });
+  const [hoveredStatus, setHoveredStatus] = useState<MuscleGroupStatus | null>(
+    null
+  );
+
   function rotateBody(nextView?: BodyView) {
     setView((current) => nextView ?? (current === "front" ? "rear" : "front"));
   }
@@ -366,8 +395,8 @@ export function BodyIntelligencePage() {
             role="region"
             tabIndex={0}
             aria-label={`Interactive 3D body, showing ${view}. Drag horizontally or use arrow keys to rotate.`}
-            onPointerDown={handleModelPointerDown}
-            onPointerUp={handleModelPointerUp}
+            onPointerDown={hasWebGL ? undefined : handleModelPointerDown}
+            onPointerUp={hasWebGL ? undefined : handleModelPointerUp}
             onPointerCancel={() => {
               dragStartX.current = null;
             }}
@@ -382,42 +411,62 @@ export function BodyIntelligencePage() {
                 rotateBody("rear");
               }
             }}
-            className="relative mt-2 h-[24rem] cursor-grab touch-pan-y select-none outline-none [perspective:1100px] active:cursor-grabbing focus-visible:ring-2 focus-visible:ring-accent/60 sm:h-[26rem]"
+            className="relative mt-2 h-[24rem] touch-pan-y select-none outline-none [perspective:1100px] focus-visible:ring-2 focus-visible:ring-accent/60 sm:h-[26rem]"
           >
-            <div className="pointer-events-none absolute left-1/2 top-[46%] h-[19rem] w-[12rem] -translate-x-1/2 -translate-y-1/2 rounded-[50%] border border-white/[0.055] shadow-[0_0_70px_rgba(240,71,46,0.08),inset_0_0_55px_rgba(255,255,255,0.025)]" />
-            <div
-              className="relative size-full transition-transform duration-700 ease-[cubic-bezier(0.22,0.8,0.2,1)] [transform-style:preserve-3d] motion-reduce:transition-none"
-              style={{
-                transform: `rotateY(${view === "front" ? 0 : 180}deg)`,
-              }}
-            >
-              <div className="absolute inset-0 [backface-visibility:hidden]">
-                <BodyMap
-                  view="front"
-                  active={view === "front"}
-                  intelligence={intelligence}
-                  selected={selected}
-                  onSelect={(id) =>
-                    setSelected((current) => (current === id ? null : id))
-                  }
-                />
+            {hasWebGL ? (
+              <BodyScene
+                intelligence={intelligence}
+                view={view}
+                selected={selected}
+                onSelect={(id) =>
+                  setSelected((current) => (current === id ? null : id))
+                }
+                onHover={(id) =>
+                  setHoveredStatus(id ? intelligence.groups[id] : null)
+                }
+              />
+            ) : (
+              <div
+                className="relative size-full cursor-grab transition-transform duration-700 ease-[cubic-bezier(0.22,0.8,0.2,1)] [transform-style:preserve-3d] active:cursor-grabbing motion-reduce:transition-none"
+                style={{
+                  transform: `rotateY(${view === "front" ? 0 : 180}deg)`,
+                }}
+              >
+                <div className="absolute inset-0 [backface-visibility:hidden]">
+                  <BodyMap
+                    view="front"
+                    active={view === "front"}
+                    intelligence={intelligence}
+                    selected={selected}
+                    onSelect={(id) =>
+                      setSelected((current) => (current === id ? null : id))
+                    }
+                  />
+                </div>
+                <div className="absolute inset-0 [backface-visibility:hidden] [transform:rotateY(180deg)]">
+                  <BodyMap
+                    view="rear"
+                    active={view === "rear"}
+                    intelligence={intelligence}
+                    selected={selected}
+                    onSelect={(id) =>
+                      setSelected((current) => (current === id ? null : id))
+                    }
+                  />
+                </div>
               </div>
-              <div className="absolute inset-0 [backface-visibility:hidden] [transform:rotateY(180deg)]">
-                <BodyMap
-                  view="rear"
-                  active={view === "rear"}
-                  intelligence={intelligence}
-                  selected={selected}
-                  onSelect={(id) =>
-                    setSelected((current) => (current === id ? null : id))
-                  }
-                />
-              </div>
-            </div>
+            )}
             <div className="pointer-events-none absolute inset-x-0 bottom-1 flex justify-center">
-              <span className="rounded-full border border-white/[0.08] bg-black/45 px-3 py-1 text-[0.6rem] font-black uppercase tracking-[0.16em] text-muted backdrop-blur">
-                {view} view
-              </span>
+              {hoveredStatus ? (
+                <span className="lf-fade rounded-full border border-white/[0.1] bg-black/60 px-3 py-1 text-[0.62rem] font-black text-foreground backdrop-blur">
+                  {hoveredStatus.name} · {stateLabels[hoveredStatus.state]} ·{" "}
+                  <span className="lf-num">{hoveredStatus.weeklySets} sets</span>
+                </span>
+              ) : (
+                <span className="rounded-full border border-white/[0.08] bg-black/45 px-3 py-1 text-[0.6rem] font-black uppercase tracking-[0.16em] text-muted backdrop-blur">
+                  {view} view
+                </span>
+              )}
             </div>
           </div>
           <button
@@ -426,7 +475,7 @@ export function BodyIntelligencePage() {
             className="lf-press mx-auto mt-1 flex items-center gap-2 rounded-full border border-line bg-black/25 px-3 py-1.5 text-[0.68rem] font-bold text-muted transition hover:border-accent/40 hover:text-foreground"
           >
             <RotateCcw className="size-3.5" />
-            Drag or tap to rotate
+            {hasWebGL ? "Drag to spin · tap a muscle" : "Drag or tap to rotate"}
           </button>
           <div className="mt-3 flex flex-wrap items-center justify-center gap-x-3 gap-y-1">
             {(

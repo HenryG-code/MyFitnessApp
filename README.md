@@ -69,8 +69,10 @@ Recommended capture flow:
   macros. When Connected Health data exists, the strip swaps in Steps and Sleep.
 - **Train (`/workouts`)** — workout history and manual logging, plus a live
   guided **Workout Mode** at `/workouts/live` that records a per-set breakdown.
-- **Body (`/body`)** — Body Intelligence, an SVG muscle map that highlights
-  worked muscle groups from recent training.
+- **Body (`/body`)** — Body Intelligence, an interactive 3D body model
+  (three.js metaballs with matcap shading) that tints muscle groups by
+  training state; drag to spin, tap a muscle for detail. Falls back to an
+  SVG muscle map when WebGL is unavailable.
 - **Progress (`/progress`)** — long-term journey trends across weight, training,
   habits, and consistency.
 - **Report (`/report`)** — a deterministic weekly report summarising the week's
