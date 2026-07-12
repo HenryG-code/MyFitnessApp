@@ -12,6 +12,7 @@ import {
   CalendarDays,
   Dumbbell,
   FileBarChart,
+  Footprints,
   HeartPulse,
   Home,
   LayoutGrid,
@@ -25,6 +26,7 @@ import {
   TrendingUp,
   X,
 } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState, type ReactNode } from "react";
@@ -44,6 +46,7 @@ const lifestyleNavItems = [
   { label: "Meal Planner", href: "/meal-planner", icon: CalendarDays },
   { label: "Grocery List", href: "/grocery-list", icon: ShoppingBasket },
   { label: "Training Plan", href: "/training-plan", icon: Target },
+  { label: "Running Coach", href: "/running-plan", icon: Footprints },
   { label: "Settings", href: "/settings", icon: Settings },
 ];
 
@@ -62,6 +65,7 @@ const mobileMenuItems = [
   { label: "Meal Planner", href: "/meal-planner", icon: CalendarDays },
   { label: "Weight", href: "/weight", icon: Scale },
   { label: "Training Plan", href: "/training-plan", icon: Target },
+  { label: "Running Coach", href: "/running-plan", icon: Footprints },
   { label: "Weekly Report", href: "/report", icon: FileBarChart },
   { label: "Connected Health", href: "/settings#connected-health", icon: HeartPulse },
   { label: "Settings", href: "/settings", icon: Settings },
@@ -106,14 +110,15 @@ function UserAvatar({
 
   return (
     <span
-      className={`grid ${sizeClassName} shrink-0 place-items-center overflow-hidden rounded-2xl border border-accent/25 bg-accent/10 font-display font-black text-accent`}
+      className={`relative grid ${sizeClassName} shrink-0 place-items-center overflow-hidden rounded-2xl border border-accent/25 bg-accent/10 font-display font-black text-accent`}
     >
       {avatarUrl ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
+        <Image
           src={avatarUrl}
           alt={`${userName} avatar`}
-          className="size-full object-cover"
+          fill
+          sizes="56px"
+          className="object-cover"
         />
       ) : (
         <span className={textClassName}>{getInitials(userName, email)}</span>

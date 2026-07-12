@@ -3,10 +3,8 @@
 import {
   trainingGoals,
   trainingLevels,
-} from "@/src/lib/training-plans/data";
-import type {
-  TrainingGoal,
-  TrainingLevel,
+  type TrainingGoal,
+  type TrainingLevel,
 } from "@/src/lib/training-plans/types";
 import { CalendarDays, Target } from "lucide-react";
 import { FitnessCard } from "@/components/ui/fitness-card";

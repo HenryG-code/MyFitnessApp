@@ -1,21 +1,10 @@
-import type {
-  TrainingGoal,
-  TrainingLevel,
-  TrainingPlan,
+import {
+  defaultTrainingGoal,
+  defaultTrainingLevel,
+  type TrainingGoal,
+  type TrainingLevel,
+  type TrainingPlan,
 } from "@/src/lib/training-plans/types";
-
-export const trainingGoals: TrainingGoal[] = [
-  "Lose weight",
-  "Gain muscle",
-  "Get fit",
-  "Build strength",
-  "Improve cardio",
-  "General health",
-];
-
-export const defaultTrainingGoal: TrainingGoal = "Get fit";
-export const trainingLevels: TrainingLevel[] = ["Beginner", "Intermediate"];
-export const defaultTrainingLevel: TrainingLevel = "Beginner";
 
 export const trainingPlans: TrainingPlan[] = [
   {

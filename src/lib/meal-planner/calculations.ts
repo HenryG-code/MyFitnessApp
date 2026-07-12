@@ -1,4 +1,4 @@
-import type { Recipe } from "@/src/lib/recipes/data";
+import type { Recipe } from "@/src/lib/recipes/types";
 import {
   mealSlots,
   weekdays,

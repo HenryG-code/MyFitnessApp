@@ -19,6 +19,7 @@ import {
   Clock,
   Dumbbell,
   Flame,
+  Footprints,
   History,
   Plus,
   Target,
@@ -160,20 +161,27 @@ export function WorkoutsList() {
             <Dumbbell className="size-5" />
           </span>
         </div>
-        <div className="mt-3 grid grid-cols-2 gap-2">
+        <div className="mt-3 grid grid-cols-3 gap-2">
+          <Link
+            href="/running-plan"
+            className="lf-press inline-flex min-h-11 min-w-0 items-center justify-center gap-1.5 rounded-xl border border-accent/25 bg-accent/10 px-2 text-xs font-black text-accent-strong"
+          >
+            <Footprints className="size-4 shrink-0" />
+            <span className="truncate">Run goal</span>
+          </Link>
           <Link
             href="/training-plan"
-            className="lf-press inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-line bg-white/[0.04] px-3 text-sm font-black"
+            className="lf-press inline-flex min-h-11 min-w-0 items-center justify-center gap-1.5 rounded-xl border border-line bg-white/[0.04] px-2 text-xs font-black"
           >
-            <Target className="size-4" />
+            <Target className="size-4 shrink-0" />
             Plan
           </Link>
           <Link
             href="/workouts/new"
-            className="lf-press inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-accent px-3 text-sm font-black text-white"
+            className="lf-press inline-flex min-h-11 min-w-0 items-center justify-center gap-1.5 rounded-xl bg-accent px-2 text-xs font-black text-white"
           >
-            <Plus className="size-4" />
-            Log workout
+            <Plus className="size-4 shrink-0" />
+            <span className="truncate">Log workout</span>
           </Link>
         </div>
       </section>
@@ -188,6 +196,13 @@ export function WorkoutsList() {
           variant="performance"
         >
           <div className="flex flex-wrap gap-2">
+            <Link
+              href="/running-plan"
+              className="inline-flex items-center justify-center gap-2 rounded-2xl border border-accent/25 bg-accent/10 px-5 py-3 text-sm font-black text-accent-strong transition hover:-translate-y-0.5"
+            >
+              <Footprints className="size-4" />
+              Running coach
+            </Link>
             <Link
               href="/training-plan"
               className="inline-flex items-center justify-center gap-2 rounded-2xl bg-stone-950 px-5 py-3 text-sm font-black text-white shadow-lg shadow-stone-900/10 transition hover:bg-accent"

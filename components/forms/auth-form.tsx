@@ -207,7 +207,7 @@ export function RegisterForm() {
       }
 
       if (data.session) {
-        router.replace("/dashboard");
+        router.replace("/onboarding");
         router.refresh();
         return;
       }

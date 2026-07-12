@@ -6,6 +6,7 @@ import type {
   HabitDefinitionInsert,
   HabitDefinitionUpdate,
 } from "@/src/lib/supabase/database.types";
+import { guidedStretchHabitName } from "@/src/lib/warm-up/routines";
 
 export type HabitDefinitionInput = {
   name: string;
@@ -39,6 +40,10 @@ export const defaultHabits = [
   {
     name: "Clean environment",
     description: "Reset your space so tomorrow starts easier.",
+  },
+  {
+    name: guidedStretchHabitName,
+    description: "Follow the guided dynamic warm-up before training.",
   },
 ] as const;
 

@@ -90,11 +90,13 @@ export type HabitCompletion = {
 export type UserPreferences = {
   user_id: string;
   selected_training_goal: string | null;
+  selected_training_level: string | null;
   notification_preferences: Json;
   preferred_reminder_time: string | null;
   meal_plan: Json;
   grocery_checked_items: Json;
   health_goals: Json;
+  running_plan: Json;
   created_at: string;
   updated_at: string;
 };
@@ -263,11 +265,13 @@ export type HabitCompletionUpdate = Partial<
 export type UserPreferencesInsert = {
   user_id: string;
   selected_training_goal?: string | null;
+  selected_training_level?: string | null;
   notification_preferences?: Json;
   preferred_reminder_time?: string | null;
   meal_plan?: Json;
   grocery_checked_items?: Json;
   health_goals?: Json;
+  running_plan?: Json;
   created_at?: string;
   updated_at?: string;
 };

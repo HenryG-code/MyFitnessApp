@@ -1,11 +1,9 @@
+import { getTrainingPlanByGoal } from "@/src/lib/training-plans/data";
+import { loadTrainingGoalFromStorage } from "@/src/lib/training-plans/storage";
 import {
   defaultTrainingGoal,
-  getTrainingPlanByGoal,
-} from "@/src/lib/training-plans/data";
-import { loadTrainingGoalFromStorage } from "@/src/lib/training-plans/storage";
-import type {
-  TrainingGoal,
-  TrainingSession,
+  type TrainingGoal,
+  type TrainingSession,
 } from "@/src/lib/training-plans/types";
 import type { Workout } from "@/src/lib/supabase/database.types";
 

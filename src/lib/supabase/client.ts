@@ -1,24 +1,16 @@
-import { createClient } from "@supabase/supabase-js";
+import { getClientEnv, hasSupabaseEnv } from "@/src/lib/env";
+import { createBrowserClient } from "@supabase/ssr";
 import type { Database } from "./database.types";
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-
-function getRequiredEnv(name: string, value: string | undefined) {
-  if (!value) {
-    throw new Error(
-      `Missing ${name}. Add it to .env.local for local development and to Vercel project settings for deployment.`
-    );
-  }
-
-  return value;
-}
-
+// Cookie-based session storage (via @supabase/ssr) so the middleware can
+// verify auth server-side before protected pages render.
 export function createBrowserSupabaseClient() {
-  return createClient<Database>(
-    getRequiredEnv("NEXT_PUBLIC_SUPABASE_URL", supabaseUrl),
-    getRequiredEnv("NEXT_PUBLIC_SUPABASE_ANON_KEY", supabaseAnonKey)
+  const env = getClientEnv();
+
+  return createBrowserClient<Database>(
+    env.NEXT_PUBLIC_SUPABASE_URL,
+    env.NEXT_PUBLIC_SUPABASE_ANON_KEY
   );
 }
 
-export const hasSupabaseEnv = Boolean(supabaseUrl && supabaseAnonKey);
+export { hasSupabaseEnv };

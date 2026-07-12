@@ -134,7 +134,10 @@ mission, muscles, journey, history, report). These are pure calculations from
 workouts, flexible daily habits, weight logs, goal weight, and planned-meal
 nutrition macros — no AI or paid services.
 
-All data fetching is client-side via the browser Supabase client in
+Sessions are cookie-based via `@supabase/ssr`: `middleware.ts` verifies the
+session server-side and redirects unauthenticated visitors off protected
+routes before they render (client-side guards remain as a second layer). Data
+fetching is client-side via the browser Supabase client in
 `src/lib/supabase/client.ts`. Supabase-backed features fetch only the signed-in
 user's rows and rely on Row Level Security as the final protection layer.
 
@@ -451,7 +454,17 @@ Run the development server:
 npm run dev
 ```
 
-Create a production build:
+Run the quality checks (also run by GitHub Actions CI on every push and PR):
+
+```bash
+npm run lint
+npm run typecheck
+npm test
+```
+
+Unit tests use Vitest and cover the deterministic logic in
+`src/lib/performance/`, `src/lib/notifications/`, and the workout-form
+schema. Create a production build:
 
 ```bash
 npm run build

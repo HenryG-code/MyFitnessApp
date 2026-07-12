@@ -1,3 +1,4 @@
+import { getNotificationEnvironment } from "@/src/lib/env";
 import {
   getDateInTimeZone,
   getDaysBetweenDates,
@@ -7,49 +8,19 @@ import { normalizeNotificationPreferences } from "@/src/lib/notifications/storag
 import type { Database, PushSubscription } from "@/src/lib/supabase/database.types";
 import { createClient } from "@supabase/supabase-js";
 import { NextRequest, NextResponse } from "next/server";
+import { timingSafeEqual } from "node:crypto";
 import webpush from "web-push";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-type NotificationEnvironment = {
-  supabaseUrl: string;
-  serviceRoleKey: string;
-  publicKey: string;
-  privateKey: string;
-  cronSecret: string;
-  contact: string;
-};
+function isAuthorized(request: NextRequest, cronSecret: string) {
+  const received = Buffer.from(request.headers.get("authorization") ?? "");
+  const expected = Buffer.from(`Bearer ${cronSecret}`);
 
-function getRequiredEnvironment(): NotificationEnvironment | null {
-  const values = {
-    supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL,
-    serviceRoleKey: process.env.SUPABASE_SERVICE_ROLE_KEY,
-    publicKey: process.env.NEXT_PUBLIC_WEB_PUSH_PUBLIC_KEY,
-    privateKey: process.env.WEB_PUSH_PRIVATE_KEY,
-    cronSecret: process.env.CRON_SECRET,
-    contact: process.env.WEB_PUSH_CONTACT ?? "mailto:support@example.com",
-  };
-
-  if (
-    !values.supabaseUrl ||
-    !values.serviceRoleKey ||
-    !values.publicKey ||
-    !values.privateKey ||
-    !values.cronSecret ||
-    !values.contact
-  ) {
-    return null;
-  }
-
-  return {
-    supabaseUrl: values.supabaseUrl,
-    serviceRoleKey: values.serviceRoleKey,
-    publicKey: values.publicKey,
-    privateKey: values.privateKey,
-    cronSecret: values.cronSecret,
-    contact: values.contact,
-  } as NotificationEnvironment;
+  return (
+    received.length === expected.length && timingSafeEqual(received, expected)
+  );
 }
 
 function wasSentToday(subscription: PushSubscription, now: Date) {
@@ -79,7 +50,7 @@ function getStatusCode(error: unknown) {
 }
 
 export async function GET(request: NextRequest) {
-  const environment = getRequiredEnvironment();
+  const environment = getNotificationEnvironment();
 
   if (!environment) {
     return NextResponse.json(
@@ -88,10 +59,7 @@ export async function GET(request: NextRequest) {
     );
   }
 
-  if (
-    request.headers.get("authorization") !==
-    `Bearer ${environment.cronSecret}`
-  ) {
+  if (!isAuthorized(request, environment.cronSecret)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -127,24 +95,32 @@ export async function GET(request: NextRequest) {
   const preferencesByUser = new Map(
     (preferenceRows ?? []).map((row) => [row.user_id, row])
   );
-  const latestWorkoutByUser = new Map<string, string | null | undefined>();
-
-  await Promise.all(
-    userIds.map(async (userId) => {
-      const { data, error } = await supabase
+  // One batched query instead of one query per subscribed user; rows arrive
+  // newest-first, so the first row seen per user is their latest workout.
+  const { data: workoutRows, error: workoutsError } = userIds.length
+    ? await supabase
         .from("workouts")
-        .select("workout_date")
-        .eq("user_id", userId)
+        .select("user_id, workout_date")
+        .in("user_id", userIds)
         .order("workout_date", { ascending: false })
-        .limit(1)
-        .maybeSingle();
+    : { data: [], error: null };
 
-      latestWorkoutByUser.set(
-        userId,
-        error ? undefined : (data?.workout_date ?? null)
-      );
-    })
+  if (workoutsError) {
+    return NextResponse.json(
+      { error: "Could not load workout history." },
+      { status: 500 }
+    );
+  }
+
+  const latestWorkoutByUser = new Map<string, string | null>(
+    userIds.map((userId) => [userId, null])
   );
+
+  for (const row of workoutRows ?? []) {
+    if (latestWorkoutByUser.get(row.user_id) === null) {
+      latestWorkoutByUser.set(row.user_id, row.workout_date);
+    }
+  }
 
   const result = { processed: subscriptions.length, sent: 0, skipped: 0, removed: 0, errors: 0 };
 
@@ -166,12 +142,8 @@ export async function GET(request: NextRequest) {
     }
 
     const localDate = getDateInTimeZone(now, subscription.timezone);
-    const latestWorkoutDate = latestWorkoutByUser.get(subscription.user_id);
-
-    if (latestWorkoutDate === undefined) {
-      result.skipped += 1;
-      continue;
-    }
+    const latestWorkoutDate =
+      latestWorkoutByUser.get(subscription.user_id) ?? null;
 
     const startingDate =
       latestWorkoutDate ?? subscription.created_at.slice(0, 10);

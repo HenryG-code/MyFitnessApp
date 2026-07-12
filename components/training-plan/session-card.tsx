@@ -13,9 +13,10 @@ import { useState } from "react";
 type SessionCardProps = {
   plan: TrainingPlan;
   session: TrainingSession;
+  onLogged?: () => Promise<void> | void;
 };
 
-export function SessionCard({ plan, session }: SessionCardProps) {
+export function SessionCard({ plan, session, onLogged }: SessionCardProps) {
   const [createdWorkoutId, setCreatedWorkoutId] = useState("");
   const [error, setError] = useState("");
   const [isLogging, setIsLogging] = useState(false);
@@ -28,6 +29,7 @@ export function SessionCard({ plan, session }: SessionCardProps) {
     try {
       const workout = await logTrainingPlanSession(plan, session);
       setCreatedWorkoutId(workout.id);
+      await onLogged?.();
     } catch (logError) {
       setError(
         logError instanceof Error

@@ -1,7 +1,8 @@
 "use client";
 
-import type { Recipe } from "@/src/lib/recipes/data";
+import type { Recipe } from "@/src/lib/recipes/types";
 import { Clock, Heart } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 
 type RecipeCardProps = {
@@ -46,12 +47,12 @@ export function RecipeCard({
       >
         {recipe.image ? (
           <span className="relative -mx-3.5 -mt-3.5 mb-3 block aspect-[2/1] overflow-hidden rounded-t-[1.2rem] sm:-mx-4 sm:-mt-4">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
+            <Image
               src={recipe.image}
               alt=""
-              loading="lazy"
-              className="size-full object-cover"
+              fill
+              sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
+              className="object-cover"
             />
           </span>
         ) : null}

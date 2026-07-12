@@ -1,11 +1,12 @@
 "use client";
 
-import type { Recipe } from "@/src/lib/recipes/data";
+import type { Recipe } from "@/src/lib/recipes/types";
 import {
   toggleFavoriteSlug,
   useFavoriteRecipes,
 } from "@/src/lib/recipes/favorites";
 import { ArrowLeft, CalendarDays, Check, Heart } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 
@@ -68,11 +69,12 @@ export function RecipeDetail({ recipe }: RecipeDetailProps) {
 
       {recipe.image ? (
         <div className="lf-rise lf-rise-1 relative aspect-[2/1] overflow-hidden rounded-xl border border-line">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
+          <Image
             src={recipe.image}
             alt={recipe.title}
-            className="size-full object-cover"
+            fill
+            sizes="(min-width: 768px) 700px, 100vw"
+            className="object-cover"
           />
         </div>
       ) : null}
