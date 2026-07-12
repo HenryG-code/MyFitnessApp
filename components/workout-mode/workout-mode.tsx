@@ -7,140 +7,19 @@ import {
   type ExercisePerformance,
 } from "@/src/lib/performance/history";
 import { createWorkout } from "@/src/lib/workouts/queries";
-import {
-  defaultTrainingGoal,
-  getTrainingPlanByGoal,
-} from "@/src/lib/training-plans/data";
+import { getTrainingPlanByGoal } from "@/src/lib/training-plans/data";
 import { isTrainingGoal } from "@/src/lib/training-plans/storage";
-import type {
-  TrainingExercise,
-  TrainingSession,
-} from "@/src/lib/training-plans/types";
-import { Check, ChevronRight, Minus, Plus, X } from "lucide-react";
+import { defaultTrainingGoal } from "@/src/lib/training-plans/types";
+import {
+  buildQueue,
+  formatClock,
+  type LoggedSet,
+  type QueueExercise,
+} from "@/src/lib/workouts/session-queue";
+import { Stepper } from "@/components/workout-mode/stepper";
+import { Check, ChevronRight, X } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-
-type LoggedSet = { weight: number | null; reps: number | null };
-
-type QueueExercise = {
-  name: string;
-  targetSets: number;
-  targetReps: number | null;
-  restSeconds: number;
-  timed: boolean;
-  durationMinutes: number | null;
-  notes?: string;
-  logged: LoggedSet[];
-  skipped: boolean;
-};
-
-function parseFirstNumber(value: string | undefined) {
-  const match = value?.match(/\d+(\.\d+)?/);
-  return match ? Number(match[0]) : null;
-}
-
-function buildQueue(session: TrainingSession): QueueExercise[] {
-  return session.exercises.map((exercise: TrainingExercise) => {
-    const timed = !exercise.sets && !exercise.reps && Boolean(exercise.duration);
-
-    return {
-      name: exercise.name,
-      targetSets: timed ? 1 : (exercise.sets ?? 3),
-      targetReps: parseFirstNumber(exercise.reps),
-      restSeconds: parseFirstNumber(exercise.rest) ?? 75,
-      timed,
-      durationMinutes: parseFirstNumber(exercise.duration),
-      notes: exercise.notes,
-      logged: [],
-      skipped: false,
-    };
-  });
-}
-
-function formatClock(totalSeconds: number) {
-  const minutes = Math.floor(totalSeconds / 60);
-  const seconds = totalSeconds % 60;
-  return `${minutes}:${seconds.toString().padStart(2, "0")}`;
-}
-
-function Stepper({
-  label,
-  value,
-  display,
-  onChange,
-  step,
-  inputMode,
-}: {
-  label: string;
-  value: number;
-  display: string;
-  onChange: (next: number) => void;
-  step: number;
-  inputMode: "decimal" | "numeric";
-}) {
-  const [editing, setEditing] = useState(false);
-  const [draft, setDraft] = useState("");
-
-  function commit() {
-    const parsed = Number(draft.replace(",", "."));
-    if (Number.isFinite(parsed) && parsed >= 0) {
-      onChange(parsed);
-    }
-    setEditing(false);
-  }
-
-  return (
-    <div className="lf-inset flex flex-1 flex-col items-center px-2 py-3">
-      <p className="lf-eyebrow !text-[0.6rem]">{label}</p>
-      <div className="mt-1.5 flex w-full items-center justify-between gap-1">
-        <button
-          type="button"
-          aria-label={`Decrease ${label}`}
-          onClick={() => onChange(Math.max(0, value - step))}
-          className="lf-press grid size-11 shrink-0 place-items-center rounded-xl border border-line bg-white/[0.04] text-muted transition hover:text-foreground"
-        >
-          <Minus className="size-4" />
-        </button>
-        {editing ? (
-          <input
-            autoFocus
-            inputMode={inputMode}
-            value={draft}
-            onChange={(event) => setDraft(event.target.value)}
-            onBlur={commit}
-            onKeyDown={(event) => {
-              if (event.key === "Enter") {
-                commit();
-              }
-            }}
-            aria-label={label}
-            className="lf-num w-16 rounded-lg border border-accent/50 bg-transparent py-1 text-center font-display text-2xl font-black outline-none"
-          />
-        ) : (
-          <button
-            type="button"
-            onClick={() => {
-              setDraft(String(value));
-              setEditing(true);
-            }}
-            aria-label={`Edit ${label}`}
-            className="lf-num min-w-0 truncate px-1 font-display text-[1.7rem] font-black leading-none"
-          >
-            {display}
-          </button>
-        )}
-        <button
-          type="button"
-          aria-label={`Increase ${label}`}
-          onClick={() => onChange(value + step)}
-          className="lf-press grid size-11 shrink-0 place-items-center rounded-xl border border-line bg-white/[0.04] text-muted transition hover:text-foreground"
-        >
-          <Plus className="size-4" />
-        </button>
-      </div>
-    </div>
-  );
-}
 
 export function WorkoutMode() {
   const router = useRouter();

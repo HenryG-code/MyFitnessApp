@@ -20,7 +20,7 @@ import {
   type MealSlot,
   type Weekday,
 } from "@/src/lib/meal-planner/types";
-import type { Recipe } from "@/src/lib/recipes/data";
+import type { Recipe } from "@/src/lib/recipes/types";
 import {
   announcePreferenceSyncStatus,
   ensureUserPreferences,

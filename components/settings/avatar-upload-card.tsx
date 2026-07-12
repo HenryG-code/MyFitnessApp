@@ -7,6 +7,7 @@ import {
 } from "@/src/lib/profile/avatar";
 import type { Profile } from "@/src/lib/supabase/database.types";
 import { Camera, Trash2, Upload } from "lucide-react";
+import Image from "next/image";
 import { useRef, useState } from "react";
 
 type AvatarUploadCardProps = {
@@ -102,11 +103,12 @@ export function AvatarUploadCard({
       <div className="flex items-center gap-3 sm:gap-4">
         <div className="relative grid size-16 shrink-0 place-items-center overflow-hidden rounded-2xl border border-accent/30 bg-accent/10 shadow-[0_18px_60px_rgba(0,0,0,0.28)] sm:size-24 sm:rounded-[1.75rem]">
           {avatarUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
+            <Image
               src={avatarUrl}
               alt={`${fullName} avatar`}
-              className="size-full object-cover"
+              fill
+              sizes="96px"
+              className="object-cover"
             />
           ) : (
             <span className="font-display text-xl font-black text-accent sm:text-3xl">

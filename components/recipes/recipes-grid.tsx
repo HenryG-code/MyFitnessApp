@@ -13,7 +13,7 @@ import {
   proteinFilterOptions,
   type Recipe,
   type RecipeFilters,
-} from "@/src/lib/recipes/data";
+} from "@/src/lib/recipes/types";
 import { ChevronDown, Heart } from "lucide-react";
 import { useMemo, useState } from "react";
 

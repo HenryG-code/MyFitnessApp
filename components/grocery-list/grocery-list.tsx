@@ -25,7 +25,7 @@ import {
   saveMealPlanToStorage,
 } from "@/src/lib/meal-planner/storage";
 import type { MealPlanState } from "@/src/lib/meal-planner/types";
-import type { Recipe } from "@/src/lib/recipes/data";
+import type { Recipe } from "@/src/lib/recipes/types";
 import {
   announcePreferenceSyncStatus,
   ensureUserPreferences,

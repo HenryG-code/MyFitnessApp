@@ -26,6 +26,7 @@ import {
   TrendingUp,
   X,
 } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState, type ReactNode } from "react";
@@ -109,14 +110,15 @@ function UserAvatar({
 
   return (
     <span
-      className={`grid ${sizeClassName} shrink-0 place-items-center overflow-hidden rounded-2xl border border-accent/25 bg-accent/10 font-display font-black text-accent`}
+      className={`relative grid ${sizeClassName} shrink-0 place-items-center overflow-hidden rounded-2xl border border-accent/25 bg-accent/10 font-display font-black text-accent`}
     >
       {avatarUrl ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
+        <Image
           src={avatarUrl}
           alt={`${userName} avatar`}
-          className="size-full object-cover"
+          fill
+          sizes="56px"
+          className="object-cover"
         />
       ) : (
         <span className={textClassName}>{getInitials(userName, email)}</span>

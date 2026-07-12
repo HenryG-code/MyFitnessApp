@@ -1,7 +1,7 @@
 "use client";
 
 import type { MealSlot } from "@/src/lib/meal-planner/types";
-import { mealTypeOptions, type Recipe } from "@/src/lib/recipes/data";
+import { mealTypeOptions, type Recipe } from "@/src/lib/recipes/types";
 import { ChevronRight, ExternalLink, X } from "lucide-react";
 import Link from "next/link";
 import { useMemo, useState } from "react";

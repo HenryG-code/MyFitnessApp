@@ -11,7 +11,7 @@ import {
   type GrocerySummary,
 } from "@/src/lib/grocery-list/types";
 import { mealSlots, weekdays, type MealPlanState } from "@/src/lib/meal-planner/types";
-import type { Recipe } from "@/src/lib/recipes/data";
+import type { Recipe } from "@/src/lib/recipes/types";
 
 function createEmptyGroceryList(): GroceryListState {
   return groceryCategories.reduce((list, category) => {
