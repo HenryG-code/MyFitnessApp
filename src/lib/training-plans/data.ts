@@ -6,6 +6,15 @@ import {
   type TrainingPlan,
 } from "@/src/lib/training-plans/types";
 
+// Preserve the original public API for modules that still import plan options
+// from this catalog while newer client code imports them from the lighter types file.
+export {
+  defaultTrainingGoal,
+  defaultTrainingLevel,
+  trainingGoals,
+  trainingLevels,
+} from "@/src/lib/training-plans/types";
+
 export const trainingPlans: TrainingPlan[] = [
   {
     slug: "fat-loss-foundation",
