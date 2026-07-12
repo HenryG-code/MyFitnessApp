@@ -1,15 +1,16 @@
 "use client";
 
+import { CurrentPlanHero } from "@/components/training-plan/current-plan-hero";
 import { GoalSelector } from "@/components/training-plan/goal-selector";
 import { PlanOverview } from "@/components/training-plan/plan-overview";
 import { SessionCard } from "@/components/training-plan/session-card";
 import { FitnessCard } from "@/components/ui/fitness-card";
-import { HeroPanel } from "@/components/ui/hero-panel";
+import { getTrainingPlanByGoal } from "@/src/lib/training-plans/data";
+import { getNextTrainingSession } from "@/src/lib/training-plans/next-session";
 import {
   defaultTrainingGoal,
   defaultTrainingLevel,
-  getTrainingPlanByGoal,
-} from "@/src/lib/training-plans/data";
+} from "@/src/lib/training-plans/types";
 import {
   loadTrainingGoalFromStorage,
   loadTrainingLevelFromStorage,
@@ -23,12 +24,16 @@ import type {
 import {
   ensureUserPreferences,
   parseSelectedTrainingGoal,
-  updateSelectedTrainingGoal,
+  parseSelectedTrainingLevel,
+  updateTrainingPlanSelection,
   announcePreferenceSyncStatus,
 } from "@/src/lib/user-preferences/queries";
-import { fitnessImages } from "@/src/lib/visuals/fitness-images";
-import { AlertTriangle, Dumbbell, HeartPulse, ShieldCheck } from "lucide-react";
-import { useEffect, useState } from "react";
+import {
+  fetchWorkouts,
+  type WorkoutListItem,
+} from "@/src/lib/workouts/queries";
+import { AlertTriangle } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
 
 export function TrainingPlanPage() {
   const [selectedGoal, setSelectedGoal] =
@@ -36,7 +41,19 @@ export function TrainingPlanPage() {
   const [selectedLevel, setSelectedLevel] =
     useState<TrainingLevel>(defaultTrainingLevel);
   const [hasLoadedGoal, setHasLoadedGoal] = useState(false);
+  const [workouts, setWorkouts] = useState<WorkoutListItem[]>([]);
   const selectedPlan = getTrainingPlanByGoal(selectedGoal, selectedLevel);
+  const nextSession = getNextTrainingSession(selectedPlan, workouts);
+
+  const refreshWorkoutHistory = useCallback(
+    () =>
+      fetchWorkouts()
+        .then(setWorkouts)
+        .catch(() => {
+          // The plan still starts at day one if workout history is unavailable.
+        }),
+    []
+  );
 
   useEffect(() => {
     let isMounted = true;
@@ -50,15 +67,21 @@ export function TrainingPlanPage() {
       try {
         const preferences = await ensureUserPreferences();
         const syncedGoal = parseSelectedTrainingGoal(preferences);
+        const syncedLevel = parseSelectedTrainingLevel(preferences);
 
         if (syncedGoal) {
           if (isMounted) {
             setSelectedGoal(syncedGoal);
+            setSelectedLevel(syncedLevel ?? storedLevel);
             saveTrainingGoalToStorage(syncedGoal);
+            saveTrainingLevelToStorage(syncedLevel ?? storedLevel);
             announcePreferenceSyncStatus("synced");
           }
+          if (!syncedLevel) {
+            await updateTrainingPlanSelection(syncedGoal, storedLevel);
+          }
         } else {
-          await updateSelectedTrainingGoal(storedGoal);
+          await updateTrainingPlanSelection(storedGoal, storedLevel);
         }
       } catch {
         announcePreferenceSyncStatus("fallback", "Saved on this device.");
@@ -77,10 +100,14 @@ export function TrainingPlanPage() {
   }, []);
 
   useEffect(() => {
+    void refreshWorkoutHistory();
+  }, [refreshWorkoutHistory]);
+
+  useEffect(() => {
     if (hasLoadedGoal) {
       saveTrainingGoalToStorage(selectedGoal);
       saveTrainingLevelToStorage(selectedLevel);
-      updateSelectedTrainingGoal(selectedGoal).catch(() => {
+      updateTrainingPlanSelection(selectedGoal, selectedLevel).catch(() => {
         announcePreferenceSyncStatus("fallback", "Saved on this device.");
       });
     }
@@ -88,33 +115,7 @@ export function TrainingPlanPage() {
 
   return (
     <div className="space-y-3 sm:space-y-5">
-      <HeroPanel
-        eyebrow="Suggested training plan"
-        title="Suggested training plan"
-        description="Choose your goal, experience level, and weekly schedule."
-        imageSrc={fitnessImages.cardioRunner}
-        imageAlt="Runner doing cardio training"
-        variant="amber"
-      >
-
-        <div className="mt-4 grid grid-cols-3 gap-2 sm:mt-8 sm:gap-3">
-          <div className="rounded-xl bg-white/10 p-2.5 sm:rounded-[1.5rem] sm:p-4">
-            <Dumbbell className="size-4 text-sun sm:size-5" />
-            <p className="mt-2 text-sm font-black sm:mt-3 sm:text-2xl">Strength</p>
-            <p className="mt-0.5 text-[0.65rem] leading-tight text-stone-300 sm:text-sm sm:leading-normal">Major muscles twice weekly</p>
-          </div>
-          <div className="rounded-xl bg-white/10 p-2.5 sm:rounded-[1.5rem] sm:p-4">
-            <HeartPulse className="size-4 text-sun sm:size-5" />
-            <p className="mt-2 text-sm font-black sm:mt-3 sm:text-2xl">Cardio</p>
-            <p className="mt-0.5 text-[0.65rem] leading-tight text-stone-300 sm:text-sm sm:leading-normal">Moderate weekly activity</p>
-          </div>
-          <div className="rounded-xl bg-white/10 p-2.5 sm:rounded-[1.5rem] sm:p-4">
-            <ShieldCheck className="size-4 text-sun sm:size-5" />
-            <p className="mt-2 text-sm font-black sm:mt-3 sm:text-2xl">Recovery</p>
-            <p className="mt-0.5 text-[0.65rem] leading-tight text-stone-300 sm:text-sm sm:leading-normal">Gradual and sustainable</p>
-          </div>
-        </div>
-      </HeroPanel>
+      <CurrentPlanHero plan={selectedPlan} nextSession={nextSession} />
 
       <FitnessCard className="border-warning/30 bg-warning/10 !p-3 sm:!p-5">
         <div className="flex items-start gap-3">
@@ -129,12 +130,14 @@ export function TrainingPlanPage() {
         </div>
       </FitnessCard>
 
-      <GoalSelector
-        selectedGoal={selectedGoal}
-        selectedLevel={selectedLevel}
-        onChange={setSelectedGoal}
-        onLevelChange={setSelectedLevel}
-      />
+      <div id="plan-builder" className="scroll-mt-4">
+        <GoalSelector
+          selectedGoal={selectedGoal}
+          selectedLevel={selectedLevel}
+          onChange={setSelectedGoal}
+          onLevelChange={setSelectedLevel}
+        />
+      </div>
       <PlanOverview plan={selectedPlan} />
 
       <section className="grid gap-3 sm:gap-5 xl:grid-cols-2">
@@ -143,6 +146,7 @@ export function TrainingPlanPage() {
             key={`${selectedPlan.slug}-${session.dayLabel}`}
             plan={selectedPlan}
             session={session}
+            onLogged={refreshWorkoutHistory}
           />
         ))}
       </section>

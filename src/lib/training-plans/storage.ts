@@ -3,10 +3,8 @@ import {
   defaultTrainingLevel,
   trainingGoals,
   trainingLevels,
-} from "@/src/lib/training-plans/data";
-import type {
-  TrainingGoal,
-  TrainingLevel,
+  type TrainingGoal,
+  type TrainingLevel,
 } from "@/src/lib/training-plans/types";
 
 export const trainingGoalStorageKey = "liftlog-training-goal-v1";

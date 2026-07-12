@@ -11,8 +11,14 @@ import type {
   UserPreferences,
   UserPreferencesUpdate,
 } from "@/src/lib/supabase/database.types";
-import { isTrainingGoal } from "@/src/lib/training-plans/storage";
-import type { TrainingGoal } from "@/src/lib/training-plans/types";
+import {
+  isTrainingGoal,
+  isTrainingLevel,
+} from "@/src/lib/training-plans/storage";
+import type {
+  TrainingGoal,
+  TrainingLevel,
+} from "@/src/lib/training-plans/types";
 import type { PreferenceSyncStatus } from "@/src/lib/user-preferences/types";
 import { preferenceSyncStatusEventName } from "@/src/lib/user-preferences/types";
 
@@ -124,11 +130,29 @@ export async function updateSelectedTrainingGoal(goal: TrainingGoal | null) {
   });
 }
 
+export async function updateTrainingPlanSelection(
+  goal: TrainingGoal,
+  level: TrainingLevel
+) {
+  return updateUserPreferences({
+    selected_training_goal: goal,
+    selected_training_level: level,
+  });
+}
+
 export function parseSelectedTrainingGoal(
   preferences: UserPreferences | null
 ): TrainingGoal | null {
   return isTrainingGoal(preferences?.selected_training_goal)
     ? preferences.selected_training_goal
+    : null;
+}
+
+export function parseSelectedTrainingLevel(
+  preferences: UserPreferences | null
+): TrainingLevel | null {
+  return isTrainingLevel(preferences?.selected_training_level)
+    ? preferences.selected_training_level
     : null;
 }
 

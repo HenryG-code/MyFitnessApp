@@ -12,6 +12,7 @@ import {
   CalendarDays,
   Dumbbell,
   FileBarChart,
+  Footprints,
   HeartPulse,
   Home,
   LayoutGrid,
@@ -44,6 +45,7 @@ const lifestyleNavItems = [
   { label: "Meal Planner", href: "/meal-planner", icon: CalendarDays },
   { label: "Grocery List", href: "/grocery-list", icon: ShoppingBasket },
   { label: "Training Plan", href: "/training-plan", icon: Target },
+  { label: "Running Coach", href: "/running-plan", icon: Footprints },
   { label: "Settings", href: "/settings", icon: Settings },
 ];
 
@@ -62,6 +64,7 @@ const mobileMenuItems = [
   { label: "Meal Planner", href: "/meal-planner", icon: CalendarDays },
   { label: "Weight", href: "/weight", icon: Scale },
   { label: "Training Plan", href: "/training-plan", icon: Target },
+  { label: "Running Coach", href: "/running-plan", icon: Footprints },
   { label: "Weekly Report", href: "/report", icon: FileBarChart },
   { label: "Connected Health", href: "/settings#connected-health", icon: HeartPulse },
   { label: "Settings", href: "/settings", icon: Settings },

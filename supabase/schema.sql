@@ -103,13 +103,21 @@ create table if not exists public.habit_completions (
 create table if not exists public.user_preferences (
   user_id uuid primary key references auth.users(id) on delete cascade,
   selected_training_goal text,
+  selected_training_level text,
   notification_preferences jsonb not null default '{}'::jsonb,
   preferred_reminder_time text,
   meal_plan jsonb not null default '{}'::jsonb,
   grocery_checked_items jsonb not null default '{}'::jsonb,
+  running_plan jsonb not null default '{}'::jsonb,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
+
+alter table public.user_preferences
+  add column if not exists running_plan jsonb not null default '{}'::jsonb;
+
+alter table public.user_preferences
+  add column if not exists selected_training_level text;
 
 create table if not exists public.push_subscriptions (
   id uuid primary key default gen_random_uuid(),

@@ -27,10 +27,12 @@ import type {
   HabitDefinition,
 } from "@/src/lib/supabase/database.types";
 import { fitnessImages } from "@/src/lib/visuals/fitness-images";
+import { isGuidedWarmUpHabit } from "@/src/lib/warm-up/routines";
 import {
   CalendarDays,
   CheckCircle2,
   ChevronDown,
+  ChevronRight,
   ChevronUp,
   ClipboardCheck,
   EyeOff,
@@ -42,6 +44,7 @@ import {
   Trash2,
   X,
 } from "lucide-react";
+import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 
 type HabitFormValues = {
@@ -503,6 +506,7 @@ export function HabitsTracker() {
               {activeDefinitions.map((habit, habitIndex) => {
                 const isComplete = completedHabitIds.has(habit.id);
                 const isSaving = savingHabitId === habit.id;
+                const hasGuidedWarmUp = isGuidedWarmUpHabit(habit.name);
 
                 return (
                   <div
@@ -514,39 +518,80 @@ export function HabitsTracker() {
                     }`}
                   >
                     <div className="flex items-center gap-2">
-                      <button
-                        type="button"
-                        onClick={() => void handleToggleHabit(habit)}
-                        disabled={isSaving}
-                        aria-pressed={isComplete}
-                        className="flex min-h-12 min-w-0 flex-1 items-center gap-3 text-left disabled:cursor-not-allowed disabled:opacity-70"
-                      >
-                        <span
-                          className={`grid size-10 shrink-0 place-items-center rounded-xl transition ${
-                            isComplete
-                              ? "liftlog-pop-in bg-accent text-white"
-                              : "bg-stone-950 text-sun"
-                          }`}
-                        >
-                          {isComplete ? (
-                            <CheckCircle2 className="size-5" />
-                          ) : (
-                            <Sparkles className="size-4" />
-                          )}
-                        </span>
-                        <span className="min-w-0">
-                          <span
-                            className="block truncate font-display text-base font-black leading-tight"
+                      {hasGuidedWarmUp ? (
+                        <>
+                          <button
+                            type="button"
+                            onClick={() => void handleToggleHabit(habit)}
+                            disabled={isSaving}
+                            aria-pressed={isComplete}
+                            aria-label={
+                              isComplete
+                                ? `Mark ${habit.name} incomplete`
+                                : `Mark ${habit.name} complete`
+                            }
+                            className={`lf-press grid size-11 shrink-0 place-items-center rounded-xl transition disabled:cursor-not-allowed disabled:opacity-70 ${
+                              isComplete
+                                ? "liftlog-pop-in bg-accent text-white"
+                                : "bg-stone-950 text-sun"
+                            }`}
                           >
-                            {habit.name}
-                          </span>
-                          {habit.description ? (
-                            <span className="block truncate text-xs leading-5 text-muted">
-                              {habit.description}
+                            {isComplete ? (
+                              <CheckCircle2 className="size-5" />
+                            ) : (
+                              <Sparkles className="size-4" />
+                            )}
+                          </button>
+                          <Link
+                            href={`/warm-up?habitId=${habit.id}`}
+                            className="lf-press flex min-h-12 min-w-0 flex-1 items-center gap-2 rounded-xl px-1 text-left"
+                          >
+                            <span className="min-w-0 flex-1">
+                              <span className="block truncate font-display text-base font-black leading-tight">
+                                {habit.name}
+                              </span>
+                              <span className="mt-1 inline-flex max-w-full items-center gap-1 rounded-full bg-accent/10 px-2 py-0.5 text-[0.6rem] font-black uppercase tracking-wider text-accent-strong">
+                                <span className="truncate">Open guided warm-up</span>
+                              </span>
                             </span>
-                          ) : null}
-                        </span>
-                      </button>
+                            <ChevronRight className="size-4 shrink-0 text-accent-strong" />
+                          </Link>
+                        </>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => void handleToggleHabit(habit)}
+                          disabled={isSaving}
+                          aria-pressed={isComplete}
+                          className="flex min-h-12 min-w-0 flex-1 items-center gap-3 text-left disabled:cursor-not-allowed disabled:opacity-70"
+                        >
+                          <span
+                            className={`grid size-10 shrink-0 place-items-center rounded-xl transition ${
+                              isComplete
+                                ? "liftlog-pop-in bg-accent text-white"
+                                : "bg-stone-950 text-sun"
+                            }`}
+                          >
+                            {isComplete ? (
+                              <CheckCircle2 className="size-5" />
+                            ) : (
+                              <Sparkles className="size-4" />
+                            )}
+                          </span>
+                          <span className="min-w-0">
+                            <span
+                              className="block truncate font-display text-base font-black leading-tight"
+                            >
+                              {habit.name}
+                            </span>
+                            {habit.description ? (
+                              <span className="block truncate text-xs leading-5 text-muted">
+                                {habit.description}
+                              </span>
+                            ) : null}
+                          </span>
+                        </button>
+                      )}
                       <button
                         type="button"
                         onClick={() =>

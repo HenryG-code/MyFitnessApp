@@ -8,6 +8,21 @@ export type TrainingGoal =
 
 export type TrainingLevel = "Beginner" | "Intermediate";
 
+// Small shared constants live here (not in data.ts) so client bundles that
+// only need goal/level options don't pull in the full plan catalog.
+export const trainingGoals: TrainingGoal[] = [
+  "Lose weight",
+  "Gain muscle",
+  "Get fit",
+  "Build strength",
+  "Improve cardio",
+  "General health",
+];
+
+export const defaultTrainingGoal: TrainingGoal = "Get fit";
+export const trainingLevels: TrainingLevel[] = ["Beginner", "Intermediate"];
+export const defaultTrainingLevel: TrainingLevel = "Beginner";
+
 export type SessionType =
   | "Strength"
   | "Cardio"
