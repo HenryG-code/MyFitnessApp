@@ -2,7 +2,17 @@ import { WorkoutForm } from "@/components/forms/workout-form";
 import { ArrowLeft, Dumbbell, Sparkles } from "lucide-react";
 import Link from "next/link";
 
-export default function NewWorkoutPage() {
+export default async function NewWorkoutPage({
+  searchParams,
+}: {
+  searchParams?: Promise<{ exercise?: string | string[] }>;
+}) {
+  const params = await searchParams;
+  const exerciseValue = Array.isArray(params?.exercise)
+    ? params.exercise[0]
+    : params?.exercise;
+  const initialExercise = exerciseValue?.trim().slice(0, 80) ?? "";
+
   return (
     <div className="mx-auto max-w-5xl space-y-3 sm:space-y-5">
       <header className="relative isolate overflow-hidden rounded-[1.5rem] border border-white/[0.08] bg-[#101012] px-4 py-4 shadow-[0_28px_90px_rgba(0,0,0,0.45)] sm:rounded-[2rem] sm:px-7 sm:py-6">
@@ -50,7 +60,7 @@ export default function NewWorkoutPage() {
         </div>
       </header>
 
-      <WorkoutForm />
+      <WorkoutForm initialExercise={initialExercise} />
     </div>
   );
 }

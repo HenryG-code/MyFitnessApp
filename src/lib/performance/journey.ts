@@ -69,10 +69,6 @@ export function buildStrengthTrends(
   const trends: StrengthTrend[] = [];
 
   byExercise.forEach((entry) => {
-    if (entry.points.length < 2) {
-      return;
-    }
-
     entry.points.sort((a, b) => a.date.localeCompare(b.date));
     const first = entry.points[0].orm;
     const last = entry.points[entry.points.length - 1].orm;

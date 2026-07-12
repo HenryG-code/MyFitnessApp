@@ -168,7 +168,8 @@ export function getEmptyExercise() {
 }
 
 export function getDefaultValues(
-  workout?: WorkoutWithExercises
+  workout?: WorkoutWithExercises,
+  initialExercise = ""
 ): WorkoutFormValues {
   if (!workout) {
     return {
@@ -176,7 +177,12 @@ export function getDefaultValues(
       workout_date: getDateInputValue(),
       duration_minutes: "",
       notes: "",
-      exercises: [getEmptyExercise()],
+      exercises: [
+        {
+          ...getEmptyExercise(),
+          exercise_name: initialExercise.trim(),
+        },
+      ],
     };
   }
 
