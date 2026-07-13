@@ -7,7 +7,6 @@ import { ConnectedHealthCard } from "@/components/settings/connected-health-card
 import { NotificationPreferencesCard } from "@/components/settings/notification-preferences-card";
 import { PreferenceSyncStatusCard } from "@/components/settings/preference-sync-status-card";
 import { ShareAppCard } from "@/components/settings/share-app-card";
-import { FitnessCard, SectionHeader } from "@/components/ui/fitness-card";
 import {
   fetchAuthenticatedProfile,
   type AuthProfile,
@@ -16,26 +15,25 @@ import {
   Bell,
   BookOpen,
   CalendarDays,
+  ChevronDown,
+  ChevronRight,
   Download,
   ExternalLink,
   HandHeart,
+  HeartPulse,
+  LayoutGrid,
   Lock,
+  LogOut,
+  RefreshCw,
+  Share2,
   ShieldCheck,
   ShoppingBasket,
   Target,
-  UserRound,
+  type LucideIcon,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useState } from "react";
-
-function getProfileDetail(profile: AuthProfile | null) {
-  if (!profile) {
-    return "Loading your protected account details.";
-  }
-
-  return `${profile.fullName} - ${profile.email ?? "No email available"}`;
-}
+import { useEffect, useState, type ReactNode } from "react";
 
 const supportLinks = {
   paypal: "https://paypal.me/HenryGagiano",
@@ -43,10 +41,102 @@ const supportLinks = {
   yoco: "",
 };
 
+const toolLinks = [
+  { href: "/recipes", title: "Recipes", detail: "Browse balanced meals", icon: BookOpen },
+  { href: "/meal-planner", title: "Meal Planner", detail: "Build your weekly meal plan", icon: CalendarDays },
+  { href: "/grocery-list", title: "Grocery List", detail: "Shop from planned meals", icon: ShoppingBasket },
+  { href: "/training-plan", title: "Training Plan", detail: "Pick a goal-based routine", icon: Target },
+];
+
+function getInitials(name: string) {
+  const words = name.trim().split(/\s+/).filter(Boolean);
+
+  if (words.length >= 2) {
+    return `${words[0][0]}${words[1][0]}`.toUpperCase();
+  }
+
+  return (words[0] ?? "L").slice(0, 2).toUpperCase();
+}
+
+/** Android-style category label above a group of setting rows. */
+function GroupLabel({ children }: { children: ReactNode }) {
+  return (
+    <p className="px-4 pb-1.5 pt-3 text-[0.65rem] font-black uppercase tracking-[0.2em] tabular-nums text-accent">
+      {children}
+    </p>
+  );
+}
+
+/** Rows in a group sit flush with hairline gaps, like Android 12+ settings. */
+function Group({ children }: { children: ReactNode }) {
+  return (
+    <div className="flex flex-col gap-0.5 [&>section]:rounded-lg [&>section:first-child]:rounded-t-2xl [&>section:last-child]:rounded-b-2xl">
+      {children}
+    </div>
+  );
+}
+
+function SettingsSection({
+  sectionKey,
+  icon: Icon,
+  iconClassName,
+  title,
+  subtitle,
+  leading,
+  open,
+  onToggle,
+  children,
+}: {
+  sectionKey: string;
+  icon?: LucideIcon;
+  iconClassName?: string;
+  title: string;
+  subtitle: string;
+  leading?: ReactNode;
+  open: boolean;
+  onToggle: (key: string) => void;
+  children: ReactNode;
+}) {
+  return (
+    <section className="overflow-hidden border border-line/60 bg-card/85">
+      <button
+        type="button"
+        aria-expanded={open}
+        onClick={() => onToggle(sectionKey)}
+        className="lf-press flex min-h-14 w-full items-center gap-3 px-3.5 py-2.5 text-left transition hover:bg-white/[0.03]"
+      >
+        {leading ??
+          (Icon ? (
+            <span
+              className={`grid size-9 shrink-0 place-items-center rounded-full ${iconClassName ?? "bg-white/[0.07] text-muted"}`}
+            >
+              <Icon className="size-4" />
+            </span>
+          ) : null)}
+        <span className="min-w-0 flex-1">
+          <span className="block text-sm font-bold leading-tight">{title}</span>
+          <span className="mt-0.5 block truncate text-xs leading-tight text-muted">
+            {subtitle}
+          </span>
+        </span>
+        <ChevronDown
+          className={`size-4 shrink-0 text-muted transition-transform ${open ? "rotate-180" : ""}`}
+        />
+      </button>
+      {open ? (
+        <div className="lf-fade border-t border-line/50 px-3.5 py-3">
+          {children}
+        </div>
+      ) : null}
+    </section>
+  );
+}
+
 export function SettingsPanel() {
   const [profile, setProfile] = useState<AuthProfile | null>(null);
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(true);
+  const [openSections, setOpenSections] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     let isMounted = true;
@@ -77,263 +167,273 @@ export function SettingsPanel() {
     };
   }, []);
 
-  const settings = [
-    {
-      title: "Profile",
-      detail: getProfileDetail(profile),
-      icon: UserRound,
-    },
-    {
-      title: "Notifications",
-      detail: "Choose reminders for workouts, habits, weekly check-ins, and meals.",
-      icon: Bell,
-    },
-    {
-      title: "Privacy",
-      detail: "Your fitness data is private to your account.",
-      icon: Lock,
-    },
-  ];
+  // Deep links like /settings#connected-health open and scroll to the section.
+  useEffect(() => {
+    if (window.location.hash.slice(1) !== "connected-health") {
+      return;
+    }
 
-  const toolLinks = [
-    {
-      href: "/recipes",
-      title: "Recipes",
-      detail: "Browse balanced meals.",
-      icon: BookOpen,
-    },
-    {
-      href: "/meal-planner",
-      title: "Meal Planner",
-      detail: "Build your weekly meal plan.",
-      icon: CalendarDays,
-    },
-    {
-      href: "/grocery-list",
-      title: "Grocery List",
-      detail: "Shop from planned meals.",
-      icon: ShoppingBasket,
-    },
-    {
-      href: "/training-plan",
-      title: "Training Plan",
-      detail: "Pick a goal-based routine.",
-      icon: Target,
-    },
-  ];
+    const frame = requestAnimationFrame(() => {
+      setOpenSections((current) => new Set(current).add("health"));
+      requestAnimationFrame(() => {
+        document
+          .getElementById("connected-health")
+          ?.scrollIntoView({ block: "start" });
+      });
+    });
+
+    return () => cancelAnimationFrame(frame);
+  }, []);
+
+  function toggleSection(key: string) {
+    setOpenSections((current) => {
+      const next = new Set(current);
+      if (next.has(key)) {
+        next.delete(key);
+      } else {
+        next.add(key);
+      }
+      return next;
+    });
+  }
+
+  const fullName = profile?.fullName ?? "Signed-in user";
+  const email = profile?.email ?? null;
+  const avatarUrl = profile?.profile?.avatar_url ?? null;
 
   return (
-    <div className="space-y-3 sm:space-y-5">
-      <section className="rounded-[1.25rem] border border-line/80 bg-card/80 p-3.5 backdrop-blur sm:p-5">
-        <p className="text-xs font-black uppercase tracking-[0.28em] text-accent">
+    <div className="mx-auto max-w-2xl space-y-1">
+      <header className="px-1 pb-2">
+        <h1 className="font-display text-2xl font-black tracking-tight sm:text-3xl">
           Settings
-        </p>
-        <h1 className="mt-1 font-display text-xl font-black tracking-tight sm:mt-1.5 sm:text-3xl">
-          Your LogFit account.
         </h1>
-        <p className="mt-2 max-w-2xl text-xs leading-5 text-muted sm:mt-3 sm:text-sm sm:leading-6">
-          Manage your profile, privacy, reminders, support options, and quick
-          links from one account space.
-        </p>
-      </section>
+      </header>
 
       {error ? (
-        <p className="rounded-[1.5rem] border border-red-100 bg-red-50 p-4 text-sm font-black text-red-700">
+        <p className="rounded-2xl border border-strain/25 bg-strain/10 p-3 text-sm font-bold text-strain">
           {error}
         </p>
       ) : null}
 
-      {isLoading ? (
-        <FitnessCard>
-          <p className="text-sm font-black text-muted">
-            Loading account settings...
-          </p>
-        </FitnessCard>
-      ) : null}
-
-      <section className="grid gap-2 sm:gap-4 lg:grid-cols-3">
-        {settings.map((item) => {
-          const Icon = item.icon;
-
-          return (
-            <FitnessCard key={item.title} className="min-w-0 !p-3 sm:!p-5">
-              <div className="flex items-center gap-3 lg:block">
-                <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-accent text-stone-950 sm:size-12 sm:rounded-2xl">
-                  <Icon className="size-5" />
-                </span>
-                <div className="min-w-0">
-                  <h2 className="font-display text-base font-black sm:text-xl lg:mt-5">
-                    {item.title}
-                  </h2>
-                  <p className="mt-0.5 truncate text-xs text-muted sm:mt-2 sm:text-sm sm:leading-6 lg:whitespace-normal">
-                    {item.detail}
-                  </p>
-                </div>
-              </div>
-            </FitnessCard>
-          );
-        })}
-      </section>
-
-      <FitnessCard className="!p-3 sm:!p-5">
-        <AvatarUploadCard
-          fullName={profile?.fullName ?? "Signed-in user"}
-          email={profile?.email ?? null}
-          avatarUrl={profile?.profile?.avatar_url ?? null}
-          onSaved={(savedProfile) =>
-            setProfile((currentProfile) =>
-              currentProfile
-                ? {
-                    ...currentProfile,
-                    fullName:
-                      savedProfile.full_name?.trim() ||
-                      currentProfile.fullName,
-                    profile: savedProfile,
-                  }
-                : currentProfile
-            )
+      <GroupLabel>Account</GroupLabel>
+      <Group>
+        <SettingsSection
+          sectionKey="profile"
+          title={fullName}
+          subtitle={
+            isLoading ? "Loading your account…" : (email ?? "Profile & avatar")
           }
-        />
-      </FitnessCard>
-
-      <FitnessCard className="!p-3 sm:!p-5">
-        <SectionHeader eyebrow="Account details" title="Signed-in profile" />
-        <div className="grid grid-cols-2 gap-2 sm:gap-3">
-          <div className="rounded-xl bg-white/[0.055] p-3 shadow-inner shadow-white/[0.02] sm:rounded-[1.25rem] sm:p-4">
-            <p className="text-xs font-black uppercase tracking-[0.18em] text-muted">
-              Name
-            </p>
-            <p className="mt-1 font-display text-base font-black sm:mt-2 sm:text-xl">
-              {profile?.fullName ?? "Signed-in user"}
-            </p>
-          </div>
-          <div className="rounded-xl bg-white/[0.055] p-3 shadow-inner shadow-white/[0.02] sm:rounded-[1.25rem] sm:p-4">
-            <p className="text-xs font-black uppercase tracking-[0.18em] text-muted">
-              Email
-            </p>
-            <p className="mt-1 break-all font-display text-sm font-black sm:mt-2 sm:text-xl">
-              {profile?.email ?? "--"}
-            </p>
-          </div>
-          <div className="rounded-xl bg-white/[0.055] p-3 shadow-inner shadow-white/[0.02] sm:rounded-[1.25rem] sm:p-4">
-            <div className="flex items-center gap-3">
-              <ShieldCheck className="size-5 text-accent" />
-              <div>
-                <p className="text-xs font-black uppercase tracking-[0.18em] text-muted">
-                  Account status
-                </p>
-                <p className="mt-1 font-display text-base font-black sm:text-xl">
-                  Signed in
-                </p>
-              </div>
-            </div>
-          </div>
-          <div className="rounded-xl bg-white/[0.055] p-3 shadow-inner shadow-white/[0.02] sm:rounded-[1.25rem] sm:p-4">
-            <p className="text-xs font-black uppercase tracking-[0.18em] text-muted">
-              Plan
-            </p>
-            <p className="mt-1 font-display text-base font-black sm:mt-2 sm:text-xl">
-              Free version
-            </p>
-          </div>
-        </div>
-      </FitnessCard>
-
-      <FitnessCard className="!p-3 sm:!p-5">
-        <SectionHeader eyebrow="Privacy" title="Private to your account" />
-        <p className="text-sm leading-6 text-muted">
-          Your workouts, weight check-ins, habits, and preferences stay private
-          to your signed-in account.
-        </p>
-      </FitnessCard>
-
-      <ConnectedHealthCard />
-
-      <FitnessCard className="!p-3 sm:!p-5">
-        <NotificationPreferencesCard />
-      </FitnessCard>
-
-      <FitnessCard className="!p-3 sm:!p-5">
-        <PreferenceSyncStatusCard />
-      </FitnessCard>
-
-      <FitnessCard className="!p-3 sm:!p-5">
-        <SectionHeader eyebrow="More tools" title="Quick links" />
-        <div className="grid grid-cols-2 gap-2 sm:gap-3 xl:grid-cols-4">
-          {toolLinks.map((item) => {
-            const Icon = item.icon;
-
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className="rounded-xl bg-white/[0.055] p-3 shadow-inner shadow-white/[0.02] transition hover:-translate-y-0.5 hover:border-accent sm:rounded-[1.25rem] sm:p-4"
-              >
-                <span className="grid size-8 place-items-center rounded-xl bg-accent text-stone-950 sm:size-10 sm:rounded-2xl">
-                  <Icon className="size-4" />
-                </span>
-                <p className="mt-2 font-display text-base font-black sm:mt-3 sm:text-lg">
-                  {item.title}
-                </p>
-                <p className="mt-0.5 text-xs leading-5 text-muted sm:mt-1 sm:text-sm sm:leading-6">
-                  {item.detail}
-                </p>
-              </Link>
-            );
-          })}
-        </div>
-      </FitnessCard>
-
-      <FitnessCard className="!p-3 sm:!p-5">
-        <ShareAppCard />
-      </FitnessCard>
-
-      <FitnessCard className="!p-3 sm:!p-5">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-          <div className="max-w-xl">
-            <span className="grid size-9 place-items-center rounded-xl bg-accent text-stone-950 sm:size-12 sm:rounded-2xl">
-              <Download className="size-5" />
+          leading={
+            <span className="relative grid size-9 shrink-0 place-items-center overflow-hidden rounded-full border border-accent/25 bg-accent/10 text-xs font-black text-accent">
+              {avatarUrl ? (
+                <Image
+                  src={avatarUrl}
+                  alt=""
+                  fill
+                  sizes="36px"
+                  className="object-cover"
+                />
+              ) : (
+                getInitials(fullName)
+              )}
             </span>
-            <div className="mt-3 sm:mt-5">
-              <SectionHeader eyebrow="App install" title="Install LogFit" />
+          }
+          open={openSections.has("profile")}
+          onToggle={toggleSection}
+        >
+          <AvatarUploadCard
+            fullName={fullName}
+            email={email}
+            avatarUrl={avatarUrl}
+            onSaved={(savedProfile) =>
+              setProfile((currentProfile) =>
+                currentProfile
+                  ? {
+                      ...currentProfile,
+                      fullName:
+                        savedProfile.full_name?.trim() ||
+                        currentProfile.fullName,
+                      profile: savedProfile,
+                    }
+                  : currentProfile
+              )
+            }
+          />
+          <dl className="mt-3 grid grid-cols-2 gap-1.5 text-xs">
+            <div className="rounded-lg bg-white/[0.05] p-2.5">
+              <dt className="font-black uppercase tracking-[0.14em] text-ink-dim">
+                Name
+              </dt>
+              <dd className="mt-0.5 font-bold">{fullName}</dd>
             </div>
-            <p className="text-sm leading-6 text-muted">
-              Add LogFit to your device for quicker access from your home
-              screen or desktop.
-            </p>
-            <p className="mt-3 text-sm font-black text-accent">
-              Install from your browser menu
-            </p>
-          </div>
-          <div className="lg:min-w-[26rem]">
+            <div className="rounded-lg bg-white/[0.05] p-2.5">
+              <dt className="font-black uppercase tracking-[0.14em] text-ink-dim">
+                Email
+              </dt>
+              <dd className="mt-0.5 break-all font-bold">{email ?? "--"}</dd>
+            </div>
+            <div className="rounded-lg bg-white/[0.05] p-2.5">
+              <dt className="font-black uppercase tracking-[0.14em] text-ink-dim">
+                Status
+              </dt>
+              <dd className="mt-0.5 flex items-center gap-1.5 font-bold">
+                <ShieldCheck className="size-3.5 text-ready" />
+                Signed in
+              </dd>
+            </div>
+            <div className="rounded-lg bg-white/[0.05] p-2.5">
+              <dt className="font-black uppercase tracking-[0.14em] text-ink-dim">
+                Plan
+              </dt>
+              <dd className="mt-0.5 font-bold">Free version</dd>
+            </div>
+          </dl>
+        </SettingsSection>
+
+        <SettingsSection
+          sectionKey="privacy"
+          icon={Lock}
+          iconClassName="bg-sun/15 text-sun"
+          title="Privacy"
+          subtitle="Your data stays private to your account"
+          open={openSections.has("privacy")}
+          onToggle={toggleSection}
+        >
+          <p className="text-xs leading-5 text-muted">
+            Your workouts, weight check-ins, habits, and preferences stay
+            private to your signed-in account.
+          </p>
+        </SettingsSection>
+      </Group>
+
+      <GroupLabel>Tracking</GroupLabel>
+      <Group>
+        <SettingsSection
+          sectionKey="notifications"
+          icon={Bell}
+          iconClassName="bg-accent/15 text-accent-strong"
+          title="Notifications"
+          subtitle="Workout, habit, and meal reminders"
+          open={openSections.has("notifications")}
+          onToggle={toggleSection}
+        >
+          <NotificationPreferencesCard />
+        </SettingsSection>
+
+        <SettingsSection
+          sectionKey="health"
+          icon={HeartPulse}
+          iconClassName="bg-ready/15 text-ready"
+          title="Connected Health"
+          subtitle="Steps, sleep, and heart data from your phone"
+          open={openSections.has("health")}
+          onToggle={toggleSection}
+        >
+          <ConnectedHealthCard />
+        </SettingsSection>
+
+        <SettingsSection
+          sectionKey="sync"
+          icon={RefreshCw}
+          iconClassName="bg-caution/15 text-caution"
+          title="Preference sync"
+          subtitle="Backup status for plans and preferences"
+          open={openSections.has("sync")}
+          onToggle={toggleSection}
+        >
+          <PreferenceSyncStatusCard />
+        </SettingsSection>
+      </Group>
+
+      <GroupLabel>App</GroupLabel>
+      <Group>
+        <SettingsSection
+          sectionKey="tools"
+          icon={LayoutGrid}
+          iconClassName="bg-white/[0.08] text-foreground"
+          title="Quick links"
+          subtitle="Recipes, meals, groceries, and plans"
+          open={openSections.has("tools")}
+          onToggle={toggleSection}
+        >
+          <ul className="divide-y divide-line/50">
+            {toolLinks.map((item) => {
+              const Icon = item.icon;
+
+              return (
+                <li key={item.href}>
+                  <Link
+                    href={item.href}
+                    className="lf-press flex min-h-12 items-center gap-3 py-2 transition hover:bg-white/[0.03]"
+                  >
+                    <span className="grid size-8 shrink-0 place-items-center rounded-full bg-white/[0.07] text-muted">
+                      <Icon className="size-4" />
+                    </span>
+                    <span className="min-w-0 flex-1">
+                      <span className="block text-sm font-bold leading-tight">
+                        {item.title}
+                      </span>
+                      <span className="block truncate text-xs text-muted">
+                        {item.detail}
+                      </span>
+                    </span>
+                    <ChevronRight className="size-4 shrink-0 text-ink-dim" />
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+        </SettingsSection>
+
+        <SettingsSection
+          sectionKey="share"
+          icon={Share2}
+          iconClassName="bg-accent/15 text-accent-strong"
+          title="Share LogFit"
+          subtitle="Invite a training partner"
+          open={openSections.has("share")}
+          onToggle={toggleSection}
+        >
+          <ShareAppCard />
+        </SettingsSection>
+
+        <SettingsSection
+          sectionKey="install"
+          icon={Download}
+          iconClassName="bg-ready/15 text-ready"
+          title="Install app"
+          subtitle="Add LogFit to your home screen"
+          open={openSections.has("install")}
+          onToggle={toggleSection}
+        >
+          <p className="text-xs leading-5 text-muted">
+            Add LogFit to your device for quicker access from your home screen
+            or desktop.
+          </p>
+          <div className="mt-2">
             <InstallAppCard />
           </div>
-        </div>
-      </FitnessCard>
+        </SettingsSection>
 
-      <FitnessCard className="!p-3 sm:!p-5">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-          <div>
-            <span className="grid size-9 place-items-center rounded-xl bg-accent text-stone-950 sm:size-12 sm:rounded-2xl">
-              <HandHeart className="size-5" />
-            </span>
-            <div className="mt-3 sm:mt-5">
-              <SectionHeader
-                eyebrow="Support"
-                title="Support the project"
-              />
-            </div>
-            <p className="max-w-2xl text-sm leading-6 text-muted">
-              Enjoying LogFit? You can support future improvements.
-            </p>
-          </div>
-          <div className="grid gap-3 sm:min-w-64">
+        <SettingsSection
+          sectionKey="support"
+          icon={HandHeart}
+          iconClassName="bg-sun/15 text-sun"
+          title="Support the project"
+          subtitle="Help fund future improvements"
+          open={openSections.has("support")}
+          onToggle={toggleSection}
+        >
+          <p className="text-xs leading-5 text-muted">
+            Enjoying LogFit? You can support future improvements.
+          </p>
+          <div className="mt-3 grid gap-2">
             {supportLinks.yoco ? (
               <a
                 href={supportLinks.yoco}
                 target="_blank"
                 rel="noreferrer"
-                className="inline-flex items-center justify-center gap-3 rounded-2xl border border-line bg-white/75 px-4 py-3 text-sm font-black transition hover:-translate-y-0.5 hover:border-accent"
+                className="lf-press inline-flex min-h-11 items-center justify-center gap-3 rounded-xl border border-line bg-white/[0.04] px-4 text-sm font-black transition hover:border-accent"
               >
                 <Image
                   src="/brand/yoco-logo.png"
@@ -347,7 +447,7 @@ export function SettingsPanel() {
               </a>
             ) : (
               <span
-                className="inline-flex items-center justify-center gap-3 rounded-2xl border border-line bg-white/50 px-4 py-3 text-sm font-black text-muted"
+                className="inline-flex min-h-11 items-center justify-center gap-3 rounded-xl border border-line bg-white/[0.02] px-4 text-sm font-black text-muted"
                 aria-disabled="true"
               >
                 <Image
@@ -364,7 +464,7 @@ export function SettingsPanel() {
               href={supportLinks.paypal}
               target="_blank"
               rel="noreferrer"
-              className="inline-flex items-center justify-center gap-3 rounded-2xl border border-line bg-white/75 px-4 py-3 text-sm font-black transition hover:-translate-y-0.5 hover:border-accent"
+              className="lf-press inline-flex min-h-11 items-center justify-center gap-3 rounded-xl border border-line bg-white/[0.04] px-4 text-sm font-black transition hover:border-accent"
             >
               <Image
                 src="/brand/paypal-icon.webp"
@@ -377,16 +477,25 @@ export function SettingsPanel() {
               <ExternalLink className="size-4 text-muted" />
             </a>
           </div>
-        </div>
-      </FitnessCard>
+        </SettingsSection>
+      </Group>
 
-      <FitnessCard className="!p-3 sm:!p-5">
-        <SectionHeader eyebrow="Account" title="Sign out" />
-        <p className="mb-4 text-sm leading-6 text-muted">
-          Log out of this browser and return to the public login page.
-        </p>
-        <LogoutButton className="bg-stone-950 text-white hover:bg-accent" />
-      </FitnessCard>
+      <div className="pt-3">
+        <section className="flex min-h-14 items-center gap-3 rounded-2xl border border-strain/20 bg-card/85 px-3.5 py-2.5">
+          <span className="grid size-9 shrink-0 place-items-center rounded-full bg-strain/15 text-strain">
+            <LogOut className="size-4" />
+          </span>
+          <span className="min-w-0 flex-1">
+            <span className="block text-sm font-bold leading-tight">
+              Sign out
+            </span>
+            <span className="mt-0.5 block truncate text-xs leading-tight text-muted">
+              Return to the public login page
+            </span>
+          </span>
+          <LogoutButton className="shrink-0 !px-4 !py-2 !text-xs bg-stone-950 text-white hover:bg-accent" />
+        </section>
+      </div>
     </div>
   );
 }
