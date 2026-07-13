@@ -1,5 +1,9 @@
 "use client";
 
+import {
+  bodyRegionInstances,
+  getBodyRegionAtPoint,
+} from "@/src/lib/performance/body-model-contract";
 import type {
   BodyIntelligence,
   MuscleGroupId,
@@ -8,21 +12,14 @@ import type {
 import { Canvas, useFrame } from "@react-three/fiber";
 import { useEffect, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
-import { MarchingCubes } from "three/addons/objects/MarchingCubes.js";
+import { MeshoptDecoder } from "three/addons/libs/meshopt_decoder.module.js";
+import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 
 export type BodySceneView = "front" | "rear";
 
-type Part = {
-  kind: "sphere" | "capsule";
-  pos: [number, number, number];
-  scale?: [number, number, number];
-  r?: number;
-  len?: number;
-  axis?: "x" | "y";
-  mirror?: boolean;
-};
+const BODY_MODEL_URL = "/models/body/logfit-anatomical-human.glb";
 
-// Matcap tints per state — concrete hexes (CSS variables can't reach WebGL).
+// Concrete colors are required because CSS variables are not available in WebGL.
 const stateTints: Record<MuscleState, string> = {
   fresh: "#f2705a",
   recovering: "#e6c464",
@@ -30,162 +27,7 @@ const stateTints: Record<MuscleState, string> = {
   neglected: "#9aa0a8",
 };
 
-const neutralTint = "#c9cdd5";
-
-/** Structural volumes that are not part of any selectable muscle group. */
-const neutralParts: Part[] = [
-  { kind: "sphere", pos: [0, 1.665, 0], scale: [0.098, 0.118, 0.104] }, // head
-  { kind: "capsule", pos: [0, 1.56, 0], r: 0.041, len: 0.07, axis: "y" }, // neck
-  { kind: "sphere", pos: [0, 1.34, 0], scale: [0.15, 0.19, 0.095] }, // ribcage
-  { kind: "sphere", pos: [0, 1.14, 0], scale: [0.115, 0.12, 0.082] }, // waist
-  { kind: "sphere", pos: [0, 1.0, 0], scale: [0.142, 0.105, 0.09] }, // pelvis
-  { kind: "sphere", pos: [0.16, 1.462, 0], scale: [0.055, 0.055, 0.055], mirror: true }, // shoulder joint
-  { kind: "capsule", pos: [0.35, 1.455, 0], r: 0.05, len: 0.2, axis: "x", mirror: true }, // upper arm
-  { kind: "sphere", pos: [0.48, 1.45, 0], scale: [0.047, 0.047, 0.047], mirror: true }, // elbow
-  { kind: "capsule", pos: [0.6, 1.448, 0], r: 0.037, len: 0.19, axis: "x", mirror: true }, // forearm bone
-  { kind: "capsule", pos: [0.705, 1.446, 0], r: 0.027, len: 0.05, axis: "x", mirror: true }, // wrist
-  { kind: "sphere", pos: [0.768, 1.444, 0.008], scale: [0.058, 0.03, 0.042], mirror: true }, // hand
-  { kind: "sphere", pos: [0.09, 0.96, 0], scale: [0.066, 0.066, 0.066], mirror: true }, // hip joint
-  { kind: "capsule", pos: [0.093, 0.6, 0.008], r: 0.056, len: 0.1, axis: "y", mirror: true }, // lower thigh
-  { kind: "sphere", pos: [0.093, 0.52, 0.004], scale: [0.057, 0.06, 0.054], mirror: true }, // knee
-  { kind: "capsule", pos: [0.093, 0.3, 0.004], r: 0.046, len: 0.26, axis: "y", mirror: true }, // shin
-  { kind: "sphere", pos: [0.09, 0.4, 0.03], scale: [0.038, 0.085, 0.036], mirror: true }, // tibialis
-  { kind: "sphere", pos: [0.093, 0.095, -0.005], scale: [0.034, 0.038, 0.036], mirror: true }, // ankle
-  { kind: "sphere", pos: [0.093, 0.042, 0.05], scale: [0.048, 0.032, 0.1], mirror: true }, // foot
-];
-
-/** Selectable muscle volumes; these also serve as raycast/highlight hulls. */
-const groupParts: Record<MuscleGroupId, Part[]> = {
-  traps: [
-    { kind: "sphere", pos: [0, 1.505, -0.035], scale: [0.105, 0.052, 0.06] },
-    { kind: "sphere", pos: [0.088, 1.487, -0.025], scale: [0.068, 0.04, 0.052], mirror: true },
-  ],
-  shoulders: [
-    { kind: "sphere", pos: [0.222, 1.465, 0], scale: [0.087, 0.082, 0.08], mirror: true },
-  ],
-  chest: [
-    { kind: "sphere", pos: [0.055, 1.405, 0.07], scale: [0.06, 0.064, 0.052], mirror: true },
-    { kind: "sphere", pos: [0.12, 1.398, 0.055], scale: [0.052, 0.057, 0.047], mirror: true },
-  ],
-  back: [
-    { kind: "sphere", pos: [0.105, 1.37, -0.048], scale: [0.062, 0.075, 0.045], mirror: true },
-    { kind: "sphere", pos: [0.085, 1.28, -0.052], scale: [0.055, 0.085, 0.042], mirror: true },
-    { kind: "sphere", pos: [0.05, 1.19, -0.055], scale: [0.042, 0.07, 0.035], mirror: true },
-  ],
-  biceps: [
-    { kind: "capsule", pos: [0.345, 1.46, 0.026], r: 0.049, len: 0.14, axis: "x", mirror: true },
-  ],
-  triceps: [
-    { kind: "capsule", pos: [0.345, 1.442, -0.028], r: 0.049, len: 0.14, axis: "x", mirror: true },
-  ],
-  forearms: [
-    { kind: "capsule", pos: [0.562, 1.45, 0.008], r: 0.048, len: 0.12, axis: "x", mirror: true },
-  ],
-  core: [
-    { kind: "sphere", pos: [0, 1.19, 0.062], scale: [0.078, 0.15, 0.032] },
-    { kind: "sphere", pos: [0.085, 1.16, 0.032], scale: [0.032, 0.09, 0.026], mirror: true },
-  ],
-  glutes: [
-    { kind: "sphere", pos: [0.07, 0.96, -0.07], scale: [0.08, 0.09, 0.065], mirror: true },
-  ],
-  quads: [
-    { kind: "capsule", pos: [0.095, 0.76, 0.022], r: 0.07, len: 0.24, axis: "y", mirror: true },
-    { kind: "sphere", pos: [0.068, 0.62, 0.04], scale: [0.046, 0.08, 0.04], mirror: true },
-  ],
-  hamstrings: [
-    { kind: "capsule", pos: [0.092, 0.75, -0.04], r: 0.06, len: 0.22, axis: "y", mirror: true },
-  ],
-  calves: [
-    { kind: "sphere", pos: [0.096, 0.43, -0.026], scale: [0.056, 0.108, 0.052], mirror: true },
-    { kind: "sphere", pos: [0.088, 0.33, -0.018], scale: [0.042, 0.09, 0.04], mirror: true },
-  ],
-};
-
-type Ball = { pos: [number, number, number]; r: number };
-
-/** Approximate a part's volume with a cluster of isotropic metaballs. */
-function partToBalls(part: Part): Ball[] {
-  const balls: Ball[] = [];
-
-  const emit = (sign: 1 | -1) => {
-    if (part.kind === "capsule") {
-      const r = part.r ?? 0.05;
-      const len = part.len ?? 0.1;
-      const steps = Math.max(2, Math.ceil(len / (r * 0.7)) + 1);
-
-      for (let index = 0; index < steps; index += 1) {
-        const t = index / (steps - 1) - 0.5;
-        const pos: [number, number, number] = [...part.pos];
-        pos[part.axis === "x" ? 0 : 1] += t * len;
-        pos[0] *= sign;
-        balls.push({ pos, r });
-      }
-      return;
-    }
-
-    const [a, b, c] = part.scale ?? [0.05, 0.05, 0.05];
-    const r = Math.min(a, b, c);
-    const axes = [a, b, c];
-    const counts = axes.map((axis) => Math.max(1, Math.round(axis / r)));
-
-    for (let ix = 0; ix < counts[0]; ix += 1) {
-      for (let iy = 0; iy < counts[1]; iy += 1) {
-        for (let iz = 0; iz < counts[2]; iz += 1) {
-          const offsets = [ix, iy, iz].map((index, axisIndex) => {
-            const count = counts[axisIndex];
-            if (count === 1) return 0;
-            const extent = axes[axisIndex] - r;
-            return (index / (count - 1) - 0.5) * 2 * extent * 0.72;
-          });
-          balls.push({
-            pos: [
-              (part.pos[0] + offsets[0]) * sign,
-              part.pos[1] + offsets[1],
-              part.pos[2] + offsets[2],
-            ],
-            r: r * 1.12,
-          });
-        }
-      }
-    }
-  };
-
-  emit(1);
-  if (part.mirror) emit(-1);
-  return balls;
-}
-
-/** Silver "studio ball" matcap generated on a canvas — no texture assets. */
-function createMatcap() {
-  const size = 256;
-  const canvas = document.createElement("canvas");
-  canvas.width = canvas.height = size;
-  const ctx = canvas.getContext("2d");
-
-  if (ctx) {
-    const gradient = ctx.createRadialGradient(
-      size * 0.38, size * 0.34, size * 0.05,
-      size * 0.5, size * 0.5, size * 0.62
-    );
-    gradient.addColorStop(0, "#ffffff");
-    gradient.addColorStop(0.18, "#e8eaee");
-    gradient.addColorStop(0.45, "#a9adb6");
-    gradient.addColorStop(0.72, "#5d616b");
-    gradient.addColorStop(0.92, "#23262c");
-    gradient.addColorStop(1, "#101216");
-    ctx.fillStyle = gradient;
-    ctx.fillRect(0, 0, size, size);
-  }
-
-  const texture = new THREE.CanvasTexture(canvas);
-  texture.colorSpace = THREE.SRGBColorSpace;
-  return texture;
-}
-
-const FIELD_SCALE = 0.98;
-const FIELD_CENTER_Y = 0.92;
-const MC_RESOLUTION = 100;
-const MC_SUBTRACT = 12;
+const neutralTint = new THREE.Color("#aeb4c0");
 
 type SceneControl = {
   targetYaw: number;
@@ -193,8 +35,88 @@ type SceneControl = {
   autoRotate: boolean;
 };
 
+type PreparedBody = {
+  bodyMesh: THREE.Mesh<THREE.BufferGeometry, THREE.MeshPhysicalMaterial>;
+  colorAttribute: THREE.BufferAttribute;
+  influences: Float32Array;
+  muscleIds: Array<MuscleGroupId | null>;
+  scene: THREE.Group;
+};
+
+function prepareBodyModel(source: THREE.Group): PreparedBody {
+  const scene = source.clone(true);
+  let bodyMesh: PreparedBody["bodyMesh"] | null = null;
+
+  scene.traverse((object) => {
+    if (!(object instanceof THREE.Mesh)) return;
+
+    object.geometry = object.geometry.clone();
+
+    const isBody =
+      object.name === "BASE_BODY" ||
+      object.geometry.name === "BASE_BODY_GEOMETRY";
+
+    if (isBody) {
+      const material = new THREE.MeshPhysicalMaterial({
+        color: "#ffffff",
+        vertexColors: true,
+        roughness: 0.38,
+        metalness: 0.015,
+        clearcoat: 0.14,
+        clearcoatRoughness: 0.38,
+      });
+      object.material = material;
+      bodyMesh = object as PreparedBody["bodyMesh"];
+      return;
+    }
+
+    object.material = new THREE.MeshPhysicalMaterial({
+      color: "#181b22",
+      roughness: 0.24,
+      metalness: 0.04,
+      clearcoat: 0.35,
+      clearcoatRoughness: 0.2,
+    });
+  });
+
+  const resolvedBodyMesh = bodyMesh as PreparedBody["bodyMesh"] | null;
+
+  if (!resolvedBodyMesh) {
+    throw new Error("The anatomical body asset is missing BASE_BODY.");
+  }
+
+  scene.updateMatrixWorld(true);
+  const position = resolvedBodyMesh.geometry.getAttribute("position");
+  const colors = new Float32Array(position.count * 3);
+  const colorAttribute = new THREE.BufferAttribute(colors, 3);
+  const muscleIds: Array<MuscleGroupId | null> = new Array(position.count);
+  const influences = new Float32Array(position.count);
+  const point = new THREE.Vector3();
+
+  for (let index = 0; index < position.count; index += 1) {
+    point
+      .fromBufferAttribute(position, index)
+      .applyMatrix4(resolvedBodyMesh.matrixWorld);
+    const region = getBodyRegionAtPoint(point.x, point.y, point.z);
+    muscleIds[index] = region.id;
+    influences[index] = region.influence;
+    colorAttribute.setXYZ(index, neutralTint.r, neutralTint.g, neutralTint.b);
+  }
+
+  resolvedBodyMesh.geometry.setAttribute("color", colorAttribute);
+
+  return {
+    bodyMesh: resolvedBodyMesh,
+    colorAttribute,
+    influences,
+    muscleIds,
+    scene,
+  };
+}
+
 function BodyFigure({
   intelligence,
+  model,
   selected,
   hovered,
   controlRef,
@@ -202,6 +124,7 @@ function BodyFigure({
   onHoverPick,
 }: {
   intelligence: BodyIntelligence;
+  model: THREE.Group;
   selected: MuscleGroupId | null;
   hovered: MuscleGroupId | null;
   controlRef: React.RefObject<SceneControl>;
@@ -209,44 +132,67 @@ function BodyFigure({
   onHoverPick: (id: MuscleGroupId | null) => void;
 }) {
   const figureRef = useRef<THREE.Group>(null);
-  const matcap = useMemo(() => createMatcap(), []);
+  const prepared = useMemo(() => prepareBodyModel(model), [model]);
 
-  const body = useMemo(() => {
-    const material = new THREE.MeshMatcapMaterial({ matcap, vertexColors: true });
-    const mc = new MarchingCubes(MC_RESOLUTION, material, false, true, 400000);
-    mc.scale.setScalar(FIELD_SCALE);
-    mc.position.set(0, FIELD_CENTER_Y, 0);
-    mc.isolation = 60;
-    mc.reset();
+  useEffect(() => {
+    const displayColor = new THREE.Color();
+    const stateColor = new THREE.Color();
+    const white = new THREE.Color("#ffffff");
 
-    const addBall = (ball: Ball, color: THREE.Color) => {
-      const fx = ball.pos[0] / (2 * FIELD_SCALE) + 0.5;
-      const fy = (ball.pos[1] - FIELD_CENTER_Y) / (2 * FIELD_SCALE) + 0.5;
-      const fz = ball.pos[2] / (2 * FIELD_SCALE) + 0.5;
-      const fieldRadius = ball.r / (2 * FIELD_SCALE);
-      mc.addBall(fx, fy, fz, fieldRadius * fieldRadius * MC_SUBTRACT * 4, MC_SUBTRACT, color);
-    };
+    for (let index = 0; index < prepared.muscleIds.length; index += 1) {
+      const id = prepared.muscleIds[index];
+      const influence = prepared.influences[index];
 
-    const neutral = new THREE.Color(neutralTint);
-    neutralParts.forEach((part) => partToBalls(part).forEach((ball) => addBall(ball, neutral)));
+      if (!id || influence <= 0) {
+        prepared.colorAttribute.setXYZ(
+          index,
+          neutralTint.r,
+          neutralTint.g,
+          neutralTint.b,
+        );
+        continue;
+      }
 
-    (Object.keys(groupParts) as MuscleGroupId[]).forEach((id) => {
-      const color = new THREE.Color(stateTints[intelligence.groups[id].state]);
-      groupParts[id].forEach((part) => partToBalls(part).forEach((ball) => addBall(ball, color)));
-    });
+      stateColor.set(stateTints[intelligence.groups[id].state]);
+      let tintStrength = 0.74;
 
-    mc.update();
-    return mc;
-  }, [intelligence, matcap]);
+      if (id === selected) {
+        stateColor.lerp(white, 0.24);
+        tintStrength = 0.92;
+      } else if (id === hovered) {
+        stateColor.lerp(white, 0.12);
+        tintStrength = 0.84;
+      }
+
+      displayColor
+        .copy(neutralTint)
+        .lerp(stateColor, influence * tintStrength);
+      prepared.colorAttribute.setXYZ(
+        index,
+        displayColor.r,
+        displayColor.g,
+        displayColor.b,
+      );
+    }
+
+    // three.js interop: vertex colors are mutated in place so the mesh is not
+    // rebuilt on every hover/selection change.
+    // eslint-disable-next-line react-hooks/immutability
+    prepared.colorAttribute.needsUpdate = true;
+  }, [hovered, intelligence, prepared, selected]);
 
   useEffect(() => {
     return () => {
-      body.geometry.dispose();
-      (body.material as THREE.Material).dispose();
+      prepared.scene.traverse((object) => {
+        if (!(object instanceof THREE.Mesh)) return;
+        object.geometry.dispose();
+        const materials = Array.isArray(object.material)
+          ? object.material
+          : [object.material];
+        materials.forEach((material) => material.dispose());
+      });
     };
-  }, [body]);
-
-  useEffect(() => () => matcap.dispose(), [matcap]);
+  }, [prepared]);
 
   useFrame((_, delta) => {
     const figure = figureRef.current;
@@ -257,83 +203,57 @@ function BodyFigure({
       state.targetYaw += delta * 0.25;
     }
 
-    // Take the short way around when snapping between stored view angles.
     let difference = state.targetYaw - figure.rotation.y;
     difference = ((difference + Math.PI) % (Math.PI * 2)) - Math.PI;
     figure.rotation.y += difference * Math.min(1, delta * 6);
   });
 
-  const hulls = useMemo(() => {
-    const entries: Array<{
-      key: string;
-      id: MuscleGroupId;
-      part: Part;
-      sign: 1 | -1;
-    }> = [];
-
-    (Object.keys(groupParts) as MuscleGroupId[]).forEach((id) => {
-      groupParts[id].forEach((part, index) => {
-        entries.push({ key: `${id}-${index}-r`, id, part, sign: 1 });
-        if (part.mirror) {
-          entries.push({ key: `${id}-${index}-l`, id, part, sign: -1 });
-        }
-      });
-    });
-
-    return entries;
-  }, []);
-
   return (
     <group ref={figureRef}>
-      <primitive object={body} />
-      {hulls.map(({ key, id, part, sign }) => {
-        const active = selected === id || hovered === id;
-        const tint = stateTints[intelligence.groups[id].state];
-        const position: [number, number, number] = [
-          part.pos[0] * sign,
-          part.pos[1],
-          part.pos[2],
-        ];
-        const rotation: [number, number, number] =
-          part.kind === "capsule" && part.axis === "x" ? [0, 0, Math.PI / 2] : [0, 0, 0];
+      <primitive object={prepared.scene} />
+
+      {bodyRegionInstances.map((part) => {
+        const rotation: [number, number, number] = [0, 0, part.rotationZ];
+        const scale: [number, number, number] =
+          part.kind === "sphere"
+            ? [
+                (part.scale?.[0] ?? 0.05) * 1.12,
+                (part.scale?.[1] ?? 0.05) * 1.12,
+                (part.scale?.[2] ?? 0.05) * 1.2,
+              ]
+            : [1.18, 1.18, 1.18];
 
         return (
           <mesh
-            key={key}
-            position={position}
+            key={part.key}
+            position={part.position}
             rotation={rotation}
-            scale={
-              part.kind === "sphere"
-                ? (part.scale ?? [0.05, 0.05, 0.05]).map((value) => value * 1.12) as [number, number, number]
-                : [1.1, 1.1, 1.1]
-            }
+            scale={scale}
             onClick={(event) => {
               event.stopPropagation();
-              onPick(id);
+              onPick(part.id);
             }}
             onPointerOver={(event) => {
               event.stopPropagation();
-              onHoverPick(id);
+              onHoverPick(part.id);
             }}
             onPointerOut={() => onHoverPick(null)}
           >
             {part.kind === "sphere" ? (
-              <sphereGeometry args={[1, 24, 18]} />
+              <sphereGeometry args={[1, 20, 16]} />
             ) : (
-              <capsuleGeometry args={[part.r ?? 0.05, part.len ?? 0.1, 6, 16]} />
+              <capsuleGeometry
+                args={[part.radius ?? 0.05, part.length ?? 0.1, 6, 14]}
+              />
             )}
-            <meshBasicMaterial
-              transparent
-              opacity={active ? (selected === id ? 0.34 : 0.2) : 0}
-              color={selected === id ? "#ffffff" : tint}
-              depthWrite={false}
-            />
+            <meshBasicMaterial colorWrite={false} depthWrite={false} />
           </mesh>
         );
       })}
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.004, 0]}>
-        <circleGeometry args={[0.42, 48]} />
-        <meshBasicMaterial color="#000000" transparent opacity={0.45} />
+
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.005, 0]}>
+        <circleGeometry args={[0.34, 64]} />
+        <meshBasicMaterial color="#000000" transparent opacity={0.42} />
       </mesh>
     </group>
   );
@@ -345,30 +265,71 @@ export function BodyScene({
   selected,
   onSelect,
   onHover,
+  onUnavailable,
+  viewRevision = 0,
 }: {
   intelligence: BodyIntelligence;
   view: BodySceneView;
   selected: MuscleGroupId | null;
   onSelect: (id: MuscleGroupId) => void;
   onHover?: (id: MuscleGroupId | null) => void;
+  onUnavailable?: () => void;
+  viewRevision?: number;
 }) {
   const [hovered, setHovered] = useState<MuscleGroupId | null>(null);
+  const [model, setModel] = useState<THREE.Group | null>(null);
+  const unavailableRef = useRef(onUnavailable);
   const controlRef = useRef<SceneControl>({
-    targetYaw: 0,
+    targetYaw: view === "front" ? 0 : Math.PI,
     lastInteraction: 0,
     autoRotate: true,
   });
   const dragRef = useRef({ active: false, lastX: 0, distance: 0 });
 
   useEffect(() => {
+    unavailableRef.current = onUnavailable;
+  }, [onUnavailable]);
+
+  useEffect(() => {
+    let isMounted = true;
+    const loader = new GLTFLoader();
+    loader.setMeshoptDecoder(MeshoptDecoder);
+    loader.load(
+      BODY_MODEL_URL,
+      (gltf) => {
+        if (!isMounted) return;
+        const hasBody = gltf.scene.getObjectByName("BASE_BODY") !== undefined;
+        if (!hasBody) {
+          unavailableRef.current?.();
+          return;
+        }
+        setModel(gltf.scene);
+      },
+      undefined,
+      () => {
+        if (isMounted) unavailableRef.current?.();
+      },
+    );
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  useEffect(() => {
     const media = window.matchMedia("(prefers-reduced-motion: reduce)");
-    controlRef.current.autoRotate = !media.matches;
+    const updateMotionPreference = () => {
+      controlRef.current.autoRotate = !media.matches;
+    };
+    updateMotionPreference();
+    media.addEventListener("change", updateMotionPreference);
+    return () => media.removeEventListener("change", updateMotionPreference);
   }, []);
 
   useEffect(() => {
     controlRef.current.targetYaw = view === "front" ? 0 : Math.PI;
     controlRef.current.lastInteraction = performance.now();
-  }, [view]);
+  }, [view, viewRevision]);
 
   function markInteraction() {
     controlRef.current.lastInteraction = performance.now();
@@ -396,10 +357,10 @@ export function BodyScene({
       onPointerMove={(event) => {
         const drag = dragRef.current;
         if (!drag.active) return;
-        const dx = event.clientX - drag.lastX;
+        const distance = event.clientX - drag.lastX;
         drag.lastX = event.clientX;
-        drag.distance += Math.abs(dx);
-        controlRef.current.targetYaw += dx * 0.011;
+        drag.distance += Math.abs(distance);
+        controlRef.current.targetYaw += distance * 0.011;
         markInteraction();
       }}
       onPointerUp={() => {
@@ -409,25 +370,59 @@ export function BodyScene({
       onPointerCancel={() => {
         dragRef.current.active = false;
       }}
+      onPointerLeave={() => {
+        dragRef.current.active = false;
+      }}
     >
       <Canvas
         dpr={[1, 2]}
-        gl={{ antialias: true, alpha: true }}
-        camera={{ fov: 33, position: [0, 1.12, 3.35], near: 0.1, far: 20 }}
-        onCreated={({ camera }) => camera.lookAt(0, 0.95, 0)}
+        gl={{
+          antialias: true,
+          alpha: true,
+          powerPreference: "high-performance",
+        }}
+        camera={{ fov: 32, position: [0, 0.92, 3.35], near: 0.1, far: 20 }}
+        onCreated={({ camera, gl }) => {
+          camera.lookAt(0, 0.92, 0);
+          gl.outputColorSpace = THREE.SRGBColorSpace;
+          gl.toneMapping = THREE.ACESFilmicToneMapping;
+          gl.toneMappingExposure = 1.08;
+          gl.domElement.addEventListener(
+            "webglcontextlost",
+            (event) => {
+              event.preventDefault();
+              unavailableRef.current?.();
+            },
+            { once: true },
+          );
+        }}
       >
-        <BodyFigure
-          intelligence={intelligence}
-          selected={selected}
-          hovered={hovered}
-          controlRef={controlRef}
-          onPick={(id) => {
-            // A horizontal drag should spin the body, not select a muscle.
-            if (dragRef.current.distance > 8) return;
-            onSelect(id);
-          }}
-          onHoverPick={handleHover}
+        <hemisphereLight args={["#eef3ff", "#151821", 0.82]} />
+        <directionalLight
+          color="#fff0e8"
+          intensity={3.4}
+          position={[2.8, 3.6, 4]}
         />
+        <directionalLight
+          color="#c5d6ff"
+          intensity={2.5}
+          position={[-3, 2.7, -3.5]}
+        />
+
+        {model ? (
+          <BodyFigure
+            intelligence={intelligence}
+            model={model}
+            selected={selected}
+            hovered={hovered}
+            controlRef={controlRef}
+            onPick={(id) => {
+              if (dragRef.current.distance > 8) return;
+              onSelect(id);
+            }}
+            onHoverPick={handleHover}
+          />
+        ) : null}
       </Canvas>
     </div>
   );

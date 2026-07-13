@@ -243,6 +243,7 @@ function MuscleDetail({
 
 export function BodyIntelligencePage() {
   const [view, setView] = useState<BodyView>("front");
+  const [viewRevision, setViewRevision] = useState(0);
   const [selected, setSelected] = useState<MuscleGroupId | null>(null);
   const dragStartX = useRef<number | null>(null);
   const [intelligence, setIntelligence] = useState<BodyIntelligence | null>(
@@ -286,7 +287,7 @@ export function BodyIntelligencePage() {
   );
 
   // The SVG map remains as the fallback for devices without WebGL.
-  const [hasWebGL] = useState(() => {
+  const [hasWebGL, setHasWebGL] = useState(() => {
     if (typeof document === "undefined") return true;
 
     try {
@@ -304,6 +305,7 @@ export function BodyIntelligencePage() {
 
   function rotateBody(nextView?: BodyView) {
     setView((current) => nextView ?? (current === "front" ? "rear" : "front"));
+    setViewRevision((current) => current + 1);
   }
 
   function handleModelPointerDown(event: React.PointerEvent<HTMLDivElement>) {
@@ -364,7 +366,7 @@ export function BodyIntelligencePage() {
               role="tab"
               type="button"
               aria-selected={view === option}
-              onClick={() => setView(option)}
+              onClick={() => rotateBody(option)}
               className={`lf-press rounded-lg px-4 py-1.5 text-xs font-bold capitalize transition ${
                 view === option
                   ? "bg-white/[0.09] text-foreground"
@@ -424,6 +426,8 @@ export function BodyIntelligencePage() {
                 onHover={(id) =>
                   setHoveredStatus(id ? intelligence.groups[id] : null)
                 }
+                onUnavailable={() => setHasWebGL(false)}
+                viewRevision={viewRevision}
               />
             ) : (
               <div
