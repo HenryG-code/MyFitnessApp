@@ -286,19 +286,11 @@ export function BodyIntelligencePage() {
     [selected, intelligence]
   );
 
-  // The SVG map remains as the fallback for devices without WebGL.
-  const [hasWebGL, setHasWebGL] = useState(() => {
-    if (typeof document === "undefined") return true;
-
-    try {
-      const canvas = document.createElement("canvas");
-      const context = canvas.getContext("webgl2");
-      context?.getExtension("WEBGL_lose_context")?.loseContext();
-      return Boolean(context);
-    } catch {
-      return false;
-    }
-  });
+  // Attempt the real renderer first. A separate capability probe can produce
+  // false negatives on mobile browsers and exhaust/lose a context immediately
+  // before Three creates its own. BodyScene activates the SVG fallback only
+  // after an actual renderer, model-load, or context failure.
+  const [hasWebGL, setHasWebGL] = useState(true);
   const [hoveredStatus, setHoveredStatus] = useState<MuscleGroupStatus | null>(
     null
   );
