@@ -7,6 +7,8 @@ import {
   buildMilestones,
   buildStrengthTrends,
   calculateBestStreak,
+  ONE_REP_MAX_STEP_KG,
+  suggestNextOneRepMax,
   type JourneySummary,
   type Milestone,
   type StrengthTrend,
@@ -48,7 +50,7 @@ const milestoneIcons = {
   current: MapPin,
 } as const;
 
-const coreLifts = ["Bench press", "Back squat", "Deadlift", "Overhead press"];
+const coreLifts = ["Bench press", "Back squat", "Deadlift", "Weighted pull-up"];
 
 function StrengthLab({ trends }: { trends: StrengthTrend[] }) {
   const trackedBench = trends.find((trend) =>
@@ -71,6 +73,11 @@ function StrengthLab({ trends }: { trends: StrengthTrend[] }) {
       normalizeExerciseName(selectedLift)
   );
   const estimate = estimateOneRepMax(Number(weight), Number(reps));
+  const nextTarget = suggestNextOneRepMax({
+    estimate,
+    currentMax: selectedTrend?.lastOneRepMax ?? null,
+    workingWeight: Number(weight) || 0,
+  });
 
   function chooseCoreLift(keyword: string, fallback: string) {
     const tracked = trends.find((trend) =>
@@ -98,7 +105,7 @@ function StrengthLab({ trends }: { trends: StrengthTrend[] }) {
           <Calculator className="hidden size-5 shrink-0 text-ink-dim sm:block" />
         </div>
 
-        <div className="mt-3 grid grid-cols-3 gap-1.5 sm:flex sm:flex-wrap sm:gap-2">
+        <div className="mt-3 grid grid-cols-4 gap-1.5 sm:flex sm:flex-wrap sm:gap-2">
           <button
             type="button"
             onClick={() => chooseCoreLift("bench", "Bench press")}
@@ -119,6 +126,13 @@ function StrengthLab({ trends }: { trends: StrengthTrend[] }) {
             className="lf-press min-h-9 rounded-lg border border-line bg-white/[0.03] px-2 text-xs font-black text-muted transition hover:border-accent/40 hover:text-foreground"
           >
             Deadlift
+          </button>
+          <button
+            type="button"
+            onClick={() => chooseCoreLift("pull", "Weighted pull-up")}
+            className="lf-press min-h-9 rounded-lg border border-line bg-white/[0.03] px-2 text-xs font-black text-muted transition hover:border-accent/40 hover:text-foreground"
+          >
+            Pull-ups
           </button>
         </div>
 
@@ -170,14 +184,21 @@ function StrengthLab({ trends }: { trends: StrengthTrend[] }) {
         <div className="mt-3 rounded-xl border border-white/[0.07] bg-black/15 p-3">
           <div className="flex items-center justify-between gap-2">
             <div>
-              <p className="text-xs font-black">Estimate a new max</p>
+              <p className="text-xs font-black">Plan your next max attempt</p>
               <p className="mt-0.5 text-[0.65rem] text-muted">
                 Enter a recent working set.
               </p>
             </div>
-            <p className="lf-num text-right font-display text-2xl font-black text-accent-strong">
-              {estimate ? `${estimate.toFixed(0)} kg` : "—"}
-            </p>
+            <div className="text-right">
+              <p className="lf-num font-display text-2xl font-black text-accent-strong">
+                {nextTarget !== null
+                  ? `${nextTarget % 1 === 0 ? nextTarget.toFixed(0) : nextTarget.toFixed(1)} kg`
+                  : "—"}
+              </p>
+              <p className="text-[0.58rem] font-black uppercase tracking-[0.14em] text-ink-dim">
+                Safe next target
+              </p>
+            </div>
           </div>
           <div className="mt-3 grid grid-cols-2 gap-2">
             <label className="min-w-0">
@@ -210,11 +231,19 @@ function StrengthLab({ trends }: { trends: StrengthTrend[] }) {
               />
             </label>
           </div>
+          {estimate !== null && nextTarget !== null && estimate > nextTarget + 0.05 ? (
+            <p className="mt-2 text-[0.65rem] leading-4 text-muted">
+              This set estimates up to {estimate.toFixed(0)} kg long-term —
+              build toward it in {ONE_REP_MAX_STEP_KG} kg steps instead of
+              jumping straight there.
+            </p>
+          ) : null}
         </div>
 
         <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-[0.65rem] leading-4 text-ink-dim">
-            Estimates use your logged weight and reps; they are a training guide, not a testing requirement.
+            Targets move up {ONE_REP_MAX_STEP_KG} kg at a time. Warm up fully
+            and use a spotter when you test a max.
           </p>
           <Link
             href={`/workouts/new?exercise=${encodeURIComponent(selectedLift)}`}

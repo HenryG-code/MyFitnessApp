@@ -45,6 +45,55 @@ function formatKg(value: number) {
   return `${value.toFixed(1)} kg`;
 }
 
+/**
+ * Lifts people actually test one-rep maxes on: the bench, squat, and
+ * deadlift families plus weighted pull-up/chin-up variants. Accessory work
+ * (curls, raises, rows, machines) is excluded — an estimated 1RM on those
+ * is noise rather than a trackable number.
+ */
+export function isOneRepMaxLift(name: string) {
+  const normalized = normalizeExerciseName(name);
+
+  // Accessory squat variants are not lifts people max out on.
+  if (
+    normalized.includes("split squat") ||
+    normalized.includes("goblet") ||
+    normalized.includes("leg press")
+  ) {
+    return false;
+  }
+
+  return (
+    normalized.includes("bench") ||
+    normalized.includes("squat") ||
+    normalized.includes("deadlift") ||
+    /\b(pull|chin)[- ]?ups?\b/.test(normalized)
+  );
+}
+
+export const ONE_REP_MAX_STEP_KG = 2.5;
+
+/**
+ * Conservative next max attempt. An Epley estimate can leap far past anything
+ * the lifter has actually held (80 kg × 5 already "estimates" 93 kg), so the
+ * suggestion is capped at one plate step (2.5 kg) above their current tracked
+ * max — and it never dips below the weight they just lifted for reps.
+ */
+export function suggestNextOneRepMax(input: {
+  estimate: number | null;
+  currentMax: number | null;
+  workingWeight: number;
+}): number | null {
+  if (input.estimate === null || input.workingWeight <= 0) {
+    return null;
+  }
+
+  const reference = input.currentMax ?? input.workingWeight;
+  const capped = Math.min(input.estimate, reference + ONE_REP_MAX_STEP_KG);
+
+  return Math.round(Math.max(input.workingWeight, capped) * 10) / 10;
+}
+
 export function buildStrengthTrends(
   exercises: DatedExercise[]
 ): StrengthTrend[] {
@@ -54,6 +103,10 @@ export function buildStrengthTrends(
   >();
 
   exercises.forEach((exercise) => {
+    if (!isOneRepMaxLift(exercise.exercise_name)) {
+      return;
+    }
+
     const orm = estimateOneRepMax(exercise.weight, exercise.reps);
     if (orm === null) {
       return;
@@ -161,6 +214,10 @@ export function buildMilestones(input: {
   );
 
   sortedExercises.forEach((exercise) => {
+    if (!isOneRepMaxLift(exercise.exercise_name)) {
+      return;
+    }
+
     const orm = estimateOneRepMax(exercise.weight, exercise.reps);
     if (orm === null) {
       return;
