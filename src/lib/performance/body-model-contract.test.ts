@@ -23,7 +23,7 @@ describe("body model contract", () => {
     expect(getBodyRegionAtPoint(0.095, 1.33, -0.1).id).toBe("back");
   });
 
-  it("keeps every interaction volume inside the bundled model bounds", () => {
+  it("keeps every interaction-volume center inside the model bounds", () => {
     for (const region of bodyRegionInstances) {
       expect(Math.abs(region.position[0])).toBeLessThanOrEqual(0.46);
       expect(region.position[1]).toBeGreaterThanOrEqual(0);

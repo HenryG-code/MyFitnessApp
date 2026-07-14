@@ -292,9 +292,9 @@ export function BodyIntelligencePage() {
 
     try {
       const canvas = document.createElement("canvas");
-      return Boolean(
-        canvas.getContext("webgl2") ?? canvas.getContext("webgl")
-      );
+      const context = canvas.getContext("webgl2");
+      context?.getExtension("WEBGL_lose_context")?.loseContext();
+      return Boolean(context);
     } catch {
       return false;
     }
@@ -396,7 +396,7 @@ export function BodyIntelligencePage() {
           <div
             role="region"
             tabIndex={0}
-            aria-label={`Interactive 3D body, showing ${view}. Drag horizontally or use arrow keys to rotate.`}
+            aria-label={`Interactive 3D body, showing ${view}. Drag horizontally or use arrow keys to rotate. A keyboard muscle selector follows the model.`}
             onPointerDown={hasWebGL ? undefined : handleModelPointerDown}
             onPointerUp={hasWebGL ? undefined : handleModelPointerUp}
             onPointerCancel={() => {
@@ -496,6 +496,37 @@ export function BodyIntelligencePage() {
                 {stateLabels[state]}
               </span>
             ))}
+          </div>
+          <div className="sr-only focus-within:not-sr-only focus-within:mt-3 focus-within:rounded-xl focus-within:border focus-within:border-line focus-within:bg-black/20 focus-within:p-3">
+            <p
+              id="body-muscle-selector-label"
+              className="mb-2 text-xs font-black text-foreground"
+            >
+              Choose a muscle group
+            </p>
+            <div
+              role="group"
+              aria-labelledby="body-muscle-selector-label"
+              className="flex flex-wrap gap-1.5"
+            >
+              {(Object.values(intelligence.groups) as MuscleGroupStatus[]).map(
+                (group) => (
+                  <button
+                    key={group.id}
+                    type="button"
+                    aria-pressed={selected === group.id}
+                    onClick={() =>
+                      setSelected((current) =>
+                        current === group.id ? null : group.id,
+                      )
+                    }
+                    className="rounded-lg border border-line bg-surface px-2.5 py-1.5 text-xs font-bold text-muted outline-none focus-visible:border-accent focus-visible:text-foreground focus-visible:ring-2 focus-visible:ring-accent/50"
+                  >
+                    {group.name}
+                  </button>
+                ),
+              )}
+            </div>
           </div>
         </section>
 

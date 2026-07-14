@@ -44,12 +44,8 @@ describe("bundled anatomical human model", () => {
 
   it("keeps the named body mesh and the required Meshopt decoder contract", () => {
     const { json } = readAsset();
-    const names = [
-      ...(json.meshes ?? []).map((mesh) => mesh.name),
-      ...(json.nodes ?? []).map((node) => node.name),
-    ];
 
-    expect(names).toContain("BASE_BODY");
+    expect(json.nodes?.some((node) => node.name === "BASE_BODY")).toBe(true);
     expect(json.extensionsRequired).toContain("EXT_meshopt_compression");
   });
 
