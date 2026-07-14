@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   buildStrengthTrends,
   calculateBestStreak,
+  estimateTrackedOneRepMax,
   isOneRepMaxLift,
   suggestNextOneRepMax,
 } from "./journey";
@@ -22,32 +23,30 @@ function exercise(
 }
 
 describe("isOneRepMaxLift", () => {
-  it("accepts the bench, squat, and deadlift families", () => {
+  it("accepts canonical heavy barbell lifts and their safe aliases", () => {
     for (const name of [
       "Bench press",
-      "Incline Bench Press",
+      "Barbell Bench Press",
       "Back squat",
-      "Front Squat",
+      "Low Bar Back Squat",
       "Deadlift",
+      "Sumo Deadlift",
+      "Overhead Press",
+      "Strict press",
+    ]) {
+      expect(isOneRepMaxLift(name)).toBe(true);
+    }
+  });
+
+  it("rejects Romanian deadlifts, secondary variants, and accessory work", () => {
+    for (const name of [
       "Romanian deadlift",
-    ]) {
-      expect(isOneRepMaxLift(name)).toBe(true);
-    }
-  });
-
-  it("accepts pull-up and chin-up variants", () => {
-    for (const name of [
-      "Pull ups",
+      "RDL",
+      "Stiff-leg deadlift",
+      "Incline Bench Press",
+      "Dumbbell Bench Press",
+      "Front Squat",
       "Weighted Pull-Up",
-      "Chin up",
-      "Chin-ups",
-    ]) {
-      expect(isOneRepMaxLift(name)).toBe(true);
-    }
-  });
-
-  it("rejects accessory and machine work", () => {
-    for (const name of [
       "Bicep curl",
       "Lateral raise",
       "Lat pulldown",
@@ -64,54 +63,23 @@ describe("isOneRepMaxLift", () => {
 });
 
 describe("suggestNextOneRepMax", () => {
-  it("caps the suggestion at one plate step above the current max", () => {
-    // 80 kg × 5 gives an Epley estimate of ~93 kg — far too big a jump.
-    expect(
-      suggestNextOneRepMax({
-        estimate: 93.3,
-        currentMax: 80,
-        workingWeight: 80,
-      })
-    ).toBe(82.5);
+  it("projects 80 kg for five reps to an 85 kg one-rep max", () => {
+    expect(suggestNextOneRepMax({ workingWeight: 80, reps: 5 })).toBe(85);
   });
 
-  it("uses the working weight as reference when there is no history", () => {
-    expect(
-      suggestNextOneRepMax({
-        estimate: 93.3,
-        currentMax: null,
-        workingWeight: 80,
-      })
-    ).toBe(82.5);
+  it("treats a completed single as the current one-rep max", () => {
+    expect(suggestNextOneRepMax({ workingWeight: 80, reps: 1 })).toBe(80);
   });
 
-  it("keeps light-set estimates below the current max untouched", () => {
-    expect(
-      suggestNextOneRepMax({
-        estimate: 70,
-        currentMax: 100,
-        workingWeight: 60,
-      })
-    ).toBe(70);
+  it("preserves practical half-kilo loading increments", () => {
+    expect(suggestNextOneRepMax({ workingWeight: 82.5, reps: 5 })).toBe(87.5);
   });
 
-  it("never suggests less than the weight already lifted", () => {
-    expect(
-      suggestNextOneRepMax({
-        estimate: 103.3,
-        currentMax: 90,
-        workingWeight: 100,
-      })
-    ).toBe(100);
-  });
-
-  it("returns null without a usable estimate or weight", () => {
-    expect(
-      suggestNextOneRepMax({ estimate: null, currentMax: 80, workingWeight: 80 })
-    ).toBeNull();
-    expect(
-      suggestNextOneRepMax({ estimate: 93, currentMax: 80, workingWeight: 0 })
-    ).toBeNull();
+  it("returns null without a usable weight and rep count", () => {
+    expect(estimateTrackedOneRepMax(null, 5)).toBeNull();
+    expect(estimateTrackedOneRepMax(80, null)).toBeNull();
+    expect(suggestNextOneRepMax({ workingWeight: 0, reps: 5 })).toBeNull();
+    expect(suggestNextOneRepMax({ workingWeight: 80, reps: 0 })).toBeNull();
   });
 });
 
@@ -122,12 +90,14 @@ describe("buildStrengthTrends", () => {
       exercise("Bench press", 85, 5, "2026-07-08"),
       exercise("Bicep curl", 16, 10, "2026-07-01"),
       exercise("Lat pulldown", 60, 8, "2026-07-01"),
-      exercise("Weighted pull-up", 20, 5, "2026-07-02"),
+      exercise("Romanian deadlift", 100, 5, "2026-07-02"),
+      exercise("Overhead press", 45, 5, "2026-07-02"),
     ]);
     const names = trends.map((trend) => trend.exerciseName);
 
-    expect(names).toContain("Bench press");
-    expect(names).toContain("Weighted pull-up");
+    expect(names).toContain("Bench Press");
+    expect(names).toContain("Overhead Press");
+    expect(names).not.toContain("Romanian deadlift");
     expect(names).not.toContain("Bicep curl");
     expect(names).not.toContain("Lat pulldown");
   });
@@ -145,10 +115,19 @@ describe("buildStrengthTrends", () => {
     );
   });
 
-  it("skips bodyweight rows without a logged load", () => {
-    expect(buildStrengthTrends([exercise("Pull ups", null, 8)])).toHaveLength(
-      0
-    );
+  it("merges bench aliases into one canonical trend", () => {
+    const trends = buildStrengthTrends([
+      exercise("Bench press", 80, 5, "2026-07-01"),
+      exercise("Bench Press", 82.5, 5, "2026-07-04"),
+      exercise("Barbell bench press", 85, 5, "2026-07-08"),
+    ]);
+
+    expect(trends).toHaveLength(1);
+    expect(trends[0]).toMatchObject({
+      liftId: "bench-press",
+      exerciseName: "Bench Press",
+      sessions: 3,
+    });
   });
 });
 

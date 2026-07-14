@@ -13,6 +13,7 @@ import { defaultTrainingGoal } from "@/src/lib/training-plans/types";
 import {
   buildQueue,
   formatClock,
+  selectRepresentativeLoggedSet,
   type LoggedSet,
   type QueueExercise,
 } from "@/src/lib/workouts/session-queue";
@@ -193,12 +194,9 @@ export function WorkoutMode() {
         duration_minutes: Math.max(1, Math.round(elapsed / 60)),
         notes: `LogFit Workout Mode — ${goal} plan.`,
         exercises: performed.map((exercise) => {
-          const weights = exercise.logged
-            .map((set) => set.weight)
-            .filter((value): value is number => value !== null && value > 0);
-          const repsLogged = exercise.logged
-            .map((set) => set.reps)
-            .filter((value): value is number => value !== null && value > 0);
+          const representativeSet = selectRepresentativeLoggedSet(
+            exercise.logged
+          );
           const breakdown = exercise.logged
             .map((set) =>
               set.weight !== null && set.reps !== null
@@ -210,10 +208,14 @@ export function WorkoutMode() {
           return {
             exercise_name: exercise.name,
             sets: exercise.logged.length,
-            reps: repsLogged.length
-              ? repsLogged[repsLogged.length - 1]
-              : null,
-            weight: weights.length ? Math.max(...weights) : null,
+            reps:
+              representativeSet?.reps && representativeSet.reps > 0
+                ? representativeSet.reps
+                : null,
+            weight:
+              representativeSet?.weight && representativeSet.weight > 0
+                ? representativeSet.weight
+                : null,
             distance_km: null,
             duration_minutes: exercise.timed ? exercise.durationMinutes : null,
             notes: exercise.timed ? null : `Sets: ${breakdown}`,

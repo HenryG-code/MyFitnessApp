@@ -23,6 +23,7 @@ export type Milestone = {
 };
 
 export type StrengthTrend = {
+  liftId: OneRepMaxLiftId;
   exerciseName: string;
   firstOneRepMax: number;
   bestOneRepMax: number;
@@ -45,78 +46,126 @@ function formatKg(value: number) {
   return `${value.toFixed(1)} kg`;
 }
 
-/**
- * Lifts people actually test one-rep maxes on: the bench, squat, and
- * deadlift families plus weighted pull-up/chin-up variants. Accessory work
- * (curls, raises, rows, machines) is excluded — an estimated 1RM on those
- * is noise rather than a trackable number.
- */
-export function isOneRepMaxLift(name: string) {
+export const ONE_REP_MAX_LIFTS = [
+  {
+    id: "bench-press",
+    name: "Bench Press",
+    shortName: "Bench",
+    aliases: [
+      "bench press",
+      "barbell bench press",
+      "flat bench press",
+      "flat barbell bench press",
+    ],
+  },
+  {
+    id: "back-squat",
+    name: "Back Squat",
+    shortName: "Squat",
+    aliases: [
+      "squat",
+      "back squat",
+      "barbell squat",
+      "barbell back squat",
+      "high bar back squat",
+      "low bar back squat",
+    ],
+  },
+  {
+    id: "deadlift",
+    name: "Deadlift",
+    shortName: "Deadlift",
+    aliases: [
+      "deadlift",
+      "barbell deadlift",
+      "conventional deadlift",
+      "sumo deadlift",
+    ],
+  },
+  {
+    id: "overhead-press",
+    name: "Overhead Press",
+    shortName: "OHP",
+    aliases: [
+      "overhead press",
+      "barbell overhead press",
+      "standing overhead press",
+      "standing barbell overhead press",
+      "strict press",
+      "military press",
+      "barbell military press",
+      "ohp",
+    ],
+  },
+] as const;
+
+export type OneRepMaxLiftId = (typeof ONE_REP_MAX_LIFTS)[number]["id"];
+
+/** Resolve plan/history aliases to one of the four classic heavy barbell lifts. */
+export function getOneRepMaxLift(name: string) {
   const normalized = normalizeExerciseName(name);
 
-  // Accessory squat variants are not lifts people max out on.
-  if (
-    normalized.includes("split squat") ||
-    normalized.includes("goblet") ||
-    normalized.includes("leg press")
-  ) {
-    return false;
-  }
-
   return (
-    normalized.includes("bench") ||
-    normalized.includes("squat") ||
-    normalized.includes("deadlift") ||
-    /\b(pull|chin)[- ]?ups?\b/.test(normalized)
+    ONE_REP_MAX_LIFTS.find((lift) =>
+      lift.aliases.some((alias) => alias === normalized)
+    ) ?? null
   );
 }
 
-export const ONE_REP_MAX_STEP_KG = 2.5;
+/** Keep the strength tracker focused on canonical, safely testable barbell lifts. */
+export function isOneRepMaxLift(name: string) {
+  return getOneRepMaxLift(name) !== null;
+}
 
 /**
- * Conservative next max attempt. An Epley estimate can leap far past anything
- * the lifter has actually held (80 kg × 5 already "estimates" 93 kg), so the
- * suggestion is capped at one plate step (2.5 kg) above their current tracked
- * max — and it never dips below the weight they just lifted for reps.
+ * Conservative rep-based projection: 80 kg for five clean reps becomes an
+ * 85 kg estimated 1RM. The Epley result acts only as an upper safety bound.
  */
+export function estimateTrackedOneRepMax(
+  workingWeight: number | null,
+  reps: number | null
+): number | null {
+  return estimateOneRepMax(workingWeight, reps);
+}
+
 export function suggestNextOneRepMax(input: {
-  estimate: number | null;
-  currentMax: number | null;
   workingWeight: number;
+  reps: number | null;
 }): number | null {
-  if (input.estimate === null || input.workingWeight <= 0) {
-    return null;
-  }
-
-  const reference = input.currentMax ?? input.workingWeight;
-  const capped = Math.min(input.estimate, reference + ONE_REP_MAX_STEP_KG);
-
-  return Math.round(Math.max(input.workingWeight, capped) * 10) / 10;
+  return estimateTrackedOneRepMax(input.workingWeight, input.reps);
 }
 
 export function buildStrengthTrends(
   exercises: DatedExercise[]
 ): StrengthTrend[] {
   const byExercise = new Map<
-    string,
-    { name: string; points: Array<{ date: string; orm: number }> }
+    OneRepMaxLiftId,
+    {
+      liftId: OneRepMaxLiftId;
+      name: string;
+      points: Array<{ date: string; orm: number }>;
+    }
   >();
 
   exercises.forEach((exercise) => {
-    if (!isOneRepMaxLift(exercise.exercise_name)) {
+    const lift = getOneRepMaxLift(exercise.exercise_name);
+    if (!lift) {
       return;
     }
 
-    const orm = estimateOneRepMax(exercise.weight, exercise.reps);
+    const orm = estimateTrackedOneRepMax(exercise.weight, exercise.reps);
     if (orm === null) {
       return;
     }
 
-    const key = normalizeExerciseName(exercise.exercise_name);
     const entry =
-      byExercise.get(key) ?? { name: exercise.exercise_name, points: [] };
+      byExercise.get(lift.id) ?? {
+        liftId: lift.id,
+        name: lift.name,
+        points: [],
+      };
     entry.points.push({ date: exercise.workout_date, orm });
-    byExercise.set(key, entry);
+    byExercise.set(lift.id, entry);
   });
 
   const trends: StrengthTrend[] = [];
@@ -128,6 +177,7 @@ export function buildStrengthTrends(
     const best = Math.max(...entry.points.map((point) => point.orm));
 
     trends.push({
+      liftId: entry.liftId,
       exerciseName: entry.name,
       firstOneRepMax: first,
       bestOneRepMax: best,
@@ -214,23 +264,24 @@ export function buildMilestones(input: {
   );
 
   sortedExercises.forEach((exercise) => {
-    if (!isOneRepMaxLift(exercise.exercise_name)) {
+    const lift = getOneRepMaxLift(exercise.exercise_name);
+    if (!lift) {
       return;
     }
 
-    const orm = estimateOneRepMax(exercise.weight, exercise.reps);
+    const orm = estimateTrackedOneRepMax(exercise.weight, exercise.reps);
     if (orm === null) {
       return;
     }
 
-    const key = normalizeExerciseName(exercise.exercise_name);
+    const key = lift.id;
     const best = bestByExercise.get(key);
 
     if (best !== undefined && orm >= best * 1.05 && orm - best >= 2.5) {
       milestones.push({
         date: exercise.workout_date,
         kind: "strength",
-        title: `${exercise.exercise_name} PR`,
+        title: `${lift.name} PR`,
         value: `${exercise.weight} kg × ${exercise.reps ?? 1}`,
         detail: `Estimated 1RM up to ${orm.toFixed(0)} kg.`,
       });

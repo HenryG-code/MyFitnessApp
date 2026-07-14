@@ -10,15 +10,7 @@ import type {
   MuscleState,
 } from "@/src/lib/performance/muscles";
 import { Canvas, useFrame } from "@react-three/fiber";
-import {
-  Component,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  type ReactNode,
-} from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
 import { MeshoptDecoder } from "three/addons/libs/meshopt_decoder.module.js";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
@@ -37,49 +29,10 @@ const stateTints: Record<MuscleState, string> = {
 
 const neutralTint = new THREE.Color("#aeb4c0");
 
-class BodySceneErrorBoundary extends Component<
-  { children: ReactNode; onUnavailable?: () => void },
-  { failed: boolean }
-> {
-  state = { failed: false };
-
-  static getDerivedStateFromError() {
-    return { failed: true };
-  }
-
-  componentDidCatch() {
-    this.props.onUnavailable?.();
-  }
-
-  render() {
-    return this.state.failed ? null : this.props.children;
-  }
-}
-
-function WebGLFallback({ onUnavailable }: { onUnavailable: () => void }) {
-  useEffect(() => {
-    onUnavailable();
-  }, [onUnavailable]);
-
-  return null;
-}
-
-function disposeSceneResources(scene: THREE.Object3D) {
-  scene.traverse((object) => {
-    if (!(object instanceof THREE.Mesh)) return;
-    object.geometry.dispose();
-    const materials = Array.isArray(object.material)
-      ? object.material
-      : [object.material];
-    materials.forEach((material) => material.dispose());
-  });
-}
-
 type SceneControl = {
   targetYaw: number;
   lastInteraction: number;
   autoRotate: boolean;
-  reducedMotion: boolean;
 };
 
 type PreparedBody = {
@@ -229,18 +182,22 @@ function BodyFigure({
   }, [hovered, intelligence, prepared, selected]);
 
   useEffect(() => {
-    return () => disposeSceneResources(prepared.scene);
+    return () => {
+      prepared.scene.traverse((object) => {
+        if (!(object instanceof THREE.Mesh)) return;
+        object.geometry.dispose();
+        const materials = Array.isArray(object.material)
+          ? object.material
+          : [object.material];
+        materials.forEach((material) => material.dispose());
+      });
+    };
   }, [prepared]);
 
   useFrame((_, delta) => {
     const figure = figureRef.current;
     const state = controlRef.current;
     if (!figure || !state) return;
-
-    if (state.reducedMotion) {
-      figure.rotation.y = state.targetYaw;
-      return;
-    }
 
     if (state.autoRotate && performance.now() - state.lastInteraction > 4000) {
       state.targetYaw += delta * 0.25;
@@ -283,13 +240,13 @@ function BodyFigure({
             onPointerOut={() => onHoverPick(null)}
           >
             {part.kind === "sphere" ? (
-              <sphereGeometry args={[1, 12, 8]} />
+              <sphereGeometry args={[1, 20, 16]} />
             ) : (
               <capsuleGeometry
-                args={[part.radius ?? 0.05, part.length ?? 0.1, 4, 8]}
+                args={[part.radius ?? 0.05, part.length ?? 0.1, 6, 14]}
               />
             )}
-            <meshBasicMaterial visible={false} />
+            <meshBasicMaterial colorWrite={false} depthWrite={false} />
           </mesh>
         );
       })}
@@ -321,23 +278,11 @@ export function BodyScene({
 }) {
   const [hovered, setHovered] = useState<MuscleGroupId | null>(null);
   const [model, setModel] = useState<THREE.Group | null>(null);
-  const [reducedMotion, setReducedMotion] = useState(false);
-  const [isIntersecting, setIsIntersecting] = useState(true);
-  const [isDocumentVisible, setIsDocumentVisible] = useState(() =>
-    typeof document === "undefined" ? true : !document.hidden,
-  );
-  const containerRef = useRef<HTMLDivElement>(null);
-  const invalidateRef = useRef<(() => void) | null>(null);
   const unavailableRef = useRef(onUnavailable);
-  const notifyUnavailable = useCallback(
-    () => unavailableRef.current?.(),
-    [],
-  );
   const controlRef = useRef<SceneControl>({
     targetYaw: view === "front" ? 0 : Math.PI,
     lastInteraction: 0,
     autoRotate: true,
-    reducedMotion: false,
   });
   const dragRef = useRef({ active: false, lastX: 0, distance: 0 });
 
@@ -347,25 +292,18 @@ export function BodyScene({
 
   useEffect(() => {
     let isMounted = true;
-    let loadedScene: THREE.Group | null = null;
     const loader = new GLTFLoader();
     loader.setMeshoptDecoder(MeshoptDecoder);
     loader.load(
       BODY_MODEL_URL,
       (gltf) => {
-        if (!isMounted) {
-          disposeSceneResources(gltf.scene);
-          return;
-        }
+        if (!isMounted) return;
         const hasBody = gltf.scene.getObjectByName("BASE_BODY") !== undefined;
         if (!hasBody) {
-          disposeSceneResources(gltf.scene);
           unavailableRef.current?.();
           return;
         }
-        loadedScene = gltf.scene;
         setModel(gltf.scene);
-        invalidateRef.current?.();
       },
       undefined,
       () => {
@@ -375,7 +313,6 @@ export function BodyScene({
 
     return () => {
       isMounted = false;
-      if (loadedScene) disposeSceneResources(loadedScene);
     };
   }, []);
 
@@ -383,9 +320,6 @@ export function BodyScene({
     const media = window.matchMedia("(prefers-reduced-motion: reduce)");
     const updateMotionPreference = () => {
       controlRef.current.autoRotate = !media.matches;
-      controlRef.current.reducedMotion = media.matches;
-      setReducedMotion(media.matches);
-      invalidateRef.current?.();
     };
     updateMotionPreference();
     media.addEventListener("change", updateMotionPreference);
@@ -393,37 +327,12 @@ export function BodyScene({
   }, []);
 
   useEffect(() => {
-    const element = containerRef.current;
-    if (!element || !("IntersectionObserver" in window)) return;
-
-    const observer = new IntersectionObserver(
-      ([entry]) => setIsIntersecting(entry?.isIntersecting ?? true),
-      { rootMargin: "160px" },
-    );
-    observer.observe(element);
-    return () => observer.disconnect();
-  }, []);
-
-  useEffect(() => {
-    const updateVisibility = () => setIsDocumentVisible(!document.hidden);
-    document.addEventListener("visibilitychange", updateVisibility);
-    return () =>
-      document.removeEventListener("visibilitychange", updateVisibility);
-  }, []);
-
-  useEffect(() => {
-    if (isIntersecting && isDocumentVisible) invalidateRef.current?.();
-  }, [isDocumentVisible, isIntersecting]);
-
-  useEffect(() => {
     controlRef.current.targetYaw = view === "front" ? 0 : Math.PI;
     controlRef.current.lastInteraction = performance.now();
-    invalidateRef.current?.();
   }, [view, viewRevision]);
 
   function markInteraction() {
     controlRef.current.lastInteraction = performance.now();
-    invalidateRef.current?.();
   }
 
   function handleHover(id: MuscleGroupId | null) {
@@ -440,8 +349,7 @@ export function BodyScene({
 
   return (
     <div
-      ref={containerRef}
-      className="relative size-full cursor-grab touch-pan-y select-none active:cursor-grabbing"
+      className="size-full cursor-grab touch-pan-y select-none active:cursor-grabbing"
       onPointerDown={(event) => {
         dragRef.current = { active: true, lastX: event.clientX, distance: 0 };
         markInteraction();
@@ -466,75 +374,56 @@ export function BodyScene({
         dragRef.current.active = false;
       }}
     >
-      <BodySceneErrorBoundary onUnavailable={notifyUnavailable}>
-        <Canvas
-          dpr={[1, 2]}
-          frameloop={
-            model && isIntersecting && isDocumentVisible && !reducedMotion
-              ? "always"
-              : "demand"
-          }
-          fallback={<WebGLFallback onUnavailable={notifyUnavailable} />}
-          gl={{ antialias: true, alpha: true }}
-          camera={{ fov: 32, position: [0, 0.92, 3.35], near: 0.1, far: 20 }}
-          onCreated={({ camera, gl, invalidate }) => {
-            invalidateRef.current = invalidate;
-            camera.lookAt(0, 0.92, 0);
-            gl.outputColorSpace = THREE.SRGBColorSpace;
-            gl.toneMapping = THREE.ACESFilmicToneMapping;
-            gl.toneMappingExposure = 1.08;
-            gl.domElement.addEventListener(
-              "webglcontextlost",
-              (event) => {
-                event.preventDefault();
-                notifyUnavailable();
-              },
-              { once: true },
-            );
-          }}
-        >
-          <hemisphereLight args={["#eef3ff", "#151821", 0.82]} />
-          <directionalLight
-            color="#fff0e8"
-            intensity={3.4}
-            position={[2.8, 3.6, 4]}
-          />
-          <directionalLight
-            color="#c5d6ff"
-            intensity={2.5}
-            position={[-3, 2.7, -3.5]}
-          />
+      <Canvas
+        dpr={[1, 2]}
+        gl={{
+          antialias: true,
+          alpha: true,
+          powerPreference: "high-performance",
+        }}
+        camera={{ fov: 32, position: [0, 0.92, 3.35], near: 0.1, far: 20 }}
+        onCreated={({ camera, gl }) => {
+          camera.lookAt(0, 0.92, 0);
+          gl.outputColorSpace = THREE.SRGBColorSpace;
+          gl.toneMapping = THREE.ACESFilmicToneMapping;
+          gl.toneMappingExposure = 1.08;
+          gl.domElement.addEventListener(
+            "webglcontextlost",
+            (event) => {
+              event.preventDefault();
+              unavailableRef.current?.();
+            },
+            { once: true },
+          );
+        }}
+      >
+        <hemisphereLight args={["#eef3ff", "#151821", 0.82]} />
+        <directionalLight
+          color="#fff0e8"
+          intensity={3.4}
+          position={[2.8, 3.6, 4]}
+        />
+        <directionalLight
+          color="#c5d6ff"
+          intensity={2.5}
+          position={[-3, 2.7, -3.5]}
+        />
 
-          <BodySceneErrorBoundary onUnavailable={notifyUnavailable}>
-            {model ? (
-              <BodyFigure
-                intelligence={intelligence}
-                model={model}
-                selected={selected}
-                hovered={hovered}
-                controlRef={controlRef}
-                onPick={(id) => {
-                  if (dragRef.current.distance > 8) return;
-                  onSelect(id);
-                }}
-                onHoverPick={handleHover}
-              />
-            ) : null}
-          </BodySceneErrorBoundary>
-        </Canvas>
-      </BodySceneErrorBoundary>
-
-      {!model ? (
-        <div
-          role="status"
-          aria-live="polite"
-          className="pointer-events-none absolute inset-0 grid place-items-center"
-        >
-          <span className="rounded-full border border-white/[0.08] bg-black/40 px-3 py-1.5 text-[0.62rem] font-black uppercase tracking-[0.14em] text-muted backdrop-blur">
-            Loading anatomical model
-          </span>
-        </div>
-      ) : null}
+        {model ? (
+          <BodyFigure
+            intelligence={intelligence}
+            model={model}
+            selected={selected}
+            hovered={hovered}
+            controlRef={controlRef}
+            onPick={(id) => {
+              if (dragRef.current.distance > 8) return;
+              onSelect(id);
+            }}
+            onHoverPick={handleHover}
+          />
+        ) : null}
+      </Canvas>
     </div>
   );
 }

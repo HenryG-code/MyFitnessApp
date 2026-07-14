@@ -1,4 +1,5 @@
 import { createRunningPlanState } from "@/src/lib/running-plans/plan";
+import { getDateInputValue } from "@/src/lib/habits/queries";
 import type {
   RunningEffort,
   RunningExperience,
@@ -65,10 +66,9 @@ export async function logRunningSession(input: {
   durationMinutes: number;
   effort: RunningEffort;
 }) {
-  const today = new Date().toISOString().slice(0, 10);
   return createWorkout({
     title: `Run · ${input.session.title}`,
-    workout_date: today,
+    workout_date: getDateInputValue(),
     duration_minutes: input.durationMinutes,
     notes: `Running Coach · ${input.plan.goalKm} km goal · Week ${input.plan.currentWeek}, attempt ${input.plan.weekAttempt} · Effort: ${input.effort}.`,
     exercises: [

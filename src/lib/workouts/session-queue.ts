@@ -2,8 +2,45 @@ import type {
   TrainingExercise,
   TrainingSession,
 } from "@/src/lib/training-plans/types";
+import { estimateOneRepMax } from "@/src/lib/performance/history";
 
 export type LoggedSet = { weight: number | null; reps: number | null };
+
+function representativeSetScore(set: LoggedSet) {
+  return estimateOneRepMax(set.weight, set.reps) ?? 0;
+}
+
+/**
+ * Keeps the saved weight and reps tied to one real set. Loaded sets are ranked
+ * by a conservative estimated max, then by weight and reps for stable ties.
+ */
+export function selectRepresentativeLoggedSet(
+  sets: LoggedSet[]
+): LoggedSet | null {
+  if (sets.length === 0) {
+    return null;
+  }
+
+  const loadedSets = sets.filter((set) => (set.weight ?? 0) > 0);
+  const candidates = loadedSets.length > 0 ? loadedSets : sets;
+
+  return candidates.reduce((best, candidate) => {
+    const scoreDifference =
+      representativeSetScore(candidate) - representativeSetScore(best);
+
+    if (scoreDifference !== 0) {
+      return scoreDifference > 0 ? candidate : best;
+    }
+
+    const weightDifference =
+      (candidate.weight ?? 0) - (best.weight ?? 0);
+    if (weightDifference !== 0) {
+      return weightDifference > 0 ? candidate : best;
+    }
+
+    return (candidate.reps ?? 0) > (best.reps ?? 0) ? candidate : best;
+  });
+}
 
 export type QueueExercise = {
   name: string;

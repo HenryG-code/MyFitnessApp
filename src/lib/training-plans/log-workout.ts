@@ -2,15 +2,12 @@ import {
   createWorkout,
   type WorkoutExerciseInput,
 } from "@/src/lib/workouts/queries";
+import { getDateInputValue } from "@/src/lib/habits/queries";
 import type {
   TrainingExercise,
   TrainingPlan,
   TrainingSession,
 } from "@/src/lib/training-plans/types";
-
-function getTodayDateInputValue() {
-  return new Date().toISOString().slice(0, 10);
-}
 
 function parseSimpleInteger(value?: string) {
   if (!value) {
@@ -63,7 +60,7 @@ export async function logTrainingPlanSession(
 ) {
   return createWorkout({
     title: session.title,
-    workout_date: getTodayDateInputValue(),
+    workout_date: getDateInputValue(),
     duration_minutes: session.durationMinutes,
     notes: `Logged from suggested training plan: ${plan.title} / ${session.title}.`,
     exercises: session.exercises.map(mapExercise),

@@ -79,12 +79,25 @@ export async function fetchLastPerformanceMap(limitWorkouts = 30) {
   return map;
 }
 
-/** Estimated 1RM via Epley. Guarded for bodyweight/cardio rows. */
+/** Conservative rep-based 1RM projection, capped by Epley for light loads. */
 export function estimateOneRepMax(weight: number | null, reps: number | null) {
-  if (!weight || weight <= 0) {
+  if (
+    weight === null ||
+    !Number.isFinite(weight) ||
+    weight <= 0 ||
+    reps === null ||
+    !Number.isFinite(reps) ||
+    reps <= 0
+  ) {
     return null;
   }
 
-  const usedReps = reps && reps > 0 ? Math.min(reps, 12) : 1;
-  return Math.round(weight * (1 + usedReps / 30) * 10) / 10;
+  const usedReps = Math.min(Math.max(Math.round(reps), 1), 12);
+  if (usedReps === 1) {
+    return Math.round(weight * 2) / 2;
+  }
+
+  const repBasedEstimate = weight + usedReps;
+  const epleyCeiling = weight * (1 + usedReps / 30);
+  return Math.round(Math.min(repBasedEstimate, epleyCeiling) * 2) / 2;
 }

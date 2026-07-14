@@ -7,24 +7,22 @@ import {
   buildMilestones,
   buildStrengthTrends,
   calculateBestStreak,
-  ONE_REP_MAX_STEP_KG,
+  ONE_REP_MAX_LIFTS,
   suggestNextOneRepMax,
   type JourneySummary,
   type Milestone,
+  type OneRepMaxLiftId,
   type StrengthTrend,
 } from "@/src/lib/performance/journey";
 import {
   fetchDatedExercises,
   type DatedExercise,
 } from "@/src/lib/performance/muscles";
-import {
-  estimateOneRepMax,
-  normalizeExerciseName,
-} from "@/src/lib/performance/history";
 import { fetchWeightLogs } from "@/src/lib/weight/queries";
 import type { WeightLog, Workout } from "@/src/lib/supabase/database.types";
 import {
   ArrowDownRight,
+  ArrowUp,
   ArrowUpRight,
   Calculator,
   Award,
@@ -33,6 +31,7 @@ import {
   Flame,
   Gauge,
   MapPin,
+  PersonStanding,
   Scale,
   TrendingUp,
 } from "lucide-react";
@@ -50,41 +49,32 @@ const milestoneIcons = {
   current: MapPin,
 } as const;
 
-const coreLifts = ["Bench press", "Back squat", "Deadlift", "Weighted pull-up"];
+const oneRepMaxIcons: Record<OneRepMaxLiftId, typeof Dumbbell> = {
+  "bench-press": Dumbbell,
+  "back-squat": PersonStanding,
+  deadlift: TrendingUp,
+  "overhead-press": ArrowUp,
+};
 
 function StrengthLab({ trends }: { trends: StrengthTrend[] }) {
-  const trackedBench = trends.find((trend) =>
-    normalizeExerciseName(trend.exerciseName).includes("bench")
-  );
-  const initialLift = trackedBench?.exerciseName ?? trends[0]?.exerciseName ?? coreLifts[0];
-  const [selectedLift, setSelectedLift] = useState(initialLift);
+  const initialLift =
+    trends.find((trend) => trend.liftId === "bench-press")?.liftId ??
+    trends[0]?.liftId ??
+    ONE_REP_MAX_LIFTS[0].id;
+  const [selectedLift, setSelectedLift] =
+    useState<OneRepMaxLiftId>(initialLift);
   const [weight, setWeight] = useState("80");
   const [reps, setReps] = useState("5");
-  const liftOptions = useMemo(
-    () =>
-      Array.from(
-        new Set([...coreLifts, ...trends.map((trend) => trend.exerciseName)])
-      ),
-    [trends]
-  );
-  const selectedTrend = trends.find(
-    (trend) =>
-      normalizeExerciseName(trend.exerciseName) ===
-      normalizeExerciseName(selectedLift)
-  );
-  const estimate = estimateOneRepMax(Number(weight), Number(reps));
+  const selectedTrend = trends.find((trend) => trend.liftId === selectedLift);
+  const selectedDefinition =
+    ONE_REP_MAX_LIFTS.find((lift) => lift.id === selectedLift) ??
+    ONE_REP_MAX_LIFTS[0];
   const nextTarget = suggestNextOneRepMax({
-    estimate,
-    currentMax: selectedTrend?.lastOneRepMax ?? null,
-    workingWeight: Number(weight) || 0,
+    workingWeight: Number(weight),
+    reps: reps === "" ? null : Number(reps),
   });
-
-  function chooseCoreLift(keyword: string, fallback: string) {
-    const tracked = trends.find((trend) =>
-      normalizeExerciseName(trend.exerciseName).includes(keyword)
-    );
-    setSelectedLift(tracked?.exerciseName ?? fallback);
-  }
+  const formatMax = (value: number) =>
+    value % 1 === 0 ? value.toFixed(0) : value.toFixed(1);
 
   return (
     <section className="lf-rise lf-panel relative min-w-0 overflow-hidden p-3 sm:p-5">
@@ -96,128 +86,118 @@ function StrengthLab({ trends }: { trends: StrengthTrend[] }) {
               <Gauge className="size-5" />
             </span>
             <div className="min-w-0">
-              <p className="lf-eyebrow">Strength lab</p>
+              <p className="lf-eyebrow">Strength lab · 4 lifts</p>
               <h2 className="mt-0.5 font-display text-lg font-black tracking-tight sm:text-xl">
-                Track your estimated 1-rep max
+                One-rep max tracker
               </h2>
             </div>
           </div>
           <Calculator className="hidden size-5 shrink-0 text-ink-dim sm:block" />
         </div>
 
-        <div className="mt-3 grid grid-cols-4 gap-1.5 sm:flex sm:flex-wrap sm:gap-2">
-          <button
-            type="button"
-            onClick={() => chooseCoreLift("bench", "Bench press")}
-            className="lf-press min-h-9 rounded-lg border border-line bg-white/[0.03] px-2 text-xs font-black text-muted transition hover:border-accent/40 hover:text-foreground"
-          >
-            Bench
-          </button>
-          <button
-            type="button"
-            onClick={() => chooseCoreLift("squat", "Back squat")}
-            className="lf-press min-h-9 rounded-lg border border-line bg-white/[0.03] px-2 text-xs font-black text-muted transition hover:border-accent/40 hover:text-foreground"
-          >
-            Squat
-          </button>
-          <button
-            type="button"
-            onClick={() => chooseCoreLift("deadlift", "Deadlift")}
-            className="lf-press min-h-9 rounded-lg border border-line bg-white/[0.03] px-2 text-xs font-black text-muted transition hover:border-accent/40 hover:text-foreground"
-          >
-            Deadlift
-          </button>
-          <button
-            type="button"
-            onClick={() => chooseCoreLift("pull", "Weighted pull-up")}
-            className="lf-press min-h-9 rounded-lg border border-line bg-white/[0.03] px-2 text-xs font-black text-muted transition hover:border-accent/40 hover:text-foreground"
-          >
-            Pull-ups
-          </button>
+        <div
+          className="mt-3 grid min-w-0 grid-cols-4 gap-1 rounded-xl border border-line bg-black/15 p-1"
+          aria-label="Tracked one-rep max lift"
+        >
+          {ONE_REP_MAX_LIFTS.map((lift) => {
+            const LiftIcon = oneRepMaxIcons[lift.id];
+            const isSelected = selectedLift === lift.id;
+
+            return (
+              <button
+                key={lift.id}
+                type="button"
+                title={lift.name}
+                aria-label={lift.name}
+                aria-pressed={isSelected}
+                onClick={() => setSelectedLift(lift.id)}
+                className={`lf-press flex min-h-11 min-w-0 flex-col items-center justify-center gap-0.5 rounded-lg px-1 text-[0.62rem] font-black transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/60 ${
+                  isSelected
+                    ? "bg-accent text-white shadow-[0_6px_18px_rgba(240,71,46,0.28)]"
+                    : "text-muted hover:bg-white/[0.05] hover:text-foreground"
+                }`}
+              >
+                <LiftIcon className="size-3.5" />
+                <span className="max-w-full truncate">{lift.shortName}</span>
+              </button>
+            );
+          })}
         </div>
 
-        <label className="mt-3 block">
-          <span className="text-[0.62rem] font-black uppercase tracking-[0.16em] text-ink-dim">
-            Lift to inspect
-          </span>
-          <select
-            value={selectedLift}
-            onChange={(event) => setSelectedLift(event.target.value)}
-            className="mt-1.5 min-h-11 w-full min-w-0 rounded-xl border border-line bg-surface px-3 text-sm font-black outline-none transition focus:border-accent sm:max-w-md"
-          >
-            {liftOptions.map((lift) => (
-              <option key={lift} value={lift}>
-                {lift}
-              </option>
-            ))}
-          </select>
-        </label>
-
-        <div className="mt-3 grid grid-cols-3 gap-2">
-          <div className="lf-inset min-w-0 p-2.5 sm:p-3">
-            <p className="lf-eyebrow !text-[0.55rem]">Current</p>
-            <p className="lf-num mt-1 truncate font-display text-xl font-black">
-              {selectedTrend ? `${selectedTrend.lastOneRepMax.toFixed(0)}` : "—"}
+        <div className="mt-3 grid grid-cols-3 divide-x divide-line overflow-hidden rounded-xl border border-line bg-white/[0.025]">
+          <div className="min-w-0 px-2 py-2.5 text-center">
+            <p className="lf-eyebrow !text-[0.54rem]">Current</p>
+            <p className="lf-num mt-0.5 truncate font-display text-xl font-black">
+              {selectedTrend ? formatMax(selectedTrend.lastOneRepMax) : "—"}
+              {selectedTrend ? (
+                <span className="ml-0.5 text-[0.58rem] text-muted">kg</span>
+              ) : null}
             </p>
-            <p className="text-[0.62rem] font-bold text-muted">kg est. 1RM</p>
           </div>
-          <div className="lf-inset min-w-0 p-2.5 sm:p-3">
-            <p className="lf-eyebrow !text-[0.55rem]">Best</p>
-            <p className="lf-num mt-1 truncate font-display text-xl font-black text-ready">
-              {selectedTrend ? `${selectedTrend.bestOneRepMax.toFixed(0)}` : "—"}
+          <div className="min-w-0 px-2 py-2.5 text-center">
+            <p className="lf-eyebrow !text-[0.54rem]">Best</p>
+            <p className="lf-num mt-0.5 truncate font-display text-xl font-black text-ready">
+              {selectedTrend ? formatMax(selectedTrend.bestOneRepMax) : "—"}
+              {selectedTrend ? (
+                <span className="ml-0.5 text-[0.58rem] text-muted">kg</span>
+              ) : null}
             </p>
-            <p className="text-[0.62rem] font-bold text-muted">kg tracked</p>
           </div>
-          <div className="lf-inset min-w-0 p-2.5 sm:p-3">
-            <p className="lf-eyebrow !text-[0.55rem]">Change</p>
-            <p className="lf-num mt-1 truncate font-display text-xl font-black text-accent-strong">
+          <div className="min-w-0 px-2 py-2.5 text-center">
+            <p className="lf-eyebrow !text-[0.54rem]">Progress</p>
+            <p className="lf-num mt-0.5 truncate font-display text-xl font-black text-accent-strong">
               {selectedTrend
                 ? `${selectedTrend.changePercent > 0 ? "+" : ""}${selectedTrend.changePercent}%`
                 : "—"}
             </p>
-            <p className="text-[0.62rem] font-bold text-muted">
-              {selectedTrend ? `${selectedTrend.sessions} sessions` : "No history"}
+            <p className="truncate text-[0.55rem] font-bold text-muted">
+              {selectedTrend ? `${selectedTrend.sessions} logs` : "No history"}
             </p>
           </div>
         </div>
 
-        <div className="mt-3 rounded-xl border border-white/[0.07] bg-black/15 p-3">
-          <div className="flex items-center justify-between gap-2">
-            <div>
-              <p className="text-xs font-black">Plan your next max attempt</p>
-              <p className="mt-0.5 text-[0.65rem] text-muted">
-                Enter a recent working set.
+        <div className="mt-3 overflow-hidden rounded-2xl border border-accent/25 bg-gradient-to-br from-accent/[0.14] via-white/[0.035] to-transparent p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]">
+          <div className="flex min-w-0 items-center justify-between gap-3">
+            <div className="min-w-0">
+              <p className="lf-eyebrow text-accent-strong">Working set → 1RM</p>
+              <p className="mt-0.5 truncate text-xs font-black">
+                {selectedDefinition.name} estimate
               </p>
             </div>
-            <div className="text-right">
-              <p className="lf-num font-display text-2xl font-black text-accent-strong">
-                {nextTarget !== null
-                  ? `${nextTarget % 1 === 0 ? nextTarget.toFixed(0) : nextTarget.toFixed(1)} kg`
-                  : "—"}
+            <div className="shrink-0 text-right" aria-live="polite">
+              <p className="lf-num font-display text-3xl font-black leading-none text-accent-strong">
+                {nextTarget !== null ? formatMax(nextTarget) : "—"}
+                {nextTarget !== null ? (
+                  <span className="ml-1 text-xs text-muted">kg</span>
+                ) : null}
               </p>
-              <p className="text-[0.58rem] font-black uppercase tracking-[0.14em] text-ink-dim">
-                Safe next target
+              <p className="mt-1 text-[0.54rem] font-black uppercase tracking-[0.14em] text-ink-dim">
+                projected max
               </p>
             </div>
           </div>
-          <div className="mt-3 grid grid-cols-2 gap-2">
-            <label className="min-w-0">
-              <span className="text-[0.6rem] font-black uppercase tracking-wider text-ink-dim">
-                Weight, kg
+
+          <div className="mt-3 grid min-w-0 grid-cols-2 gap-2">
+            <label className="min-w-0 rounded-xl border border-line bg-black/20 px-3 py-2 transition focus-within:border-accent/70 focus-within:ring-1 focus-within:ring-accent/25">
+              <span className="block text-[0.56rem] font-black uppercase tracking-wider text-ink-dim">
+                Weight
               </span>
-              <input
-                value={weight}
-                onChange={(event) => setWeight(event.target.value)}
-                type="number"
-                inputMode="decimal"
-                min="0"
-                step="0.5"
-                className="lf-num mt-1 min-h-11 w-full min-w-0 rounded-xl border border-line bg-surface px-3 text-lg font-black outline-none focus:border-accent"
-              />
+              <span className="flex min-w-0 items-baseline gap-1">
+                <input
+                  value={weight}
+                  onChange={(event) => setWeight(event.target.value)}
+                  type="number"
+                  inputMode="decimal"
+                  min="0"
+                  step="0.5"
+                  className="lf-num h-7 w-full min-w-0 bg-transparent text-xl font-black outline-none"
+                />
+                <span className="text-[0.62rem] font-black text-muted">kg</span>
+              </span>
             </label>
-            <label className="min-w-0">
-              <span className="text-[0.6rem] font-black uppercase tracking-wider text-ink-dim">
-                Reps
+            <label className="min-w-0 rounded-xl border border-line bg-black/20 px-3 py-2 transition focus-within:border-accent/70 focus-within:ring-1 focus-within:ring-accent/25">
+              <span className="block text-[0.56rem] font-black uppercase tracking-wider text-ink-dim">
+                Clean reps
               </span>
               <input
                 value={reps}
@@ -227,31 +207,30 @@ function StrengthLab({ trends }: { trends: StrengthTrend[] }) {
                 min="1"
                 max="12"
                 step="1"
-                className="lf-num mt-1 min-h-11 w-full min-w-0 rounded-xl border border-line bg-surface px-3 text-lg font-black outline-none focus:border-accent"
+                className="lf-num h-7 w-full min-w-0 bg-transparent text-xl font-black outline-none"
               />
             </label>
           </div>
-          {estimate !== null && nextTarget !== null && estimate > nextTarget + 0.05 ? (
-            <p className="mt-2 text-[0.65rem] leading-4 text-muted">
-              This set estimates up to {estimate.toFixed(0)} kg long-term —
-              build toward it in {ONE_REP_MAX_STEP_KG} kg steps instead of
-              jumping straight there.
+
+          <div className="mt-2 flex min-w-0 items-center gap-2">
+            <p className="min-w-0 flex-1 text-[0.61rem] leading-4 text-muted">
+              {nextTarget !== null
+                ? `${weight} kg × ${reps} clean reps projects ${formatMax(nextTarget)} kg.`
+                : "Enter a completed set of 1–12 clean reps."}
             </p>
-          ) : null}
+            <Link
+              href={`/workouts/new?exercise=${encodeURIComponent(selectedDefinition.name)}`}
+              aria-label={`Log ${selectedDefinition.name}`}
+              className="lf-press inline-flex min-h-10 shrink-0 items-center justify-center rounded-xl bg-accent px-3 text-xs font-black text-white transition hover:bg-accent-strong"
+            >
+              Log lift
+            </Link>
+          </div>
         </div>
 
-        <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-[0.65rem] leading-4 text-ink-dim">
-            Targets move up {ONE_REP_MAX_STEP_KG} kg at a time. Warm up fully
-            and use a spotter when you test a max.
-          </p>
-          <Link
-            href={`/workouts/new?exercise=${encodeURIComponent(selectedLift)}`}
-            className="lf-press inline-flex min-h-11 shrink-0 items-center justify-center rounded-xl bg-accent px-4 text-sm font-black text-white transition hover:bg-accent-strong"
-          >
-            Log {selectedLift}
-          </Link>
-        </div>
+        <p className="mt-2 text-center text-[0.58rem] leading-4 text-ink-dim">
+          Estimates are guidance. Warm up fully and use safety arms or a spotter.
+        </p>
       </div>
     </section>
   );

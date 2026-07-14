@@ -22,8 +22,10 @@ export type HabitCompletionPoint = {
 
 export function HabitCompletionChart({
   data,
+  compact = false,
 }: {
   data: HabitCompletionPoint[];
+  compact?: boolean;
 }) {
   const mounted = useSyncExternalStore(
     () => () => undefined,
@@ -32,11 +34,17 @@ export function HabitCompletionChart({
   );
 
   if (!mounted) {
-    return <div className="h-56 w-full min-w-0 max-w-full rounded-[1.5rem] bg-surface sm:h-64" />;
+    return (
+      <div
+        className={`${compact ? "h-36" : "h-56 sm:h-64"} w-full min-w-0 max-w-full rounded-xl bg-surface sm:rounded-[1.5rem]`}
+      />
+    );
   }
 
   return (
-    <div className="h-56 w-full min-w-0 max-w-full overflow-hidden sm:h-64">
+    <div
+      className={`${compact ? "h-36" : "h-56 sm:h-64"} w-full min-w-0 max-w-full overflow-hidden`}
+    >
       <ResponsiveContainer width="100%" height="100%" minWidth={0}>
         <BarChart data={data} margin={{ top: 8, right: 8, left: -18, bottom: 0 }}>
           <CartesianGrid stroke="#2a2a33" strokeDasharray="4 6" vertical={false} />

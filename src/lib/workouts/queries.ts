@@ -1,4 +1,5 @@
 import { createBrowserSupabaseClient } from "@/src/lib/supabase/client";
+import { completeTrainedHabitForDate } from "@/src/lib/habits/queries";
 import type {
   Workout,
   WorkoutExercise,
@@ -165,6 +166,17 @@ export async function createWorkout(input: WorkoutInput) {
     if (exerciseError) {
       throw new Error(exerciseError.message);
     }
+  }
+
+  try {
+    await completeTrainedHabitForDate(input.workout_date, {
+      supabase,
+      userId,
+    });
+  } catch (habitError) {
+    // The workout already exists. Do not surface a failed post-save sync as a
+    // failed workout, because retrying would create a duplicate session.
+    console.warn("Workout saved, but the Trained habit could not be synced.", habitError);
   }
 
   return workout satisfies Workout;

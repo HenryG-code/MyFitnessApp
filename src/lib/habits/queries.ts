@@ -27,9 +27,14 @@ export type HabitDayStats = Pick<
   "completed" | "total" | "percentage"
 >;
 
+export const trainedHabitName = "Trained";
+
 export const defaultHabits = [
   { name: "Sleep 8 hours", description: "Support recovery with enough rest." },
-  { name: "Trained", description: "Complete a workout or planned session." },
+  {
+    name: trainedHabitName,
+    description: "Complete a workout or planned session.",
+  },
   { name: "Walked 10k steps", description: "Keep daily movement visible." },
   { name: "Ate healthy", description: "Choose balanced meals today." },
   {
@@ -94,6 +99,23 @@ function formatHabitDisplayDate(value: string) {
 
 function normalizeName(value: string) {
   return value.trim().replace(/\s+/g, " ").toLowerCase();
+}
+
+type TrainedHabitCandidate = Pick<
+  HabitDefinition,
+  "id" | "name" | "is_active" | "is_default"
+>;
+
+export function findActiveTrainedHabit<T extends TrainedHabitCandidate>(
+  definitions: readonly T[]
+): T | null {
+  const matches = definitions.filter(
+    (habit) =>
+      habit.is_active &&
+      normalizeName(habit.name) === normalizeName(trainedHabitName)
+  );
+
+  return matches.find((habit) => habit.is_default) ?? matches[0] ?? null;
 }
 
 function validateHabitInput(input: HabitDefinitionInput) {
@@ -348,6 +370,50 @@ export async function toggleHabitCompletion(
   };
 
   // Keep one row per habit/date so history remains queryable even after undo.
+  const { data, error } = await supabase
+    .from("habit_completions")
+    .upsert(payload, { onConflict: "habit_id,completed_date" })
+    .select("*")
+    .single();
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return data satisfies HabitCompletion;
+}
+
+/**
+ * Marks the active Trained habit complete for a workout date. The upsert is
+ * idempotent, and a hidden or deleted Trained habit is intentionally left alone.
+ */
+export async function completeTrainedHabitForDate(
+  completedDate: string,
+  authenticated?: Awaited<ReturnType<typeof getAuthenticatedUserId>>
+) {
+  const { supabase, userId } =
+    authenticated ?? (await getAuthenticatedUserId());
+  const { data: definitions, error: definitionError } = await supabase
+    .from("habit_definitions")
+    .select("id,name,is_active,is_default")
+    .eq("user_id", userId)
+    .eq("is_active", true);
+
+  if (definitionError) {
+    throw new Error(definitionError.message);
+  }
+
+  const trainedHabit = findActiveTrainedHabit(definitions ?? []);
+  if (!trainedHabit) {
+    return null;
+  }
+
+  const payload: HabitCompletionInsert = {
+    habit_id: trainedHabit.id,
+    user_id: userId,
+    completed_date: completedDate,
+    is_completed: true,
+  };
   const { data, error } = await supabase
     .from("habit_completions")
     .upsert(payload, { onConflict: "habit_id,completed_date" })
