@@ -164,7 +164,7 @@ describe("calculateReadiness", () => {
     expect(readiness.components).toHaveLength(4);
   });
 
-  it("rewards one full rest day after a session", () => {
+  it("keeps recovery reduced the day after a session", () => {
     const readiness = calculateReadiness({
       ...emptyReadinessInput,
       workoutsLastSevenDays: [
@@ -175,11 +175,11 @@ describe("calculateReadiness", () => {
       (component) => component.label === "Recovery"
     );
 
-    expect(recovery?.score).toBe(96);
-    expect(readiness.state).toBe("ready");
+    expect(recovery?.score).toBe(64);
+    expect(recovery?.detail).toContain("recovery still underway");
   });
 
-  it("lowers recovery when the user already trained today", () => {
+  it("drops recovery hardest right after training", () => {
     const readiness = calculateReadiness({
       ...emptyReadinessInput,
       workoutsLastSevenDays: [
@@ -190,7 +190,73 @@ describe("calculateReadiness", () => {
       (component) => component.label === "Recovery"
     );
 
-    expect(recovery?.score).toBe(58);
+    expect(recovery?.score).toBe(45);
+  });
+
+  it("climbs back as rest days accumulate", () => {
+    const recoveryAfter = (daysAgo: number) => {
+      const readiness = calculateReadiness({
+        ...emptyReadinessInput,
+        workoutsLastSevenDays: [
+          workout({
+            workout_date: getDateDaysAgo(daysAgo),
+            duration_minutes: 60,
+          }),
+        ],
+      });
+      return (
+        readiness.components.find(
+          (component) => component.label === "Recovery"
+        )?.score ?? 0
+      );
+    };
+
+    const curve = [0, 1, 2, 3].map(recoveryAfter);
+
+    // Strictly increasing across the repair window.
+    expect(curve[0]).toBeLessThan(curve[1]);
+    expect(curve[1]).toBeLessThan(curve[2]);
+    expect(curve[2]).toBeLessThan(curve[3]);
+  });
+
+  it("caps the total score after training even with perfect sleep", () => {
+    const trainedToday = calculateReadiness({
+      ...emptyReadinessInput,
+      recentHabits: [
+        { date: getDateDaysAgo(0), percentage: 100 } as never,
+      ],
+      workoutsLastSevenDays: [
+        workout({ workout_date: getDateDaysAgo(0), duration_minutes: 60 }),
+        workout({ workout_date: getDateDaysAgo(2), duration_minutes: 90 }),
+        workout({ workout_date: getDateDaysAgo(4), duration_minutes: 90 }),
+      ],
+      healthToday: {
+        metric_date: getDateDaysAgo(0),
+        sleep_minutes: 480,
+        resting_heart_rate_bpm: null,
+      } as never,
+    });
+
+    expect(trainedToday.score).toBeLessThanOrEqual(62);
+
+    const trainedYesterday = calculateReadiness({
+      ...emptyReadinessInput,
+      recentHabits: [
+        { date: getDateDaysAgo(0), percentage: 100 } as never,
+      ],
+      workoutsLastSevenDays: [
+        workout({ workout_date: getDateDaysAgo(1), duration_minutes: 60 }),
+        workout({ workout_date: getDateDaysAgo(3), duration_minutes: 90 }),
+        workout({ workout_date: getDateDaysAgo(5), duration_minutes: 90 }),
+      ],
+      healthToday: {
+        metric_date: getDateDaysAgo(0),
+        sleep_minutes: 480,
+        resting_heart_rate_bpm: null,
+      } as never,
+    });
+
+    expect(trainedYesterday.score).toBeLessThanOrEqual(72);
   });
 
   it("prefers synced sleep over the manual habit", () => {

@@ -102,22 +102,29 @@ export function calculateReadiness(input: {
   const sleepHabitId = findHabitId(input.habitDefinitions, "sleep");
   const alcoholHabitId = findHabitId(input.habitDefinitions, "alcohol");
 
-  // Recovery: rest since last session.
+  // Recovery follows the repair curve: lowest right after a session, climbing
+  // back as muscles rebuild over the next 2–3 days, then drifting once fresh.
   const restDays = daysSinceLastWorkout(input.workoutsLastSevenDays);
   let recoveryScore = 72;
   let recoveryDetail = "No sessions logged yet.";
 
   if (restDays === 0) {
-    recoveryScore = 58;
-    recoveryDetail = "You already trained today.";
+    recoveryScore = 45;
+    recoveryDetail = "Trained today — muscles are rebuilding.";
   } else if (restDays === 1) {
-    recoveryScore = 96;
-    recoveryDetail = "One full rest day banked.";
+    recoveryScore = 64;
+    recoveryDetail = "Trained yesterday — recovery still underway.";
   } else if (restDays === 2) {
-    recoveryScore = 90;
+    recoveryScore = 85;
+    recoveryDetail = "Two rest days — mostly recovered.";
+  } else if (restDays === 3) {
+    recoveryScore = 94;
     recoveryDetail = "Fully recovered and fresh.";
+  } else if (restDays !== null && restDays <= 5) {
+    recoveryScore = 86;
+    recoveryDetail = "Fresh and ready to load.";
   } else if (restDays !== null) {
-    recoveryScore = 78;
+    recoveryScore = 76;
     recoveryDetail = `${restDays} days since your last session.`;
   }
 
@@ -232,6 +239,14 @@ export function calculateReadiness(input: {
 
   if (stayedClean === false) {
     score = Math.max(0, score - 6);
+  }
+
+  // Fresh training caps the ceiling: perfect sleep and habits cannot make
+  // muscles that are still rebuilding fully ready.
+  if (restDays === 0) {
+    score = Math.min(score, 62);
+  } else if (restDays === 1) {
+    score = Math.min(score, 72);
   }
 
   score = Math.max(0, Math.min(100, score));
