@@ -1,0 +1,35 @@
+# Dependabot watches the libraries this project depends on and opens a pull request when a newer
+# version comes out. Each pull request gets a Vercel preview and runs CI, so a broken update shows up
+# before it reaches the live site.
+#
+# This file controls version updates. Security alerts and security fixes are switched on separately,
+# in the repository's settings on GitHub under "Advanced Security".
+version: 2
+updates:
+  # The npm packages of the web app (root) and the mobile app (apps/mobile).
+  - package-ecosystem: npm
+    directories:
+      - /
+      - /apps/mobile
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: chore
+    groups:
+      # Small, low-risk updates arrive together as one pull request instead of one each.
+      # Major versions, which can contain breaking changes, still arrive one at a time.
+      minor-and-patch:
+        update-types:
+          - minor
+          - patch
+
+  # The actions used in .github/workflows.
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    commit-message:
+      prefix: chore
